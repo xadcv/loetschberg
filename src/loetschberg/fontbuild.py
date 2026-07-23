@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import math
 import shutil
 import subprocess
 import sys
@@ -39,10 +38,10 @@ TEXT_SOURCES = SOURCES / "text"
 EXTRUDED_SOURCES = SOURCES / "extruded"
 BUILD = ROOT / "build"
 
-PRIMARY_NAME = "Loetschberg-VF[wght,wdth,opsz,slnt].ttf"
-SIDECAR_NAME = "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf"
-REGULAR_COMPAT_NAME = "Loetschberg-Regular-VF[wght,wdth,opsz,slnt].ttf"
-EXTRUDED_COMPAT_NAME = "Loetschberg-Extruded-VF[wght,wdth,opsz,slnt].ttf"
+PRIMARY_NAME = "Loetschberg-VF[wght,wdth].ttf"
+SIDECAR_NAME = "Loetschberg-Text-VF[wght,wdth].otf"
+REGULAR_COMPAT_NAME = "Loetschberg-Regular-VF[wght,wdth].ttf"
+EXTRUDED_COMPAT_NAME = "Loetschberg-Extruded-VF[wght,wdth].ttf"
 PRIMARY = ROOT / PRIMARY_NAME
 SIDECAR = ROOT / SIDECAR_NAME
 REGULAR_COMPAT = ROOT / REGULAR_COMPAT_NAME
@@ -62,9 +61,9 @@ DESCENDER = -300
 HATCH_N = 7
 FIXED_OT_TIMESTAMP = 3867523200  # 2026-07-22 00:00:00 UTC, seconds from 1904.
 FONT_VERSION_MAJOR = 1
-FONT_VERSION_MINOR = 1
-FONT_VERSION_STRING = "1.001"
-FONT_REVISION = 1.001
+FONT_VERSION_MINOR = 2
+FONT_VERSION_STRING = "1.002"
+FONT_REVISION = 1.002
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,16 +73,12 @@ class MasterSpec:
     key: str
     wght: float = 400
     wdth: float = 100
-    opsz: float = 12
-    slnt: float = 0
 
     @property
     def location(self) -> dict[str, float]:
         return {
             "Weight": self.wght,
             "Width": self.wdth,
-            "Optical size": self.opsz,
-            "Slant": self.slnt,
         }
 
     @property
@@ -91,8 +86,6 @@ class MasterSpec:
         return {
             "wght": self.wght,
             "wdth": self.wdth,
-            "opsz": self.opsz,
-            "slnt": self.slnt,
         }
 
     @property
@@ -101,35 +94,27 @@ class MasterSpec:
 
     @property
     def track(self) -> float:
-        return _opsz_value(self.opsz, 140, 196)
+        return 196.0
 
     @property
     def kern(self) -> float:
-        return _opsz_value(self.opsz, -40, -55)
+        return -55.0
 
     def params(self, *, hand: bool = False) -> gen.GeneratorParams:
-        s, sh = _weight_strokes(self.wght)
-        # Optical-size compensation scales the selected weight instead of
-        # subtracting a fixed amount. A fixed subtraction made Caption Thin
-        # disproportionately fragile (24 units versus 184 at Black), whereas
-        # the donor's 88/104 and 85/100 ratios describe a coherent optical cut
-        # at every weight.
-        s *= _opsz_value(self.opsz, 88 / 104, 1)
-        sh *= _opsz_value(self.opsz, 85 / 100, 1)
+        s, sh = _weight_strokes(self.wght, self.wdth)
+        heavy_progress = _smoothstep((self.wght - 400) / 500)
+        # Heavy cuts need more skeleton room as well as more stroke. Expanding
+        # the skeleton most at Condensed prevents counters and joins from being
+        # consumed while preserving the requested width ordering.
+        skeleton_growth = _lerp(0.08, 0.04, (self.wdth - 75) / 50)
         return gen.GeneratorParams(
             s=s,
             sh=sh,
-            # The donor's Caption cut uses an 81% skeleton. Multiplying it by
-            # the registered width location keeps the two controls orthogonal:
-            # wdth chooses the family width, opsz applies the optical cut.
-            w=(self.wdth / 100) * _opsz_value(self.opsz, 0.81, 1),
-            v=(
-                _opsz_value(self.opsz, 46, 60),
-                _opsz_value(self.opsz, 54, 70),
-            ),
+            w=(self.wdth / 100) * (1 + skeleton_growth * heavy_progress),
+            v=(60, 70),
             hatch_n=HATCH_N,
-            hatch_t=_opsz_value(self.opsz, 10, 9),
-            hatch_sp=_opsz_value(self.opsz, 21, 17),
+            hatch_t=9,
+            hatch_sp=17,
             jit=3.4 if hand else 0,
         )
 
@@ -138,23 +123,41 @@ def _lerp(a: float, b: float, t: float) -> float:
     return a + (b - a) * t
 
 
-def _weight_strokes(weight: float) -> tuple[float, float]:
+def _smoothstep(value: float) -> float:
+    value = min(1.0, max(0.0, value))
+    return value * value * (3 - 2 * value)
+
+
+def _heavy_width_factor(width: float) -> float:
+    """Limit added Black ink where the condensed skeleton has less room."""
+
+    if width <= 100:
+        return _lerp(0.9, 1.0, (width - 75) / 25)
+    return _lerp(1.0, 1.04, (width - 100) / 25)
+
+
+def _weight_strokes(weight: float, width: float = 100) -> tuple[float, float]:
+    """Return coordinated vertical/horizontal strokes for the family.
+
+    Thin through Regular retains the canonical donor values. Above Regular,
+    growth eases toward a deliberate Black ceiling instead of scaling every
+    piece to 200 units. The added ink is width-aware, so condensed counters and
+    joins retain the same visual margin as the normal and expanded cuts.
+    """
+
     if weight <= 400:
         t = (weight - 100) / 300
         return _lerp(40, 104, t), _lerp(36, 100, t)
-    t = (weight - 400) / 500
-    return _lerp(104, 200, t), _lerp(100, 196, t)
-
-
-def _opsz_value(opsz: float, small: float, display: float) -> float:
-    # The donor has two exact cuts. The transition is completed at the default;
-    # 12..144 retains the display construction and provides a named endpoint.
-    t = min(1.0, max(0.0, (opsz - 8) / 4))
-    return _lerp(small, display, t)
+    progress = _smoothstep((weight - 400) / 500)
+    width_factor = _heavy_width_factor(width)
+    return (
+        104 + (176 - 104) * progress * width_factor,
+        100 + (170 - 100) * progress * width_factor,
+    )
 
 
 def master_specs() -> list[MasterSpec]:
-    """Return exact 4x3 core and Caption planes plus support sources."""
+    """Return the complete 4×3 Weight × Width interpolation plane."""
 
     specs = [MasterSpec("default")]
     for weight in (100, 400, 700, 900):
@@ -162,15 +165,6 @@ def master_specs() -> list[MasterSpec]:
             if (weight, width) == (400, 100):
                 continue
             specs.append(MasterSpec(f"w{weight}-d{width}", weight, width))
-    for weight in (100, 400, 700, 900):
-        for width in (75, 100, 125):
-            key = (
-                "caption"
-                if (weight, width) == (400, 100)
-                else f"caption-w{weight}-d{width}"
-            )
-            specs.append(MasterSpec(key, weight, width, opsz=8))
-    specs.extend([MasterSpec("display", opsz=144), MasterSpec("slanted", slnt=-12)])
     return specs
 
 
@@ -299,7 +293,7 @@ def _font_info(font: Font, spec: MasterSpec, *, text_only: bool) -> None:
     info.descender = DESCENDER
     info.capHeight = CAP_HEIGHT
     info.xHeight = X_HEIGHT
-    info.italicAngle = spec.slnt
+    info.italicAngle = 0
     info.versionMajor = FONT_VERSION_MAJOR
     info.versionMinor = FONT_VERSION_MINOR
     info.year = 2026
@@ -360,18 +354,14 @@ def _source_bbox(contours: Sequence[Sequence[gen.SamplePoint]]) -> tuple[float, 
 def _font_contours(
     contours: Sequence[Sequence[gen.SamplePoint]],
     *,
-    slnt: float,
     shift_x: float,
 ) -> list[list[tuple[float, float]]]:
-    # Registered `slnt` uses negative values for a clockwise/right lean.  Font
-    # coordinates are y-up, so negate the tangent to move cap points right.
-    shear = -math.tan(math.radians(slnt))
     result: list[list[tuple[float, float]]] = []
     for contour in contours:
         transformed: list[tuple[float, float]] = []
         for point in contour:
             y = CAP_HEIGHT - point.y
-            transformed.append((point.x + shift_x + shear * y, y))
+            transformed.append((point.x + shift_x, y))
         result.append(transformed)
     return result
 
@@ -625,8 +615,8 @@ def _build_master_fonts(
         hand_shift, _ = _shift_and_width(char, hand_outlines, spec.track)
         regular_source = _outline_contours(regular_outlines[char])
         hand_source = _outline_contours(hand_outlines[char])
-        regular_font = _font_contours(regular_source, slnt=spec.slnt, shift_x=shift)
-        hand_font = _font_contours(hand_source, slnt=spec.slnt, shift_x=hand_shift)
+        regular_font = _font_contours(regular_source, shift_x=shift)
+        hand_font = _font_contours(hand_source, shift_x=hand_shift)
 
         if char in COMPOSITES:
             base_char, _accent = COMPOSITES[char]
@@ -640,10 +630,10 @@ def _build_master_fonts(
                 char, hand_outlines[char], hand_outlines[base_char]
             )
             regular_mark_font = _font_contours(
-                regular_mark_source, slnt=spec.slnt, shift_x=shift
+                regular_mark_source, shift_x=shift
             )
             hand_mark_font = _font_contours(
-                hand_mark_source, slnt=spec.slnt, shift_x=hand_shift
+                hand_mark_source, shift_x=hand_shift
             )
             for font in (color, text):
                 _new_glyph(font, reg_mark, 0, regular_mark_font)
@@ -707,7 +697,7 @@ def _build_master_fonts(
             for role, pieces in roles.items():
                 source_contours = _layer_contours(pieces)
                 font_contours = _font_contours(
-                    source_contours, slnt=spec.slnt, shift_x=layer_shift
+                    source_contours, shift_x=layer_shift
                 )
                 if role in {"wallDark", "wallBronze"}:
                     font_contours = _grid_safe_wall_contours(font_contours)
@@ -780,8 +770,6 @@ def _write_designspace(
     axes = [
         ("wght", "Weight", 100, 400, 900),
         ("wdth", "Width", 75, 100, 125),
-        ("opsz", "Optical size", 8, 12, 144),
-        ("slnt", "Slant", -12, 0, 0),
     ]
     for tag, name, minimum, default, maximum in axes:
         axis = AxisDescriptor()
@@ -826,22 +814,8 @@ def _write_designspace(
             instance.designLocation = {
                 "Weight": weight,
                 "Width": width,
-                "Optical size": 12,
-                "Slant": 0,
             }
             document.addInstance(instance)
-    for optical, name in ((8, "Caption"), (144, "Display")):
-        instance = InstanceDescriptor()
-        instance.familyName = family_name
-        instance.styleName = name
-        instance.postScriptFontName = f"{postscript_prefix}-{name}"
-        instance.designLocation = {
-            "Weight": 400,
-            "Width": 100,
-            "Optical size": optical,
-            "Slant": 0,
-        }
-        document.addInstance(instance)
 
     document.write(path)
     return path
@@ -1070,25 +1044,6 @@ def _stat(font: TTFont) -> None:
                 {"value": 125, "name": "Expanded"},
             ],
         },
-        {
-            "tag": "opsz",
-            "name": "Optical size",
-            "ordering": 2,
-            "values": [
-                {"value": 8, "name": "Caption"},
-                {"value": 12, "name": "Text", "flags": 0x2},
-                {"value": 144, "name": "Display"},
-            ],
-        },
-        {
-            "tag": "slnt",
-            "name": "Slant",
-            "ordering": 3,
-            "values": [
-                {"value": -12, "name": "Slanted"},
-                {"value": 0, "name": "Upright", "flags": 0x2},
-            ],
-        },
     ]
     buildStatTable(font, axes, elidedFallbackName="Regular")
 
@@ -1133,6 +1088,7 @@ def _common_postprocess(font: TTFont, *, text: bool) -> None:
     _set_name(font, 6, "LoetschbergTextVF" if text else "LoetschbergVF")
     _set_name(font, 16, family)
     _set_name(font, 17, subfamily)
+    _set_name(font, 25, "LoetschbergText" if text else "Loetschberg")
     _ensure_cmap12(font)
     _stat(font)
     if "DSIG" in font:
@@ -1253,6 +1209,7 @@ def _postprocess_compat(
     _set_name(font, 10, description)
     _set_name(font, 16, family)
     _set_name(font, 17, "Regular")
+    _set_name(font, 25, postscript_prefix)
     for instance in font["fvar"].instances:
         style_name = font["name"].getDebugName(instance.subfamilyNameID)
         if style_name is None or instance.postscriptNameID == 0xFFFF:
@@ -1335,8 +1292,6 @@ def validate_outputs(topology_report: Mapping[str, object]) -> dict[str, object]
     expected_axes = {
         "wght": (100, 400, 900),
         "wdth": (75, 100, 125),
-        "opsz": (8, 12, 144),
-        "slnt": (-12, 0, 0),
     }
     axis_ranges: dict[str, tuple[float, float, float]] = {}
     for label, font in (

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Thorn.hand.ext" format="2">
-  <advance width="848.845879"/>
+  <advance width="890.902785"/>
   <outline>
     <component base="Thorn.hand"/>
   </outline>

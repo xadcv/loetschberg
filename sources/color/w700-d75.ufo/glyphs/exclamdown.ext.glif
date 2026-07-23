@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="exclamdown.ext" format="2">
-  <advance width="396.0"/>
+  <advance width="374.46624"/>
   <outline>
     <component base="exclamdown"/>
   </outline>

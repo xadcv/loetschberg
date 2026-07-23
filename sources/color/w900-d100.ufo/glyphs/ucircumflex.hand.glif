@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="ucircumflex.hand" format="2">
-  <advance width="816.0"/>
+  <advance width="858.975824"/>
   <outline>
     <component base="u.hand"/>
     <component base="_mark.ucircumflex.u.circ.hand"/>

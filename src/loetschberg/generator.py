@@ -380,6 +380,10 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
 
         base_stroke = ro - ri
         desired_stroke = base_stroke * weight_ratio
+        heavy_progress = min(
+            1.0,
+            max(0.0, (desired_stroke - base_stroke) / max(base_stroke * 0.7, 1)),
+        )
 
         skeleton_rx = (ro + ri) * W / 2
         counter_floor_x = max(16.0, ri * W * 0.35)
@@ -387,16 +391,22 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
             desired_stroke,
             max(1.0, 2 * (skeleton_rx - counter_floor_x)),
         )
-        outer_rx = skeleton_rx + stroke_x / 2
-        inner_rx = skeleton_rx - stroke_x / 2
+        outward_share = 0.5 + 0.12 * heavy_progress
+        outer_rx = skeleton_rx + stroke_x * outward_share
+        inner_rx = skeleton_rx - stroke_x * (1 - outward_share)
 
-        # Preserve the canonical vertical silhouette and overshoot.  Curves
-        # receive ordinary optical compensation at weights where a literal
-        # 200-unit stroke cannot fit inside a compact bowl.
+        # Keep the canonical silhouette at Regular. Above it, distribute new
+        # curve weight both outside and inside instead of consuming the full
+        # counter. This is the round-glyph counterpart to the weight-aware
+        # skeleton expansion used by straight and diagonal construction.
         counter_floor_y = max(18.0, ri * 0.35)
-        stroke_y = min(desired_stroke, max(1.0, ro - counter_floor_y))
-        inner_ry = ro - stroke_y
-        return outer_rx, inner_rx, ro, inner_ry
+        added_stroke_y = max(0.0, desired_stroke - base_stroke)
+        outer_ry = ro + added_stroke_y * 0.35
+        inner_ry = max(
+            counter_floor_y,
+            ri - added_stroke_y * 0.65,
+        )
+        return outer_rx, inner_rx, outer_ry, inner_ry
 
     # ``w`` is applied to the canonical grid geometry, never to stale specimen
     # outlines. Coordinates that place skeleton features scale in x while

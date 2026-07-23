@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="ntilde.hand" format="2">
-  <advance width="483.15"/>
-  <outline>
-    <component base="n.hand"/>
-    <component base="_mark.ntilde.n.tilde.hand"/>
-  </outline>
-</glyph>

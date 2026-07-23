@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="icircumflex.hand" format="2">
-  <advance width="300.0"/>
-  <outline>
-    <component base="dotlessi.hand"/>
-    <component base="_mark.icircumflex.dotlessi.circ.hand"/>
-  </outline>
-</glyph>

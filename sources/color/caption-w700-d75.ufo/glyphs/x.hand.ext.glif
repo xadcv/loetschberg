@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="x.hand.ext" format="2">
-  <advance width="517.308462"/>
-  <outline>
-    <component base="x.hand"/>
-  </outline>
-</glyph>

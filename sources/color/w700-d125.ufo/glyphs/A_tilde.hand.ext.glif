@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Atilde.hand.ext" format="2">
-  <advance width="1112.6"/>
+  <advance width="1123.09184"/>
   <outline>
     <component base="Atilde.hand"/>
   </outline>

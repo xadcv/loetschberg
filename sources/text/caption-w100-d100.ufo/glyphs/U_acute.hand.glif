@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="Uacute.hand" format="2">
-  <advance width="599.906154"/>
-  <outline>
-    <component base="U.hand"/>
-    <component base="_mark.Uacute.U.acute.hand"/>
-  </outline>
-</glyph>

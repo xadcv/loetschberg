@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="quotedbl.ext" format="2">
-  <advance width="328.79497"/>
-  <outline>
-    <component base="quotedbl"/>
-  </outline>
-</glyph>

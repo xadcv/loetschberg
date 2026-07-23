@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="backslash.ext" format="2">
-  <advance width="390.116154"/>
-  <outline>
-    <component base="backslash"/>
-  </outline>
-</glyph>

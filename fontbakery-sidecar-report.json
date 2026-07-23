@@ -11,7 +11,7 @@
                     "description": "Check hhea.caretSlopeRise and hhea.caretSlopeRun",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/caret_slope>",
@@ -40,10 +40,74 @@
                     "severity": null
                 },
                 {
+                    "description": "Is the CFF2 subr/gsubr call depth > 10?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff2_call_depth>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.cff2_call_depth",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/2425"
+                    ],
+                    "rationale": "\n        Per \"The CFF2 CharString Format\", the \"Subr nesting, stack limit\" is 10.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.cff_ascii_strings",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4619"
+                    ],
+                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
                     "description": "Is the CFF subr/gsubr call depth > 10?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/cff_call_depth>",
@@ -72,10 +136,42 @@
                     "severity": null
                 },
                 {
+                    "description": "Does the font use deprecated CFF operators or operations?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff_deprecated_operators>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.cff_deprecated_operators",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/3033"
+                    ],
+                    "rationale": "\n        The 'dotsection' operator and the use of 'endchar' to build accented characters\n        from the Adobe Standard Encoding Character Set (\"seac\") are deprecated in CFF.\n        Adobe recommends repairing any fonts that use these, especially endchar-as-seac,\n        because a rendering issue was discovered in Microsoft Word with a font that\n        makes use of this operation. The check treats that usage as a FAIL.\n        There are no known ill effects of using dotsection, so that check is a WARN.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
                     "description": "Check code page character ranges",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/code_pages>",
@@ -107,7 +203,7 @@
                     "description": "The font should not need a DSIG table anymore.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/dsig>",
@@ -244,7 +340,7 @@
                     "description": "Font follows the family naming recommendations?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/family_naming_recommendations>",
@@ -328,7 +424,7 @@
                     "description": "Checking font version fields (head and name table).",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/font_version>",
@@ -360,7 +456,7 @@
                     "description": "Checking OS/2 fsSelection value.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/fsselection>",
@@ -393,7 +489,7 @@
                     "description": "Axes and named instances fall within correct ranges?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/fvar/axis_ranges_correct>",
@@ -427,7 +523,7 @@
                     "description": "Axes and named instances fall within correct ranges?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/fvar/regular_coords_correct>",
@@ -460,7 +556,7 @@
                     "description": "Check mark characters are in GDEF mark glyph class.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/gdef_mark_chars>",
@@ -492,7 +588,7 @@
                     "description": "Check GDEF mark glyph class doesn't have characters that are not marks.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/gdef_non_mark_chars>",
@@ -524,7 +620,7 @@
                     "description": "Check glyphs in mark glyph class are non-spacing.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/gdef_spacing_marks>",
@@ -556,7 +652,7 @@
                     "description": "Check glyphs do not have duplicate components which have the same x,y coordinates.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/glyf_non_transformed_duplicate_components>",
@@ -588,7 +684,7 @@
                     "description": "Is there any unused data at the end of the glyf table?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/glyf_unused_data>",
@@ -620,7 +716,7 @@
                     "description": "Checking post.italicAngle value.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/italic_angle>",
@@ -652,7 +748,7 @@
                     "description": "Is there a usable \"kern\" table declared in the font?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/kern_table>",
@@ -686,7 +782,7 @@
                     "description": "Does the font have any invalid feature tags?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/layout_valid_feature_tags>",
@@ -718,7 +814,7 @@
                     "description": "Does the font have any invalid language tags?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/layout_valid_language_tags>",
@@ -750,7 +846,7 @@
                     "description": "Does the font have any invalid script tags?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/layout_valid_script_tags>",
@@ -782,7 +878,7 @@
                     "description": "Does the number of glyphs in the loca table match the maxp table?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/loca/maxp_num_glyphs>",
@@ -814,7 +910,7 @@
                     "description": "Checking head.macStyle value.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/mac_style>",
@@ -853,7 +949,7 @@
                     "description": "MaxAdvanceWidth is consistent with values in the Hmtx and Hhea tables?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/maxadvancewidth>",
@@ -885,7 +981,7 @@
                     "description": "Checking correctness of monospaced metadata.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/monospace>",
@@ -917,7 +1013,7 @@
                     "description": "Check name table for empty records.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/name/empty_records>",
@@ -949,7 +1045,7 @@
                     "description": "Does full font name begin with the font family name?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/name/match_familyname_fullfont>",
@@ -981,7 +1077,7 @@
                     "description": "Name table ID 6 (PostScript name) must be consistent across platforms.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/name/postscript_name_consistency>",
@@ -1013,7 +1109,7 @@
                     "description": "CFF table FontName must match name table ID 6 (PostScript name).",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/name/postscript_vs_cff>",
@@ -1045,7 +1141,7 @@
                     "description": "Check for points out of bounds.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/points_out_of_bounds>",
@@ -1077,7 +1173,7 @@
                     "description": "PostScript name follows OpenType specification requirements?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/postscript_name>",
@@ -1109,7 +1205,7 @@
                     "description": "Font has correct post table version?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/post_table_version>",
@@ -1144,7 +1240,7 @@
                     "description": "Checking direction of slnt axis angles.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/slant_direction>",
@@ -1158,8 +1254,8 @@
                     "logs": [
                         {
                             "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
+                                "code": null,
+                                "message": "Font has no slnt axis"
                             },
                             "status": "PASS"
                         }
@@ -1204,7 +1300,7 @@
                     "description": "Checking unitsPerEm value is reasonable.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/unitsperem>",
@@ -1236,7 +1332,7 @@
                     "description": "Are there unwanted Apple tables?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/unwanted_aat_tables>",
@@ -1268,7 +1364,7 @@
                     "description": "Validates that all of the instance records in a given font have distinct data.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/varfont/distinct_instance_records>",
@@ -1326,7 +1422,7 @@
                     "description": "Validate foundry-defined design-variation axis tag names.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/varfont/foundry_defined_tag_name>",
@@ -1358,7 +1454,7 @@
                     "description": "Validates that all of the instance records in a given font have the same size.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/varfont/same_size_instance_records>",
@@ -1390,7 +1486,7 @@
                     "description": "All fvar axes have a correspondent Axis Record on STAT table?",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/varfont/STAT_axis_record_for_each_axis>",
@@ -1422,7 +1518,7 @@
                     "description": "Validates subfamilyNameID and postScriptNameID for the default instance record",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/varfont/valid_default_instance_nameids>",
@@ -1454,7 +1550,7 @@
                     "description": "Validates that all of the name IDs in an instance record are within the correct range",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/varfont/valid_nameids>",
@@ -1487,7 +1583,7 @@
                     "description": "Checking OS/2 achVendID against configuration.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/vendor_id>",
@@ -1519,7 +1615,7 @@
                     "description": "Checking if OS/2 usWeightClass matches fvar.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/weight_class_fvar>",
@@ -1551,7 +1647,7 @@
                     "description": "Check if OS/2 xAvgCharWidth is correct.",
                     "documentation": null,
                     "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
                         "<FontBakeryCheck:opentype/xavgcharwidth>",
@@ -1576,102 +1672,6 @@
                         "https://github.com/fonttools/fontbakery/issues/4829"
                     ],
                     "rationale": "\n        The OS/2.xAvgCharWidth field is used to calculate the width of a string of\n        characters. It is the average width of all non-zero width glyphs in the font.\n\n        This check ensures that the value is correct. A failure here may indicate\n        a bug in the font compiler, rather than something that the designer can\n        do anything about.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_ascii_strings",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4619"
-                    ],
-                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Does the font use deprecated CFF operators or operations?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_deprecated_operators>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_deprecated_operators",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/3033"
-                    ],
-                    "rationale": "\n        The 'dotsection' operator and the use of 'endchar' to build accented characters\n        from the Adobe Standard Encoding Character Set (\"seac\") are deprecated in CFF.\n        Adobe recommends repairing any fonts that use these, especially endchar-as-seac,\n        because a rendering issue was discovered in Microsoft Word with a font that\n        makes use of this operation. The check treats that usage as a FAIL.\n        There are no known ill effects of using dotsection, so that check is a WARN.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Is the CFF2 subr/gsubr call depth > 10?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff2_call_depth>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.cff2_call_depth",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2425"
-                    ],
-                    "rationale": "\n        Per \"The CFF2 CharString Format\", the \"Subr nesting, stack limit\" is 10.\n    ",
                     "result": "PASS",
                     "severity": null
                 }

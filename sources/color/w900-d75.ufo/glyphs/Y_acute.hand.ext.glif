@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Yacute.hand.ext" format="2">
-  <advance width="798.0"/>
+  <advance width="798.96"/>
   <outline>
     <component base="Yacute.hand"/>
   </outline>

@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="udieresis.hand" format="2">
-  <advance width="653.25"/>
-  <outline>
-    <component base="u.hand"/>
-    <component base="_mark.udieresis.u.dier.hand"/>
-  </outline>
-</glyph>

@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="plusminus.hand.ext" format="2">
-  <advance width="496.4"/>
-  <outline>
-    <component base="plusminus.hand"/>
-  </outline>
-</glyph>

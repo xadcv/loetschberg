@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="asciicircum.hand.ext" format="2">
-  <advance width="577.244789"/>
+  <advance width="576.957405"/>
   <outline>
     <component base="asciicircum.hand"/>
   </outline>

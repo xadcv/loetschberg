@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="iacute.hand" format="2">
-  <advance width="396.0"/>
+  <advance width="374.88"/>
   <outline>
     <component base="dotlessi.hand"/>
     <component base="_mark.iacute.dotlessi.acute.hand"/>

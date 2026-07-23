@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="ntilde.ext" format="2">
-  <advance width="428.996154"/>
-  <outline>
-    <component base="ntilde"/>
-  </outline>
-</glyph>

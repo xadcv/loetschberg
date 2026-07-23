@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="ecircumflex.hand" format="2">
-  <advance width="777.446707"/>
+  <advance width="805.997329"/>
   <outline>
     <component base="e.hand"/>
     <component base="_mark.ecircumflex.e.circ.hand"/>

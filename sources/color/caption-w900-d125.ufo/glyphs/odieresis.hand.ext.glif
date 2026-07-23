@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="odieresis.hand.ext" format="2">
-  <advance width="734.480769"/>
-  <outline>
-    <component base="odieresis.hand"/>
-  </outline>
-</glyph>

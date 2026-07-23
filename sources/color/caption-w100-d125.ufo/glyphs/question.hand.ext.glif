@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="question.hand.ext" format="2">
-  <advance width="461.734649"/>
-  <outline>
-    <component base="question.hand"/>
-  </outline>
-</glyph>

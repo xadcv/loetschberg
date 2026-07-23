@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="logicalnot.ext" format="2">
-  <advance width="548.557633"/>
-  <outline>
-    <component base="logicalnot"/>
-  </outline>
-</glyph>

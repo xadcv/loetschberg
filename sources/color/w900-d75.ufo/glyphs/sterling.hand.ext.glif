@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="sterling.hand.ext" format="2">
-  <advance width="623.5"/>
+  <advance width="665.011359"/>
   <outline>
     <component base="sterling.hand"/>
   </outline>

@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="threequarters.hand.ext" format="2">
-  <advance width="632.570663"/>
-  <outline>
-    <component base="threequarters.hand"/>
-  </outline>
-</glyph>

@@ -1,18 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="cedilla.ext.wallBronze" format="2">
-  <advance width="299.5"/>
+  <advance width="304.86544"/>
   <outline>
     <contour>
-      <point x="201.5" y="10.0" type="line"/>
-      <point x="201.5" y="-10.5" type="line"/>
-      <point x="201.5" y="-31.0" type="line"/>
-      <point x="201.5" y="-51.5" type="line"/>
-      <point x="201.5" y="-72.0" type="line"/>
-      <point x="261.5" y="-142.0" type="line"/>
-      <point x="261.5" y="-121.5" type="line"/>
-      <point x="261.5" y="-101.0" type="line"/>
-      <point x="261.5" y="-80.5" type="line"/>
-      <point x="261.5" y="-60.0" type="line"/>
+      <point x="206.86543999999998" y="10.0" type="line"/>
+      <point x="206.86543999999998" y="-10.5" type="line"/>
+      <point x="206.86543999999998" y="-31.0" type="line"/>
+      <point x="206.86543999999998" y="-51.5" type="line"/>
+      <point x="206.86543999999998" y="-72.0" type="line"/>
+      <point x="266.86544000000004" y="-142.0" type="line"/>
+      <point x="266.86544000000004" y="-121.5" type="line"/>
+      <point x="266.86544000000004" y="-101.0" type="line"/>
+      <point x="266.86544000000004" y="-80.5" type="line"/>
+      <point x="266.86544000000004" y="-60.0" type="line"/>
     </contour>
   </outline>
 </glyph>

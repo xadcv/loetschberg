@@ -1,18 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="macron.ext.wallBronze" format="2">
-  <advance width="466.0"/>
+  <advance width="487.6"/>
   <outline>
     <contour>
-      <point x="368.0" y="702.24" type="line"/>
-      <point x="368.0" y="659.12" type="line"/>
-      <point x="368.0" y="616.0" type="line"/>
-      <point x="368.0" y="572.88" type="line"/>
-      <point x="368.0" y="529.76" type="line"/>
-      <point x="428.0" y="459.76" type="line"/>
-      <point x="428.0" y="502.88" type="line"/>
-      <point x="428.0" y="546.0" type="line"/>
-      <point x="428.0" y="589.12" type="line"/>
-      <point x="428.0" y="632.24" type="line"/>
+      <point x="389.6" y="687.72" type="line"/>
+      <point x="389.6" y="651.86" type="line"/>
+      <point x="389.6" y="616.0" type="line"/>
+      <point x="389.6" y="580.14" type="line"/>
+      <point x="389.6" y="544.28" type="line"/>
+      <point x="449.6" y="474.28" type="line"/>
+      <point x="449.6" y="510.14" type="line"/>
+      <point x="449.6" y="546.0" type="line"/>
+      <point x="449.6" y="581.86" type="line"/>
+      <point x="449.6" y="617.72" type="line"/>
     </contour>
   </outline>
 </glyph>

@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="ordmasculine.ext" format="2">
-  <advance width="466.964423"/>
-  <outline>
-    <component base="ordmasculine"/>
-  </outline>
-</glyph>

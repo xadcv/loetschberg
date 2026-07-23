@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Yacute.hand" format="2">
-  <advance width="893.6"/>
+  <advance width="903.49568"/>
   <outline>
     <component base="Y.hand"/>
     <component base="_mark.Yacute.Y.acute.hand"/>

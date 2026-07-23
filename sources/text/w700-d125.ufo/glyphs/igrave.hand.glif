@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="igrave.hand" format="2">
-  <advance width="357.6"/>
+  <advance width="348.52224"/>
   <outline>
     <component base="dotlessi.hand"/>
     <component base="_mark.igrave.dotlessi.grave.hand"/>

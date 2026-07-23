@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Idieresis.hand.ext" format="2">
-  <advance width="396.0"/>
+  <advance width="364.8"/>
   <outline>
     <component base="Idieresis.hand"/>
   </outline>

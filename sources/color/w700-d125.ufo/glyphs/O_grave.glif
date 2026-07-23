@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Ograve" format="2">
-  <advance width="1132.6"/>
+  <advance width="1168.00822"/>
   <unicode hex="00D2"/>
   <outline>
     <component base="O"/>

@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="braceright.hand.ext" format="2">
-  <advance width="545.561867"/>
-  <outline>
-    <component base="braceright.hand"/>
-  </outline>
-</glyph>

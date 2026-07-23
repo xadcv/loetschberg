@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="periodcentered.hand.ext" format="2">
-  <advance width="258.0"/>
-  <outline>
-    <component base="periodcentered.hand"/>
-  </outline>
-</glyph>

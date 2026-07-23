@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="slash.ext" format="2">
-  <advance width="624.6"/>
+  <advance width="622.83168"/>
   <outline>
     <component base="slash"/>
   </outline>

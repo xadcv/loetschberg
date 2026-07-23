@@ -1,33 +1,33 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="brokenbar.ext.face" format="2">
-  <advance width="396.0"/>
+  <advance width="372.0"/>
   <outline>
     <contour>
       <point x="98.0" y="740.0" type="line"/>
-      <point x="138.0" y="740.0" type="line"/>
-      <point x="178.0" y="740.0" type="line"/>
-      <point x="218.0" y="740.0" type="line"/>
-      <point x="258.0" y="740.0" type="line"/>
-      <point x="298.0" y="740.0" type="line"/>
-      <point x="298.0" y="717.3333333333334" type="line"/>
-      <point x="298.0" y="694.6666666666666" type="line"/>
-      <point x="298.0" y="672.0" type="line"/>
-      <point x="298.0" y="649.3333333333334" type="line"/>
-      <point x="298.0" y="626.6666666666666" type="line"/>
-      <point x="298.0" y="604.0" type="line"/>
-      <point x="298.0" y="581.3333333333334" type="line"/>
-      <point x="298.0" y="558.6666666666666" type="line"/>
-      <point x="298.0" y="536.0" type="line"/>
-      <point x="298.0" y="513.3333333333334" type="line"/>
-      <point x="298.0" y="490.66666666666663" type="line"/>
-      <point x="298.0" y="468.0" type="line"/>
-      <point x="298.0" y="445.3333333333333" type="line"/>
-      <point x="298.0" y="422.6666666666667" type="line"/>
-      <point x="298.0" y="400.0" type="line"/>
-      <point x="258.0" y="400.0" type="line"/>
-      <point x="218.0" y="400.0" type="line"/>
-      <point x="178.0" y="400.0" type="line"/>
-      <point x="138.0" y="400.0" type="line"/>
+      <point x="133.2" y="740.0" type="line"/>
+      <point x="168.4" y="740.0" type="line"/>
+      <point x="203.6" y="740.0" type="line"/>
+      <point x="238.8" y="740.0" type="line"/>
+      <point x="274.0" y="740.0" type="line"/>
+      <point x="274.0" y="717.3333333333334" type="line"/>
+      <point x="274.0" y="694.6666666666666" type="line"/>
+      <point x="274.0" y="672.0" type="line"/>
+      <point x="274.0" y="649.3333333333334" type="line"/>
+      <point x="274.0" y="626.6666666666666" type="line"/>
+      <point x="274.0" y="604.0" type="line"/>
+      <point x="274.0" y="581.3333333333334" type="line"/>
+      <point x="274.0" y="558.6666666666666" type="line"/>
+      <point x="274.0" y="536.0" type="line"/>
+      <point x="274.0" y="513.3333333333334" type="line"/>
+      <point x="274.0" y="490.66666666666663" type="line"/>
+      <point x="274.0" y="468.0" type="line"/>
+      <point x="274.0" y="445.3333333333333" type="line"/>
+      <point x="274.0" y="422.6666666666667" type="line"/>
+      <point x="274.0" y="400.0" type="line"/>
+      <point x="238.8" y="400.0" type="line"/>
+      <point x="203.6" y="400.0" type="line"/>
+      <point x="168.4" y="400.0" type="line"/>
+      <point x="133.2" y="400.0" type="line"/>
       <point x="98.0" y="400.0" type="line"/>
       <point x="98.0" y="422.6666666666667" type="line"/>
       <point x="98.0" y="445.33333333333337" type="line"/>
@@ -46,30 +46,30 @@
     </contour>
     <contour>
       <point x="98.0" y="280.0" type="line"/>
-      <point x="138.0" y="280.0" type="line"/>
-      <point x="178.0" y="280.0" type="line"/>
-      <point x="218.0" y="280.0" type="line"/>
-      <point x="258.0" y="280.0" type="line"/>
-      <point x="298.0" y="280.0" type="line"/>
-      <point x="298.0" y="256.0" type="line"/>
-      <point x="298.0" y="232.0" type="line"/>
-      <point x="298.0" y="208.0" type="line"/>
-      <point x="298.0" y="184.0" type="line"/>
-      <point x="298.0" y="160.0" type="line"/>
-      <point x="298.0" y="136.0" type="line"/>
-      <point x="298.0" y="112.0" type="line"/>
-      <point x="298.0" y="88.0" type="line"/>
-      <point x="298.0" y="64.0" type="line"/>
-      <point x="298.0" y="40.0" type="line"/>
-      <point x="298.0" y="16.0" type="line"/>
-      <point x="298.0" y="-8.0" type="line"/>
-      <point x="298.0" y="-32.0" type="line"/>
-      <point x="298.0" y="-56.0" type="line"/>
-      <point x="298.0" y="-80.0" type="line"/>
-      <point x="258.0" y="-80.0" type="line"/>
-      <point x="218.0" y="-80.0" type="line"/>
-      <point x="178.0" y="-80.0" type="line"/>
-      <point x="138.0" y="-80.0" type="line"/>
+      <point x="133.2" y="280.0" type="line"/>
+      <point x="168.4" y="280.0" type="line"/>
+      <point x="203.6" y="280.0" type="line"/>
+      <point x="238.8" y="280.0" type="line"/>
+      <point x="274.0" y="280.0" type="line"/>
+      <point x="274.0" y="256.0" type="line"/>
+      <point x="274.0" y="232.0" type="line"/>
+      <point x="274.0" y="208.0" type="line"/>
+      <point x="274.0" y="184.0" type="line"/>
+      <point x="274.0" y="160.0" type="line"/>
+      <point x="274.0" y="136.0" type="line"/>
+      <point x="274.0" y="112.0" type="line"/>
+      <point x="274.0" y="88.0" type="line"/>
+      <point x="274.0" y="64.0" type="line"/>
+      <point x="274.0" y="40.0" type="line"/>
+      <point x="274.0" y="16.0" type="line"/>
+      <point x="274.0" y="-8.0" type="line"/>
+      <point x="274.0" y="-32.0" type="line"/>
+      <point x="274.0" y="-56.0" type="line"/>
+      <point x="274.0" y="-80.0" type="line"/>
+      <point x="238.8" y="-80.0" type="line"/>
+      <point x="203.6" y="-80.0" type="line"/>
+      <point x="168.4" y="-80.0" type="line"/>
+      <point x="133.2" y="-80.0" type="line"/>
       <point x="98.0" y="-80.0" type="line"/>
       <point x="98.0" y="-56.0" type="line"/>
       <point x="98.0" y="-32.0" type="line"/>

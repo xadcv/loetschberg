@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="Aring.hand" format="2">
-  <advance width="717.24"/>
-  <outline>
-    <component base="A.hand"/>
-    <component base="_mark.Aring.A.ring.hand"/>
-  </outline>
-</glyph>

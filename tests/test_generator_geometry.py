@@ -37,8 +37,7 @@ Box: TypeAlias = tuple[float, float, float, float]
 
 WEIGHTS = (100.0, 400.0, 700.0, 900.0)
 WIDTHS = (75.0, 100.0, 125.0)
-OPTICAL_SIZES = (8.0, 12.0, 144.0)
-LOCATIONS = tuple(product(WEIGHTS, WIDTHS, OPTICAL_SIZES))
+LOCATIONS = tuple(product(WEIGHTS, WIDTHS))
 
 COORD_EPSILON = 1e-7
 AREA_EPSILON = 1e-4
@@ -60,8 +59,8 @@ class LayerAuditResult:
     hatch_failures: tuple[str, ...]
 
 
-def _location_label(weight: float, width: float, optical_size: float) -> str:
-    return f"wght={weight:g},wdth={width:g},opsz={optical_size:g}"
+def _location_label(weight: float, width: float) -> str:
+    return f"wght={weight:g},wdth={width:g}"
 
 
 def _points(contour: gen.BuiltContour) -> tuple[Point, ...]:
@@ -355,13 +354,12 @@ def _audit_generator_geometry() -> AuditResult:
     contour_failures: list[str] = []
     junction_failures: list[str] = []
 
-    for weight, width, optical_size in LOCATIONS:
-        location = _location_label(weight, width, optical_size)
+    for weight, width in LOCATIONS:
+        location = _location_label(weight, width)
         params = MasterSpec(
             "geometry-probe",
             wght=weight,
             wdth=width,
-            opsz=optical_size,
         ).params()
         outlines: dict[str, gen.GlyphOutline] = {}
         for glyph_name in glyph_names:
@@ -396,15 +394,11 @@ def _audit_generator_geometry() -> AuditResult:
 
     for hand in (False, True):
         family = "hand" if hand else "regular"
-        for width, optical_size in product(
-            (75.0, 87.5, 100.0, 112.5, 125.0),
-            (8.0, 9.0, 10.0, 11.0, 12.0),
-        ):
+        for width in (75.0, 87.5, 100.0, 112.5, 125.0):
             params = MasterSpec(
                 "thin-attachment-probe",
                 wght=100,
                 wdth=width,
-                opsz=optical_size,
             ).params(hand=hand)
             outlines = {
                 glyph_name: gen.build_contours(
@@ -418,12 +412,12 @@ def _audit_generator_geometry() -> AuditResult:
                 _append_contour_failures(
                     contour_failures,
                     glyph_name,
-                    f"wght=100,wdth={width:g},opsz={optical_size:g},{family}",
+                    f"wght=100,wdth={width:g},{family}",
                     outline,
                 )
             _append_attachment_failures(
                 junction_failures,
-                f"wght=100,wdth={width:g},opsz={optical_size:g},{family}",
+                f"wght=100,wdth={width:g},{family}",
                 outlines["R"],
                 outlines["N"],
                 outlines["1"],
@@ -481,7 +475,6 @@ def _audit_replayed_layer_geometry() -> LayerAuditResult:
                                     for x, y in polygon
                                 )
                             ],
-                            slnt=master.slnt,
                             shift_x=shift,
                         )
                         transformed_raw_area = _polygon_area(
@@ -667,19 +660,26 @@ def test_h_junctions_and_g_terminal_remain_attached() -> None:
     assert not failures, _failure_message("generator junction failures", failures)
 
 
-def test_caption_cut_scales_weight_and_width_multiplicatively() -> None:
-    thin = MasterSpec("probe", wght=100, wdth=125, opsz=8).params()
-    black = MasterSpec("probe", wght=900, wdth=75, opsz=8).params()
-    assert thin.s == pytest.approx(40 * 88 / 104)
-    assert black.s == pytest.approx(200 * 88 / 104)
-    assert thin.w == pytest.approx(1.25 * 0.81)
-    assert black.w == pytest.approx(0.75 * 0.81)
+def test_weight_width_ink_budget_is_coordinated() -> None:
+    thin = MasterSpec("probe", wght=100, wdth=125).params()
+    black_condensed = MasterSpec("probe", wght=900, wdth=75).params()
+    black_normal = MasterSpec("probe", wght=900, wdth=100).params()
+    black_expanded = MasterSpec("probe", wght=900, wdth=125).params()
+    assert thin.s == pytest.approx(40)
+    assert thin.w == pytest.approx(1.25)
+    assert (
+        black_condensed.s
+        < black_normal.s
+        < black_expanded.s
+    )
+    assert black_normal.s == pytest.approx(176)
+    assert black_normal.sh == pytest.approx(170)
 
 
-def test_caption_has_a_complete_weight_width_interaction_plane() -> None:
-    caption = [spec for spec in master_specs() if spec.opsz == 8]
-    assert len(caption) == 12
-    assert {(spec.wght, spec.wdth) for spec in caption} == set(
+def test_family_has_a_complete_weight_width_interaction_plane() -> None:
+    specs = master_specs()
+    assert len(specs) == 12
+    assert {(spec.wght, spec.wdth) for spec in specs} == set(
         product((100, 400, 700, 900), (75, 100, 125))
     )
 

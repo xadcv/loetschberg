@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="Ograve.hand.ext" format="2">
-  <advance width="604.65"/>
-  <outline>
-    <component base="Ograve.hand"/>
-  </outline>
-</glyph>

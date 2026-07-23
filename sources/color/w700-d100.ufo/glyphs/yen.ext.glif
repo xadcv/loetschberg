@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="yen.ext" format="2">
-  <advance width="893.6"/>
+  <advance width="903.49568"/>
   <outline>
     <component base="yen"/>
   </outline>

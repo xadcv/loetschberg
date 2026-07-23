@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="germandbls.ext" format="2">
-  <advance width="624.751325"/>
-  <outline>
-    <component base="germandbls"/>
-  </outline>
-</glyph>

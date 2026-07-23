@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Lötschberg variable colour typeface specimen — four axes, handdrawn and extruded OpenType variants, Basic Latin and Latin-1." data-i18n-content="meta.description">
+  <meta name="description" content="Lötschberg variable colour typeface specimen — weight, width, handdrawn and extruded OpenType variants, Basic Latin and Latin-1." data-i18n-content="meta.description">
   <meta name="theme-color" content="#7c453b">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%237c453b'/%3E%3Cpath d='M15 10h10v34h25v10H15z' fill='%23e2a250'/%3E%3C/svg%3E">
   <title data-i18n="meta.title">Lötschberg — Variable Colour Typeface</title>
@@ -33,8 +33,6 @@
       --rule: #c9bba2;
       --wght: 400;
       --wdth: 100;
-      --opsz: 12;
-      --slnt: 0;
       --shell: min(100% - 48px, 1360px);
       --shadow: 0 22px 64px rgb(42 32 22 / 0.16);
     }
@@ -108,13 +106,10 @@
 
     .typeface {
       font-family: "Loetschberg", Impact, sans-serif;
-      font-optical-sizing: none;
       font-synthesis: none;
       font-variation-settings:
         "wght" var(--wght),
-        "wdth" var(--wdth),
-        "opsz" var(--opsz),
-        "slnt" var(--slnt);
+        "wdth" var(--wdth);
     }
 
     .mono-label {
@@ -629,12 +624,12 @@
 
     .cut--caption .cut__sample {
       font-size: clamp(2rem, 4.8vw, 4.4rem);
-      font-variation-settings: "wght" 400, "wdth" 100, "opsz" 8, "slnt" 0;
+      font-variation-settings: "wght" 400, "wdth" 100;
     }
 
     .cut--display .cut__sample {
       font-size: clamp(3.4rem, 7.4vw, 7.2rem);
-      font-variation-settings: "wght" 400, "wdth" 100, "opsz" 12, "slnt" 0;
+      font-variation-settings: "wght" 400, "wdth" 100;
     }
 
     .cut__copy {
@@ -746,7 +741,7 @@
       background: #f7f1e7;
       font-family: "Loetschberg", Impact, sans-serif;
       font-size: clamp(1.05rem, 2.35vw, 2.25rem);
-      font-variation-settings: "wght" 400, "wdth" 100, "opsz" 12, "slnt" 0;
+      font-variation-settings: "wght" 400, "wdth" 100;
       font-feature-settings: "ss01" 0, "ss02" 0;
     }
 
@@ -1186,7 +1181,6 @@
         <nav class="nav-links" aria-label="Specimen sections" data-i18n-aria="nav.aria">
           <a href="#variants" data-i18n="nav.variants">Variants</a>
           <a href="#axes" data-i18n="nav.axes">Axes</a>
-          <a href="#optical" data-i18n="nav.optical">Optical cuts</a>
           <a href="#waterfall" data-i18n="nav.waterfall">Waterfall</a>
           <a href="#charset" data-i18n="nav.charset">Character set</a>
           <a href="#colour" data-i18n="nav.colour">Colour</a>
@@ -1209,7 +1203,7 @@
         <h1 class="hero__word typeface axis-target editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable Lötschberg title" data-i18n-aria="hero.titleAria" data-single-line="true">LÖTSCHBERG</h1>
       </div>
       <div class="hero__footer">
-        <p class="hero__intro" data-i18n="hero.intro">A parametric railway sans rebuilt as one four-axis variable font. Its austere monoline face can become hand-painted, extruded, or both—without leaving live, selectable text.</p>
+        <p class="hero__intro" data-i18n="hero.intro">A parametric railway sans rebuilt as one two-axis variable font. Weight and width move continuously while its austere monoline face can become hand-painted, extruded, or both—without leaving live, selectable text.</p>
         <p class="hero__note mono-label" data-i18n-html="hero.note">Edit the title · Move the axes<br>Enable ss01 + ss02 independently</p>
       </div>
     </div>
@@ -1218,7 +1212,7 @@
   <form class="axis-console" aria-label="Global variable font controls" data-i18n-aria="controls.aria" onsubmit="return false">
     <div class="axis-console__heading">
       <p class="mono-label" data-i18n="controls.heading">Live designspace controls</p>
-      <p class="mono-label" id="axis-summary">wght 400 · wdth 100 · opsz 12 · slnt 0</p>
+      <p class="mono-label" id="axis-summary">wght 400 · wdth 100</p>
     </div>
     <div class="axis-console__body">
       <div class="axis-control">
@@ -1234,20 +1228,6 @@
           <output id="value-wdth" for="axis-wdth">100</output>
         </div>
         <input class="range" id="axis-wdth" data-axis="wdth" type="range" min="75" max="125" step="1" value="100">
-      </div>
-      <div class="axis-control">
-        <div class="axis-control__top">
-          <label class="mono-label" for="axis-opsz" data-i18n="axes.opticalSize">Optical size</label>
-          <output id="value-opsz" for="axis-opsz">12</output>
-        </div>
-        <input class="range" id="axis-opsz" data-axis="opsz" type="range" min="8" max="12" step="1" value="12">
-      </div>
-      <div class="axis-control">
-        <div class="axis-control__top">
-          <label class="mono-label" for="axis-slnt" data-i18n="axes.slant">Slant</label>
-          <output id="value-slnt" for="axis-slnt">0°</output>
-        </div>
-        <input class="range" id="axis-slnt" data-axis="slnt" type="range" min="-12" max="0" step="1" value="0">
       </div>
       <button class="reset-button" id="reset-axes" type="button" data-i18n="controls.reset">Reset axes</button>
     </div>
@@ -1300,9 +1280,9 @@
       <div class="section-head">
         <span class="section-head__number mono-label">02</span>
         <h2 id="axes-title" data-i18n="designspace.title">Drive the whole machine</h2>
-        <span class="section-head__note mono-label">wght · wdth · opsz · slnt</span>
+        <span class="section-head__note mono-label">wght · wdth</span>
       </div>
-      <p class="section-intro" data-i18n="designspace.intro">The controls above address four registered axes. Every colour layer follows the same interpolation-compatible outlines, so the depth remains live while weight, width, optical size, and slant change.</p>
+      <p class="section-intro" data-i18n="designspace.intro">The controls above address the two registered axes. Every colour layer follows the same interpolation-compatible outlines, so the depth remains live while weight and width change.</p>
 
       <div class="playground">
         <div class="playground__controls">
@@ -1320,33 +1300,11 @@
       </div>
     </section>
 
-    <section class="section" id="optical" aria-labelledby="optical-title">
-      <div class="section-head">
-        <span class="section-head__number mono-label">03</span>
-        <h2 id="optical-title" data-i18n="optical.title">Caption and display cuts</h2>
-        <span class="section-head__note mono-label" data-i18n="optical.note">Not simple scaling</span>
-      </div>
-      <p class="section-intro" data-i18n="optical.intro">At small optical sizes the face becomes narrower and lighter, spacing tightens, and the depth becomes shallower. The hatch count does not change: seven marks are retained and compressed to preserve the painted transition.</p>
-
-      <div class="cut-comparison">
-        <article class="cut cut--caption">
-          <div class="cut__meta mono-label"><span data-i18n="optical.caption">Caption</span><span>opsz 8</span></div>
-          <div class="cut__sample typeface feature-base editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable caption optical size sample" data-i18n-aria="optical.captionAria" data-fit-line data-fit-min="18" data-single-line="true">BERN · SIMPLON 151</div>
-          <p class="cut__copy" data-i18n="optical.captionCopy">Designed for compact reading: a leaner stroke, narrower skeleton, tighter fit, and shorter extrusion vector.</p>
-        </article>
-        <article class="cut cut--display">
-          <div class="cut__meta mono-label"><span data-i18n="optical.display">Display</span><span>opsz 12</span></div>
-          <div class="cut__sample typeface feature-base editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable display optical size sample" data-i18n-aria="optical.displayAria" data-fit-line data-fit-min="18" data-single-line="true">SIMPLON</div>
-          <p class="cut__copy" data-i18n="optical.displayCopy">Designed for locomotive-scale lettering: broad proportions, full stroke, and the most expansive spacing.</p>
-        </article>
-      </div>
-    </section>
-
     <section class="section" id="waterfall" aria-labelledby="waterfall-title">
       <div class="section-head">
         <span class="section-head__number mono-label">04</span>
         <h2 id="waterfall-title" data-i18n="waterfall.title">Weight × width</h2>
-        <span class="section-head__note mono-label" data-i18n="waterfall.note">Twelve positions · opsz 12</span>
+        <span class="section-head__note mono-label" data-i18n="waterfall.note">Twelve named positions</span>
       </div>
       <p class="section-intro" data-i18n="waterfall.intro">Width moves the skeleton while stems hold their authority. Weight grows independently from Thin 100 to Black 900.</p>
 
@@ -1359,27 +1317,27 @@
         </div>
         <div class="waterfall__row" role="row">
           <span class="waterfall__weight mono-label" role="rowheader">100</span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 100,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 100,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 100,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 100,'wdth' 75"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 100,'wdth' 100"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 100,'wdth' 125"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
         </div>
         <div class="waterfall__row" role="row">
           <span class="waterfall__weight mono-label" role="rowheader">400</span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 400,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 400,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 400,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 400,'wdth' 75"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 400,'wdth' 100"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 400,'wdth' 125"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
         </div>
         <div class="waterfall__row" role="row">
           <span class="waterfall__weight mono-label" role="rowheader">700</span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 700,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 700,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 700,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 700,'wdth' 75"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 700,'wdth' 100"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 700,'wdth' 125"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
         </div>
         <div class="waterfall__row" role="row">
           <span class="waterfall__weight mono-label" role="rowheader">900</span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 900,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 900,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 900,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 900,'wdth' 75"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 900,'wdth' 100"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 900,'wdth' 125"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
         </div>
       </div>
     </section>
@@ -1463,16 +1421,16 @@
         <h2 id="downloads-title" data-i18n="downloads.title">Take the typeface</h2>
         <span class="section-head__note mono-label" data-i18n="downloads.note">Desktop · Web · Complete package</span>
       </div>
-      <p class="section-intro" data-i18n="downloads.intro">Choose the two-font Figma pair, an individual colour or text build, or the complete release archive. Every variable build retains all four registered axes; the primary colour font keeps the live COLRv1 extrusion for the web and modern colour-font applications.</p>
+      <p class="section-intro" data-i18n="downloads.intro">Choose the two-font Figma pair, an individual colour or text build, or the complete release archive. Every variable build retains weight and width; the primary colour font keeps the live COLRv1 extrusion for the web and modern colour-font applications.</p>
       <p class="download-advisory" data-i18n-html="downloads.figmaAdvisory"><span><strong>For Figma, install only the Regular and Extruded compatibility TTFs.</strong> Remove or disable the primary colour TTF first: it shares the Lötschberg family name with the Regular compatibility build.</span></p>
 
       <div class="download-grid">
         <article class="download-card">
           <p class="download-card__format mono-label" data-i18n="downloads.figmaRegularFormat">TTF · Figma compatibility</p>
           <h3 data-i18n="downloads.figmaRegularTitle">Lötschberg Regular</h3>
-          <p class="download-card__copy" data-i18n="downloads.figmaRegularCopy">Four-axis monochrome glyf family with Handdrawn available through ss01.</p>
+          <p class="download-card__copy" data-i18n="downloads.figmaRegularCopy">Two-axis monochrome glyf family with Handdrawn available through ss01.</p>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-Regular-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.ttf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
+            <a class="download-button" href="./Loetschberg-Regular-VF%5Bwght%2Cwdth%5D.ttf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
           </div>
         </article>
         <article class="download-card">
@@ -1480,7 +1438,7 @@
           <h3 data-i18n="downloads.figmaExtrudedTitle">Lötschberg Extruded</h3>
           <p class="download-card__copy" data-i18n="downloads.figmaExtrudedCopy">Separate monochrome family with the extruded silhouette, seven hatch knockouts, and Handdrawn through ss01.</p>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-Extruded-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.ttf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
+            <a class="download-button" href="./Loetschberg-Extruded-VF%5Bwght%2Cwdth%5D.ttf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
           </div>
         </article>
         <article class="download-card">
@@ -1488,7 +1446,7 @@
           <h3 data-i18n="downloads.ttfTitle">Primary COLRv1 font</h3>
           <p class="download-card__copy" data-i18n="downloads.ttfCopy">Full-colour web and modern-app build with glyf outlines, CPAL, ss01, and ss02.</p>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.ttf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
+            <a class="download-button" href="./Loetschberg-VF%5Bwght%2Cwdth%5D.ttf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
           </div>
         </article>
         <article class="download-card">
@@ -1496,7 +1454,7 @@
           <h3 data-i18n="downloads.otfTitle">CFF2 text sidecar</h3>
           <p class="download-card__copy" data-i18n="downloads.otfCopy">Monochrome base and handdrawn forms for text workflows.</p>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-Text-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.otf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
+            <a class="download-button" href="./Loetschberg-Text-VF%5Bwght%2Cwdth%5D.otf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
           </div>
         </article>
         <article class="download-card">
@@ -1517,13 +1475,13 @@
         </article>
         <article class="download-card download-card--bundle">
           <div>
-            <p class="download-card__format mono-label" data-i18n="downloads.zipFormat">ZIP · Release 1.0.1</p>
+            <p class="download-card__format mono-label" data-i18n="downloads.zipFormat">ZIP · Release 1.0.2</p>
             <h3 data-i18n="downloads.zipTitle">Complete Lötschberg package</h3>
             <p class="download-card__copy" data-i18n="downloads.zipCopy">All six production font files, including the Figma pair, with English and Swiss German build and variant documentation.</p>
           </div>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-1.0.1.zip" download><span data-i18n="downloads.downloadZip">Download ZIP</span> <span aria-hidden="true">↓</span></a>
-            <a class="download-release-link" href="https://github.com/xadcv/loetschberg/releases/tag/v1.0.1" target="_blank" rel="noopener noreferrer" data-i18n="downloads.githubRelease">GitHub release ↗</a>
+            <a class="download-button" href="./Loetschberg-1.0.2.zip" download><span data-i18n="downloads.downloadZip">Download ZIP</span> <span aria-hidden="true">↓</span></a>
+            <a class="download-release-link" href="https://github.com/xadcv/loetschberg/releases/tag/v1.0.2" target="_blank" rel="noopener noreferrer" data-i18n="downloads.githubRelease">GitHub release ↗</a>
           </div>
         </article>
       </div>
@@ -1540,8 +1498,6 @@
           <tbody>
             <tr><th scope="row" data-i18n="axes.weight">Weight</th><td data-i18n="specs.weightValue">wght 100–900 · default 400</td></tr>
             <tr><th scope="row" data-i18n="axes.width">Width</th><td data-i18n="specs.widthValue">wdth 75–125 · default 100</td></tr>
-            <tr><th scope="row" data-i18n="axes.opticalSize">Optical size</th><td data-i18n="specs.opticalValue">opsz 8–12 · default 12</td></tr>
-            <tr><th scope="row" data-i18n="axes.slant">Slant</th><td data-i18n="specs.slantValue">slnt −12–0 · default 0</td></tr>
             <tr><th scope="row" data-i18n="specs.verticalMetrics">Vertical metrics</th><td>960 / 700 / 0 / −300</td></tr>
           </tbody>
         </table>
@@ -1556,7 +1512,7 @@
           </article>
           <article class="production-note">
             <h3 class="mono-label" data-i18n="specs.figmaTitle">Figma compatibility pair</h3>
-            <p data-i18n="specs.figmaCopy">Regular and Extruded are separate, palette-free glyf families for applications without COLRv1 rendering. Both retain all four axes and Handdrawn through ss01.</p>
+            <p data-i18n="specs.figmaCopy">Regular and Extruded are separate, palette-free glyf families for applications without COLRv1 rendering. Both retain weight, width, and Handdrawn through ss01.</p>
           </article>
         </div>
       </div>
@@ -1566,7 +1522,7 @@
   <footer class="site-footer">
     <div class="footer__inner">
       <p class="footer__word typeface axis-target" aria-label="Lötschberg 151">LÖTSCHBERG 151</p>
-      <p class="footer__meta mono-label" data-i18n-html="footer.meta">Parametric outlines · frozen depth recipe<br>Four axes · two independent features</p>
+      <p class="footer__meta mono-label" data-i18n-html="footer.meta">Parametric outlines · frozen depth recipe<br>Two axes · two independent features</p>
     </div>
   </footer>
 
@@ -1574,7 +1530,7 @@
     (function () {
       "use strict";
 
-      var defaults = { wght: "400", wdth: "100", opsz: "12", slnt: "0" };
+      var defaults = { wght: "400", wdth: "100" };
       var root = document.documentElement;
       root.classList.add("fit-lines");
       var sliders = Array.prototype.slice.call(document.querySelectorAll("[data-axis]"));
@@ -1593,14 +1549,13 @@
       };
       var gswCH = {
         "meta.title": "Lötschberg — Variabli Farbschrift",
-        "meta.description": "Schriftmuster vo de variable Lötschberg-Farbschrift — vier Achse, handzeichneti und extrudierti OpenType-Variante, Basis-Lateinisch und Latin-1.",
+        "meta.description": "Schriftmuster vo de variable Lötschberg-Farbschrift — Gwicht, Breiti, handzeichneti und extrudierti OpenType-Variante, Basis-Lateinisch und Latin-1.",
         "skip": "Zum Schriftmuster springe",
         "header.catalogue": "Muster vo ere variable Farbschrift · Nr. 151",
         "header.specificationsAria": "Spezifikatione vo de Schrift",
         "nav.aria": "Bereich vom Schriftmuster",
         "nav.variants": "Variante",
         "nav.axes": "Achse",
-        "nav.optical": "Optischi Grösse",
         "nav.waterfall": "Kaskade",
         "nav.charset": "Zeichesatz",
         "nav.colour": "Farb",
@@ -1614,15 +1569,13 @@
         "font.error": "Schrift nöd verfügbar · Ersatzschrift wird aazeigt",
         "font.statusUnavailable": "Status vom Schriftlade nöd verfügbar",
         "hero.titleAria": "Lötschberg-Titel zum Bearbeite",
-        "hero.intro": "E parametrischi Iisebahn-Grotesk, neu ufbaut als variabli Schrift mit vier Achse. Sis strenge monolineare Schriftbild cha handgmalt, extrudiert oder beides werde – und bliibt debii live und uswählbar.",
+        "hero.intro": "E parametrischi Iisebahn-Grotesk, neu ufbaut als variabli Schrift mit zwei Achse. Gwicht und Breiti bewegid sich stufelos; s strenge monolineare Schriftbild cha handgmalt, extrudiert oder beides werde – und bliibt debii live und uswählbar.",
         "hero.note": "Titel bearbeite · Achse bewege<br>ss01 + ss02 unabhängig aktiviere",
         "controls.aria": "Globali Stüürig vo de variable Schrift",
         "controls.heading": "Interaktivi Designspace-Stüürig",
         "controls.reset": "Achse zruggsetze",
         "axes.weight": "Gwicht",
         "axes.width": "Breiti",
-        "axes.opticalSize": "Optischi Grössi",
-        "axes.slant": "Neiig",
         "noscript": "D Schrift bliibt sichtbar, aber d Achsestüürig und die generierte Zeichetabelle bruuched JavaScript.",
         "variants.title": "Zwei Schalter, vier Stimme",
         "variants.note": "Unabhängigi OpenType-Features",
@@ -1637,7 +1590,7 @@
         "variants.handExtrudedAria": "Bearbeitbars Muster: handzeichnet und extrudiert",
         "common.default": "Standard",
         "designspace.title": "D ganzi Maschine stüüre",
-        "designspace.intro": "D Stüürig obe bedient vier registrierti Achse. Jedi Farbebeni folgt de gliiche interpolationskompatible Umriss, drum bliibt d Tüüfi live, während sich Gwicht, Breiti, optischi Grössi und Neiig veränderet.",
+        "designspace.intro": "D Stüürig obe bedient die zwei registrierte Achse. Jedi Farbebeni folgt de gliiche interpolationskompatible Umriss, drum bliibt d Tüüfi live, während sich Gwicht und Breiti veränderet.",
         "designspace.switches": "Feature-Schalter",
         "features.handdrawn": "Handzeichnet",
         "features.handdrawnNote": "ss01 · Variation mit de gliiche Pünktstruktur",
@@ -1645,17 +1598,8 @@
         "features.extrudedNote": "ss02 · COLRv1 mit siebe Schraffure",
         "designspace.sampleAria": "Bearbeitbars Live-Muster vo de variable Schrift",
         "designspace.placeholder": "Da schriibe",
-        "optical.title": "Caption- und Display-Schnitt",
-        "optical.note": "Nöd eifach skaliert",
-        "optical.intro": "Bi chline optische Grösse wird s Schriftbild schmaler und liechter, d Abständ werded enger und d Tüüfi flacher. D Aazahl Schraffure änderet nöd: Siebe Strich bliibed erhalte und werded verdichtet, damit de gmalt Übergang bliibt.",
-        "optical.caption": "Caption",
-        "optical.display": "Display",
-        "optical.captionAria": "Bearbeitbars Muster vom optische Caption-Schnitt",
-        "optical.displayAria": "Bearbeitbars Muster vom optische Display-Schnitt",
-        "optical.captionCopy": "Für s kompakte Läse gestaltet: en schlankere Strich, es schmalers Skelett, e engeri Zurichtig und en chürzere Extrusionsvektor.",
-        "optical.displayCopy": "Für Beschriftige im Lokomotiv-Massstab gestaltet: breiti Proportione, de volli Strich und die grosszügigschte Abständ.",
         "waterfall.title": "Gwicht × Breiti",
-        "waterfall.note": "Zwölf Positione · opsz 12",
+        "waterfall.note": "Zwölf benännti Positione",
         "waterfall.intro": "D Breiti verschiebt s Skelett, während d Stämm ihri Autorität bhalted. S Gwicht wachst unabhängig vo Thin 100 bis Black 900.",
         "waterfall.aria": "Schriftmuster für Gwicht und Breiti",
         "waterfall.condensed": "Schmal · 75",
@@ -1692,11 +1636,11 @@
         "colour.layerNote": "S fixiert Ebenerezept wird einmal am Standard-Master zerleit und überall abgspielt. D konstanti Aazahl Konture und Schraffure haltet jedi Ebeni interpolationskompatibel.",
         "downloads.title": "Schrift abelade",
         "downloads.note": "Desktop · Web · Komplettpaket",
-        "downloads.intro": "Wähl s Figma-Paar us zwei Schrifte, e einzelni Farb- oder Textversion oder lad s vollständige Release-Archiv abe. Jedi variabli Version bhaltet all vier registrierte Achse; d primäri Farbschrift bhaltet d live COLRv1-Extrusion fürs Web und moderni Farbfont-Apps.",
+        "downloads.intro": "Wähl s Figma-Paar us zwei Schrifte, e einzelni Farb- oder Textversion oder lad s vollständige Release-Archiv abe. Jedi variabli Version bhaltet Gwicht und Breiti; d primäri Farbschrift bhaltet d live COLRv1-Extrusion fürs Web und moderni Farbfont-Apps.",
         "downloads.figmaAdvisory": "<span><strong>Für Figma nume die kompatible Regular- und Extruded-TTF installiere.</strong> D primäri Farb-TTF vorher entferne oder deaktiviere: Si teilt de Familiename Lötschberg mit de kompatible Regular-Version.</span>",
         "downloads.figmaRegularFormat": "TTF · Figma-kompatibel",
         "downloads.figmaRegularTitle": "Lötschberg Regular",
-        "downloads.figmaRegularCopy": "Monochromi glyf-Familie mit vier Achse und Handdrawn über ss01.",
+        "downloads.figmaRegularCopy": "Monochromi glyf-Familie mit zwei Achse und Handdrawn über ss01.",
         "downloads.figmaExtrudedFormat": "TTF · Figma-kompatibel",
         "downloads.figmaExtrudedTitle": "Lötschberg Extruded",
         "downloads.figmaExtrudedCopy": "Separati monochromi Familie mit extrudierter Silhouette, siebe usgsparte Schraffure und Handdrawn über ss01.",
@@ -1712,7 +1656,7 @@
         "downloads.woffFormat": "WOFF · Web-Fallback",
         "downloads.woffTitle": "Kompatibli Farb-Webschrift",
         "downloads.woffCopy": "En breiter kompatible Fallback mit de gliiche variable Tabelle.",
-        "downloads.zipFormat": "ZIP · Version 1.0.1",
+        "downloads.zipFormat": "ZIP · Version 1.0.2",
         "downloads.zipTitle": "Vollständigs Lötschberg-Paket",
         "downloads.zipCopy": "All sechs Produktionsschriftdateie inklusive em Figma-Paar, mit de englische und schwiizerdütsche Build- und Variantendokumentation.",
         "downloads.download": "Abelade",
@@ -1723,16 +1667,14 @@
         "specs.tableAria": "Variabli Achse",
         "specs.weightValue": "wght 100–900 · Standard 400",
         "specs.widthValue": "wdth 75–125 · Standard 100",
-        "specs.opticalValue": "opsz 8–12 · Standard 12",
-        "specs.slantValue": "slnt −12–0 · Standard 0",
         "specs.verticalMetrics": "Vertikali Metrike",
         "specs.primaryTitle": "Primäri Schrift",
         "specs.primaryCopy": "E variabli Schrift mit glyf-Umriss enthaltet ss01, ss02, COLRv1, CPAL und Umriss-Delta für all Farbebeene. Farb-Renderer ohni Unterstützig überchömed trotzdem en bruchbare monochrome Umriss.",
         "specs.sidecarTitle": "Textversion",
         "specs.sidecarCopy": "E variabli CFF2-OTF bhaltet d Basis- und handzeichnete Forme für reini Text-Workflows; d Farbtabellen sind absichtlich entfernt.",
         "specs.figmaTitle": "Figma-kompatibles Paar",
-        "specs.figmaCopy": "Regular und Extruded sind separati glyf-Familie ohni Palette für Apps, wo COLRv1 nöd renderet. Beidi bhalted all vier Achse und Handdrawn über ss01.",
-        "footer.meta": "Parametrischi Umriss · fixierts Tüüferezept<br>Vier Achse · zwei unabhängigi Features"
+        "specs.figmaCopy": "Regular und Extruded sind separati glyf-Familie ohni Palette für Apps, wo COLRv1 nöd renderet. Beidi bhalted Gwicht, Breiti und Handdrawn über ss01.",
+        "footer.meta": "Parametrischi Umriss · fixierts Tüüferezept<br>Zwei Achse · zwei unabhängigi Features"
       };
       var english = {
         text: {},
@@ -1896,10 +1838,10 @@
           var output = document.getElementById("value-" + axis);
           values[axis] = value;
           root.style.setProperty("--" + axis, value);
-          output.textContent = value + (axis === "slnt" ? "°" : "");
+          output.textContent = value;
           output.value = value;
         });
-        summary.textContent = "wght " + values.wght + " · wdth " + values.wdth + " · opsz " + values.opsz + " · slnt " + values.slnt;
+        summary.textContent = "wght " + values.wght + " · wdth " + values.wdth;
         fitHero();
       }
 

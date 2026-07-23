@@ -5,240 +5,90 @@
   "mismatchCount": 0,
   "mismatches": [],
   "canonicalScriptSHA256": "b42ad1dfdf204d650da26e35624b3283466350efb0bf780ad0fb3777ee02f47a",
-  "masterCount": 26,
+  "masterCount": 12,
   "masters": [
     {
       "name": "default",
       "location": {
         "wght": 400,
-        "wdth": 100,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 100
       }
     },
     {
       "name": "w100-d75",
       "location": {
         "wght": 100,
-        "wdth": 75,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 75
       }
     },
     {
       "name": "w100-d100",
       "location": {
         "wght": 100,
-        "wdth": 100,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 100
       }
     },
     {
       "name": "w100-d125",
       "location": {
         "wght": 100,
-        "wdth": 125,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 125
       }
     },
     {
       "name": "w400-d75",
       "location": {
         "wght": 400,
-        "wdth": 75,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 75
       }
     },
     {
       "name": "w400-d125",
       "location": {
         "wght": 400,
-        "wdth": 125,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 125
       }
     },
     {
       "name": "w700-d75",
       "location": {
         "wght": 700,
-        "wdth": 75,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 75
       }
     },
     {
       "name": "w700-d100",
       "location": {
         "wght": 700,
-        "wdth": 100,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 100
       }
     },
     {
       "name": "w700-d125",
       "location": {
         "wght": 700,
-        "wdth": 125,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 125
       }
     },
     {
       "name": "w900-d75",
       "location": {
         "wght": 900,
-        "wdth": 75,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 75
       }
     },
     {
       "name": "w900-d100",
       "location": {
         "wght": 900,
-        "wdth": 100,
-        "opsz": 12,
-        "slnt": 0
+        "wdth": 100
       }
     },
     {
       "name": "w900-d125",
       "location": {
         "wght": 900,
-        "wdth": 125,
-        "opsz": 12,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w100-d75",
-      "location": {
-        "wght": 100,
-        "wdth": 75,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w100-d100",
-      "location": {
-        "wght": 100,
-        "wdth": 100,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w100-d125",
-      "location": {
-        "wght": 100,
-        "wdth": 125,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w400-d75",
-      "location": {
-        "wght": 400,
-        "wdth": 75,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption",
-      "location": {
-        "wght": 400,
-        "wdth": 100,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w400-d125",
-      "location": {
-        "wght": 400,
-        "wdth": 125,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w700-d75",
-      "location": {
-        "wght": 700,
-        "wdth": 75,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w700-d100",
-      "location": {
-        "wght": 700,
-        "wdth": 100,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w700-d125",
-      "location": {
-        "wght": 700,
-        "wdth": 125,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w900-d75",
-      "location": {
-        "wght": 900,
-        "wdth": 75,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w900-d100",
-      "location": {
-        "wght": 900,
-        "wdth": 100,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "caption-w900-d125",
-      "location": {
-        "wght": 900,
-        "wdth": 125,
-        "opsz": 8,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "display",
-      "location": {
-        "wght": 400,
-        "wdth": 100,
-        "opsz": 144,
-        "slnt": 0
-      }
-    },
-    {
-      "name": "slanted",
-      "location": {
-        "wght": 400,
-        "wdth": 100,
-        "opsz": 12,
-        "slnt": -12
+        "wdth": 125
       }
     }
   ],

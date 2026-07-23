@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="germandbls.hand.ext" format="2">
-  <advance width="610.42025"/>
-  <outline>
-    <component base="germandbls.hand"/>
-  </outline>
-</glyph>

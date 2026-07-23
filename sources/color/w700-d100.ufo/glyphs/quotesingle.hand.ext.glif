@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="quotesingle.hand.ext" format="2">
-  <advance width="335.846154"/>
+  <advance width="326.375385"/>
   <outline>
     <component base="quotesingle.hand"/>
   </outline>

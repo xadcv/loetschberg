@@ -7,12 +7,6 @@
     <axis tag="wdth" name="Width" minimum="75" maximum="125" default="100">
       <labelname xml:lang="en">Width</labelname>
     </axis>
-    <axis tag="opsz" name="Optical size" minimum="8" maximum="144" default="12">
-      <labelname xml:lang="en">Optical size</labelname>
-    </axis>
-    <axis tag="slnt" name="Slant" minimum="-12" maximum="0" default="0">
-      <labelname xml:lang="en">Slant</labelname>
-    </axis>
   </axes>
   <sources>
     <source filename="extruded/default.ufo" name="default" familyname="Lötschberg Extruded" stylename="Master default">
@@ -23,208 +17,72 @@
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w100-d75.ufo" name="w100-d75" familyname="Lötschberg Extruded" stylename="Master w100-d75">
       <location>
         <dimension name="Weight" xvalue="100"/>
         <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w100-d100.ufo" name="w100-d100" familyname="Lötschberg Extruded" stylename="Master w100-d100">
       <location>
         <dimension name="Weight" xvalue="100"/>
         <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w100-d125.ufo" name="w100-d125" familyname="Lötschberg Extruded" stylename="Master w100-d125">
       <location>
         <dimension name="Weight" xvalue="100"/>
         <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w400-d75.ufo" name="w400-d75" familyname="Lötschberg Extruded" stylename="Master w400-d75">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w400-d125.ufo" name="w400-d125" familyname="Lötschberg Extruded" stylename="Master w400-d125">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w700-d75.ufo" name="w700-d75" familyname="Lötschberg Extruded" stylename="Master w700-d75">
       <location>
         <dimension name="Weight" xvalue="700"/>
         <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w700-d100.ufo" name="w700-d100" familyname="Lötschberg Extruded" stylename="Master w700-d100">
       <location>
         <dimension name="Weight" xvalue="700"/>
         <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w700-d125.ufo" name="w700-d125" familyname="Lötschberg Extruded" stylename="Master w700-d125">
       <location>
         <dimension name="Weight" xvalue="700"/>
         <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w900-d75.ufo" name="w900-d75" familyname="Lötschberg Extruded" stylename="Master w900-d75">
       <location>
         <dimension name="Weight" xvalue="900"/>
         <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w900-d100.ufo" name="w900-d100" familyname="Lötschberg Extruded" stylename="Master w900-d100">
       <location>
         <dimension name="Weight" xvalue="900"/>
         <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </source>
     <source filename="extruded/w900-d125.ufo" name="w900-d125" familyname="Lötschberg Extruded" stylename="Master w900-d125">
       <location>
         <dimension name="Weight" xvalue="900"/>
         <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w100-d75.ufo" name="caption-w100-d75" familyname="Lötschberg Extruded" stylename="Master caption-w100-d75">
-      <location>
-        <dimension name="Weight" xvalue="100"/>
-        <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w100-d100.ufo" name="caption-w100-d100" familyname="Lötschberg Extruded" stylename="Master caption-w100-d100">
-      <location>
-        <dimension name="Weight" xvalue="100"/>
-        <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w100-d125.ufo" name="caption-w100-d125" familyname="Lötschberg Extruded" stylename="Master caption-w100-d125">
-      <location>
-        <dimension name="Weight" xvalue="100"/>
-        <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w400-d75.ufo" name="caption-w400-d75" familyname="Lötschberg Extruded" stylename="Master caption-w400-d75">
-      <location>
-        <dimension name="Weight" xvalue="400"/>
-        <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption.ufo" name="caption" familyname="Lötschberg Extruded" stylename="Master caption">
-      <location>
-        <dimension name="Weight" xvalue="400"/>
-        <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w400-d125.ufo" name="caption-w400-d125" familyname="Lötschberg Extruded" stylename="Master caption-w400-d125">
-      <location>
-        <dimension name="Weight" xvalue="400"/>
-        <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w700-d75.ufo" name="caption-w700-d75" familyname="Lötschberg Extruded" stylename="Master caption-w700-d75">
-      <location>
-        <dimension name="Weight" xvalue="700"/>
-        <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w700-d100.ufo" name="caption-w700-d100" familyname="Lötschberg Extruded" stylename="Master caption-w700-d100">
-      <location>
-        <dimension name="Weight" xvalue="700"/>
-        <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w700-d125.ufo" name="caption-w700-d125" familyname="Lötschberg Extruded" stylename="Master caption-w700-d125">
-      <location>
-        <dimension name="Weight" xvalue="700"/>
-        <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w900-d75.ufo" name="caption-w900-d75" familyname="Lötschberg Extruded" stylename="Master caption-w900-d75">
-      <location>
-        <dimension name="Weight" xvalue="900"/>
-        <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w900-d100.ufo" name="caption-w900-d100" familyname="Lötschberg Extruded" stylename="Master caption-w900-d100">
-      <location>
-        <dimension name="Weight" xvalue="900"/>
-        <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/caption-w900-d125.ufo" name="caption-w900-d125" familyname="Lötschberg Extruded" stylename="Master caption-w900-d125">
-      <location>
-        <dimension name="Weight" xvalue="900"/>
-        <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/display.ufo" name="display" familyname="Lötschberg Extruded" stylename="Master display">
-      <location>
-        <dimension name="Weight" xvalue="400"/>
-        <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="144"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </source>
-    <source filename="extruded/slanted.ufo" name="slanted" familyname="Lötschberg Extruded" stylename="Master slanted">
-      <location>
-        <dimension name="Weight" xvalue="400"/>
-        <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="-12"/>
       </location>
     </source>
   </sources>
@@ -233,112 +91,72 @@
       <location>
         <dimension name="Weight" xvalue="100"/>
         <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Thin" postscriptfontname="LoetschbergExtruded-Thin">
       <location>
         <dimension name="Weight" xvalue="100"/>
         <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Thin Expanded" postscriptfontname="LoetschbergExtruded-ThinExpanded">
       <location>
         <dimension name="Weight" xvalue="100"/>
         <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Regular Condensed" postscriptfontname="LoetschbergExtruded-RegularCondensed">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Regular" postscriptfontname="LoetschbergExtrudedVF">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Regular Expanded" postscriptfontname="LoetschbergExtruded-RegularExpanded">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Bold Condensed" postscriptfontname="LoetschbergExtruded-BoldCondensed">
       <location>
         <dimension name="Weight" xvalue="700"/>
         <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Bold" postscriptfontname="LoetschbergExtruded-Bold">
       <location>
         <dimension name="Weight" xvalue="700"/>
         <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Bold Expanded" postscriptfontname="LoetschbergExtruded-BoldExpanded">
       <location>
         <dimension name="Weight" xvalue="700"/>
         <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Black Condensed" postscriptfontname="LoetschbergExtruded-BlackCondensed">
       <location>
         <dimension name="Weight" xvalue="900"/>
         <dimension name="Width" xvalue="75"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Black" postscriptfontname="LoetschbergExtruded-Black">
       <location>
         <dimension name="Weight" xvalue="900"/>
         <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
     <instance familyname="Lötschberg Extruded" stylename="Black Expanded" postscriptfontname="LoetschbergExtruded-BlackExpanded">
       <location>
         <dimension name="Weight" xvalue="900"/>
         <dimension name="Width" xvalue="125"/>
-        <dimension name="Optical size" xvalue="12"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </instance>
-    <instance familyname="Lötschberg Extruded" stylename="Caption" postscriptfontname="LoetschbergExtruded-Caption">
-      <location>
-        <dimension name="Weight" xvalue="400"/>
-        <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="8"/>
-        <dimension name="Slant" xvalue="0"/>
-      </location>
-    </instance>
-    <instance familyname="Lötschberg Extruded" stylename="Display" postscriptfontname="LoetschbergExtruded-Display">
-      <location>
-        <dimension name="Weight" xvalue="400"/>
-        <dimension name="Width" xvalue="100"/>
-        <dimension name="Optical size" xvalue="144"/>
-        <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
   </instances>

@@ -19,14 +19,10 @@ from fontTools.varLib.instancer import instantiateVariableFont
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PRIMARY_PATH = ROOT / "Loetschberg-VF[wght,wdth,opsz,slnt].ttf"
-SIDECAR_PATH = ROOT / "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf"
-REGULAR_COMPAT_PATH = (
-    ROOT / "Loetschberg-Regular-VF[wght,wdth,opsz,slnt].ttf"
-)
-EXTRUDED_COMPAT_PATH = (
-    ROOT / "Loetschberg-Extruded-VF[wght,wdth,opsz,slnt].ttf"
-)
+PRIMARY_PATH = ROOT / "Loetschberg-VF[wght,wdth].ttf"
+SIDECAR_PATH = ROOT / "Loetschberg-Text-VF[wght,wdth].otf"
+REGULAR_COMPAT_PATH = ROOT / "Loetschberg-Regular-VF[wght,wdth].ttf"
+EXTRUDED_COMPAT_PATH = ROOT / "Loetschberg-Extruded-VF[wght,wdth].ttf"
 WOFF_PATH = ROOT / "Loetschberg-VF.woff"
 WOFF2_PATH = ROOT / "Loetschberg-VF.woff2"
 TOPOLOGY_PATH = ROOT / "sources" / "topology-report.json"
@@ -46,8 +42,6 @@ ARTIFACTS = (
 AXES = {
     "wght": (100.0, 400.0, 900.0),
     "wdth": (75.0, 100.0, 125.0),
-    "opsz": (8.0, 12.0, 144.0),
-    "slnt": (-12.0, 0.0, 0.0),
 }
 
 PALETTE = (
@@ -370,7 +364,7 @@ def test_variable_axes_and_stat(request: pytest.FixtureRequest, fixture_name: st
     design_axes = font["STAT"].table.DesignAxisRecord
     assert design_axes is not None
     tags = [axis.AxisTag for axis in design_axes.Axis]
-    assert len(tags) == 4
+    assert len(tags) == 2
     assert set(tags) == set(AXES)
 
 
@@ -395,8 +389,8 @@ def test_default_instance_version_and_family_names(
         ]
         assert len(matching) == 1
         assert font["name"].getDebugName(matching[0].subfamilyNameID) == "Regular"
-        assert font["name"].getDebugName(5) == "Version 1.001"
-        assert font["head"].fontRevision == pytest.approx(1.001, abs=0.00002)
+        assert font["name"].getDebugName(5) == "Version 1.002"
+        assert font["head"].fontRevision == pytest.approx(1.002, abs=0.00002)
 
     assert primary_font["name"].getDebugName(1) == "Lötschberg"
     assert regular_compat_font["name"].getDebugName(1) == "Lötschberg"
@@ -419,6 +413,24 @@ def test_default_instance_version_and_family_names(
         == "LoetschbergExtrudedVF"
     )
     assert sidecar_font["name"].getDebugName(6) == "LoetschbergTextVF"
+
+
+@pytest.mark.parametrize(
+    ("fixture_name", "expected_prefix"),
+    [
+        ("primary_font", "Loetschberg"),
+        ("sidecar_font", "LoetschbergText"),
+        ("regular_compat_font", "Loetschberg"),
+        ("extruded_compat_font", "LoetschbergExtruded"),
+    ],
+)
+def test_variable_postscript_prefix_is_present(
+    request: pytest.FixtureRequest,
+    fixture_name: str,
+    expected_prefix: str,
+) -> None:
+    font: TTFont = request.getfixturevalue(fixture_name)
+    assert font["name"].getDebugName(25) == expected_prefix
 
 
 @pytest.mark.parametrize(
@@ -695,31 +707,6 @@ def test_extruded_compat_has_structurally_distinct_expanded_outlines(
     assert extruded.yMin < regular.yMin
 
 
-def test_slnt_axis_changes_outlines(primary_font: TTFont) -> None:
-    glyph_name = _cmap_name(primary_font, ord("A"))
-    upright = _static_primary(slnt=0.0)
-    slanted = _static_primary(slnt=-12.0)
-    try:
-        assert _recording(upright, glyph_name) != _recording(slanted, glyph_name)
-    finally:
-        upright.close()
-        slanted.close()
-
-
-def test_negative_slnt_leans_clockwise(primary_font: TTFont) -> None:
-    glyph_name = _cmap_name(primary_font, ord("H"))
-    slanted = _static_primary(slnt=-12.0)
-    try:
-        glyf = slanted["glyf"]
-        coordinates, _end_points, _flags = glyf[glyph_name].getCoordinates(glyf)
-        baseline_x = [x for x, y in coordinates if y == 0]
-        cap_x = [x for x, y in coordinates if y == 700]
-        assert baseline_x and cap_x
-        assert min(cap_x) > min(baseline_x)
-    finally:
-        slanted.close()
-
-
 def test_h_left_stem_is_invariant_across_width(primary_font: TTFont) -> None:
     narrow = _static_primary(wdth=75.0)
     wide = _static_primary(wdth=125.0)
@@ -732,25 +719,31 @@ def test_h_left_stem_is_invariant_across_width(primary_font: TTFont) -> None:
         wide.close()
 
 
-def test_caption_weight_interactions_are_multiplicative(primary_font: TTFont) -> None:
-    thin = _static_primary(wght=100.0, wdth=125.0, opsz=8.0)
-    black = _static_primary(wght=900.0, wdth=75.0, opsz=8.0)
+def test_heavy_strokes_use_width_aware_ink_budget(primary_font: TTFont) -> None:
+    thin = _static_primary(wght=100.0, wdth=125.0)
+    black_condensed = _static_primary(wght=900.0, wdth=75.0)
+    black_normal = _static_primary(wght=900.0, wdth=100.0)
+    black_expanded = _static_primary(wght=900.0, wdth=125.0)
     try:
-        assert _left_h_stem(thin) == pytest.approx(40 * 88 / 104, abs=1.0)
-        assert _left_h_stem(black) == pytest.approx(200 * 88 / 104, abs=1.0)
+        assert _left_h_stem(thin) == pytest.approx(40, abs=1.0)
+        condensed = _left_h_stem(black_condensed)
+        normal = _left_h_stem(black_normal)
+        expanded = _left_h_stem(black_expanded)
+        assert 160 <= condensed < normal < expanded <= 180
     finally:
         thin.close()
-        black.close()
+        black_condensed.close()
+        black_normal.close()
+        black_expanded.close()
 
 
-def test_thin_structural_joins_survive_interpolated_width_and_opsz(
+def test_thin_structural_joins_survive_interpolated_width(
     primary_font: TTFont,
 ) -> None:
-    for width, optical_size in ((87.5, 9.0), (112.5, 11.0)):
+    for width in (87.5, 112.5):
         instance = _static_primary(
             wght=100.0,
             wdth=width,
-            opsz=optical_size,
         )
         try:
             for suffix in (None, "hand"):

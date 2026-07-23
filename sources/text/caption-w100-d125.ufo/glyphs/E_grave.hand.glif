@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="Egrave.hand" format="2">
-  <advance width="743.45"/>
-  <outline>
-    <component base="E.hand"/>
-    <component base="_mark.Egrave.E.grave.hand"/>
-  </outline>
-</glyph>

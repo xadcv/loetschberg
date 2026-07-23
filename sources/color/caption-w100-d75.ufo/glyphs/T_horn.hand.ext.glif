@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="Thorn.hand.ext" format="2">
-  <advance width="492.803647"/>
-  <outline>
-    <component base="Thorn.hand"/>
-  </outline>
-</glyph>

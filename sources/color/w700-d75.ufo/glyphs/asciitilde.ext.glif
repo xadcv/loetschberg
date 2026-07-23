@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="asciitilde.ext" format="2">
-  <advance width="590.586676"/>
+  <advance width="606.43184"/>
   <outline>
     <component base="asciitilde"/>
   </outline>

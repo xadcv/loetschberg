@@ -1,18 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="asciitilde.ext.wallBronze" format="2">
-  <advance width="794.015364"/>
+  <advance width="804.559647"/>
   <outline>
     <contour>
-      <point x="648.0" y="405.6724286115899" type="line"/>
-      <point x="660.0038411211386" y="372.83621430579495" type="line"/>
-      <point x="672.0076822422774" y="340.0" type="line"/>
-      <point x="684.0115233634161" y="307.16378569420505" type="line"/>
-      <point x="696.0153644845548" y="274.3275713884101" type="line"/>
-      <point x="756.0153644845548" y="204.3275713884101" type="line"/>
-      <point x="744.0115233634161" y="237.16378569420505" type="line"/>
-      <point x="732.0076822422774" y="270.0" type="line"/>
-      <point x="720.0038411211386" y="302.83621430579495" type="line"/>
-      <point x="708.0" y="335.6724286115899" type="line"/>
+      <point x="662.2559999999999" y="402.1664148630586" type="line"/>
+      <point x="673.3319117696251" y="371.08320743152933" type="line"/>
+      <point x="684.4078235392503" y="340.0" type="line"/>
+      <point x="695.4837353088753" y="308.91679256847067" type="line"/>
+      <point x="706.5596470785006" y="277.8335851369414" type="line"/>
+      <point x="766.5596470785006" y="207.8335851369414" type="line"/>
+      <point x="755.4837353088753" y="238.91679256847067" type="line"/>
+      <point x="744.4078235392503" y="270.0" type="line"/>
+      <point x="733.3319117696251" y="301.08320743152933" type="line"/>
+      <point x="722.2559999999999" y="332.1664148630586" type="line"/>
     </contour>
   </outline>
 </glyph>

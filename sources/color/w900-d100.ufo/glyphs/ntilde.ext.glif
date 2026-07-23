@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="ntilde.ext" format="2">
-  <advance width="816.0"/>
+  <advance width="858.975824"/>
   <outline>
     <component base="ntilde"/>
   </outline>

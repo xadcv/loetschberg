@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="z.hand.ext" format="2">
-  <advance width="443.75"/>
-  <outline>
-    <component base="z.hand"/>
-  </outline>
-</glyph>

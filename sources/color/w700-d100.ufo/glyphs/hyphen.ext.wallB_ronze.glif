@@ -1,20 +1,20 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="hyphen.ext.wallBronze" format="2">
-  <advance width="596.0"/>
+  <advance width="611.552"/>
   <outline>
     <contour>
-      <point x="498.0" y="418.8" type="line"/>
-      <point x="498.0" y="387.28000000000003" type="line"/>
-      <point x="498.0" y="355.76" type="line"/>
-      <point x="498.0" y="324.24" type="line"/>
-      <point x="498.0" y="292.72" type="line"/>
-      <point x="498.0" y="261.2" type="line"/>
-      <point x="558.0" y="191.2" type="line"/>
-      <point x="558.0" y="222.72000000000003" type="line"/>
-      <point x="558.0" y="254.24" type="line"/>
-      <point x="558.0" y="285.76" type="line"/>
-      <point x="558.0" y="317.28000000000003" type="line"/>
-      <point x="558.0" y="348.8" type="line"/>
+      <point x="513.552" y="412.68" type="line"/>
+      <point x="513.552" y="383.608" type="line"/>
+      <point x="513.552" y="354.536" type="line"/>
+      <point x="513.552" y="325.464" type="line"/>
+      <point x="513.552" y="296.392" type="line"/>
+      <point x="513.552" y="267.32" type="line"/>
+      <point x="573.552" y="197.32" type="line"/>
+      <point x="573.552" y="226.392" type="line"/>
+      <point x="573.552" y="255.464" type="line"/>
+      <point x="573.552" y="284.536" type="line"/>
+      <point x="573.552" y="313.608" type="line"/>
+      <point x="573.552" y="342.68" type="line"/>
     </contour>
   </outline>
 </glyph>

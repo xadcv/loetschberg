@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="period.ext" format="2">
-  <advance width="350.8"/>
+  <advance width="342.9952"/>
   <outline>
     <component base="period"/>
   </outline>

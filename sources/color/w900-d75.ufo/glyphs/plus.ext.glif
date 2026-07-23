@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="plus.ext" format="2">
-  <advance width="526.0"/>
+  <advance width="552.4"/>
   <outline>
     <component base="plus"/>
   </outline>

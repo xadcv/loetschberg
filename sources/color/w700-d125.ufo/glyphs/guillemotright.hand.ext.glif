@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="guillemotright.hand.ext" format="2">
-  <advance width="780.852785"/>
+  <advance width="784.830191"/>
   <outline>
     <component base="guillemotright.hand"/>
   </outline>

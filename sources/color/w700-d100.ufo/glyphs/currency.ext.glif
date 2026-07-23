@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="currency.ext" format="2">
-  <advance width="653.898812"/>
+  <advance width="660.754396"/>
   <outline>
     <component base="currency"/>
   </outline>

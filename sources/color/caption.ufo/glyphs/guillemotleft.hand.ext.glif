@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="guillemotleft.hand.ext" format="2">
-  <advance width="498.350865"/>
-  <outline>
-    <component base="guillemotleft.hand"/>
-  </outline>
-</glyph>

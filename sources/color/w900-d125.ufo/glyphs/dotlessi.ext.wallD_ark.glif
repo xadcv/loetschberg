@@ -1,20 +1,20 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="dotlessi.ext.wallDark" format="2">
-  <advance width="396.0"/>
+  <advance width="374.88"/>
   <outline>
     <contour>
-      <point x="298.0" y="0.0" type="line"/>
-      <point x="258.0" y="0.0" type="line"/>
-      <point x="218.0" y="0.0" type="line"/>
-      <point x="178.0" y="0.0" type="line"/>
-      <point x="138.0" y="0.0" type="line"/>
+      <point x="276.88" y="0.0" type="line"/>
+      <point x="241.10399999999998" y="0.0" type="line"/>
+      <point x="205.328" y="0.0" type="line"/>
+      <point x="169.552" y="0.0" type="line"/>
+      <point x="133.776" y="0.0" type="line"/>
       <point x="98.0" y="0.0" type="line"/>
       <point x="158.0" y="-70.0" type="line"/>
-      <point x="198.0" y="-70.0" type="line"/>
-      <point x="238.0" y="-70.0" type="line"/>
-      <point x="278.0" y="-70.0" type="line"/>
-      <point x="318.0" y="-70.0" type="line"/>
-      <point x="358.0" y="-70.0" type="line"/>
+      <point x="193.776" y="-70.0" type="line"/>
+      <point x="229.552" y="-70.0" type="line"/>
+      <point x="265.328" y="-70.0" type="line"/>
+      <point x="301.104" y="-70.0" type="line"/>
+      <point x="336.88" y="-70.0" type="line"/>
     </contour>
   </outline>
 </glyph>

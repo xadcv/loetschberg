@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="cedilla.ext" format="2">
-  <advance width="251.78"/>
-  <outline>
-    <component base="cedilla"/>
-  </outline>
-</glyph>

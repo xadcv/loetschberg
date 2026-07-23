@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<glyph name="Ccedilla.hand" format="2">
-  <advance width="619.064871"/>
-  <outline>
-    <component base="C.hand"/>
-    <component base="_mark.Ccedilla.C.ced.hand"/>
-  </outline>
-</glyph>

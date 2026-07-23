@@ -1,18 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="underscore.ext.wallBronze" format="2">
-  <advance width="896.0"/>
+  <advance width="924.0"/>
   <outline>
     <contour>
-      <point x="798.0" y="13.200000000000045" type="line"/>
-      <point x="798.0" y="-30.899999999999977" type="line"/>
-      <point x="798.0" y="-75.0" type="line"/>
-      <point x="798.0" y="-119.10000000000002" type="line"/>
-      <point x="798.0" y="-163.20000000000005" type="line"/>
-      <point x="858.0" y="-233.20000000000005" type="line"/>
-      <point x="858.0" y="-189.10000000000002" type="line"/>
-      <point x="858.0" y="-145.0" type="line"/>
-      <point x="858.0" y="-100.89999999999998" type="line"/>
-      <point x="858.0" y="-56.799999999999955" type="line"/>
+      <point x="826.0" y="2.759999999999991" type="line"/>
+      <point x="826.0" y="-36.120000000000005" type="line"/>
+      <point x="826.0" y="-75.0" type="line"/>
+      <point x="826.0" y="-113.88" type="line"/>
+      <point x="826.0" y="-152.76" type="line"/>
+      <point x="886.0" y="-222.76" type="line"/>
+      <point x="886.0" y="-183.88" type="line"/>
+      <point x="886.0" y="-145.0" type="line"/>
+      <point x="886.0" y="-106.12" type="line"/>
+      <point x="886.0" y="-67.24000000000001" type="line"/>
     </contour>
   </outline>
 </glyph>

@@ -25,9 +25,9 @@
     <key>openTypeNameManufacturer</key>
     <string>ADCV</string>
     <key>openTypeNameUniqueID</key>
-    <string>1.001;ADCV;Loetschberg-w900-d125</string>
+    <string>1.002;ADCV;Loetschberg-w900-d125</string>
     <key>openTypeNameVersion</key>
-    <string>Version 1.001</string>
+    <string>Version 1.002</string>
     <key>openTypeOS2Type</key>
     <array/>
     <key>openTypeOS2TypoAscender</key>
@@ -67,7 +67,7 @@
     <key>versionMajor</key>
     <integer>1</integer>
     <key>versionMinor</key>
-    <integer>1</integer>
+    <integer>2</integer>
     <key>xHeight</key>
     <integer>500</integer>
     <key>year</key>

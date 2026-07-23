@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="dieresis.ext" format="2">
-  <advance width="634.8"/>
+  <advance width="638.03712"/>
   <outline>
     <component base="dieresis"/>
   </outline>

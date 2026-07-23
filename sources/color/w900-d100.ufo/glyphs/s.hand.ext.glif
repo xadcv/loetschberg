@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="s.hand.ext" format="2">
-  <advance width="768.875154"/>
+  <advance width="840.70206"/>
   <outline>
     <component base="s.hand"/>
   </outline>
