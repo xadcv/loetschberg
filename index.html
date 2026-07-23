@@ -597,7 +597,7 @@
 
     .cut--display .cut__sample {
       font-size: clamp(3.4rem, 7.4vw, 7.2rem);
-      font-variation-settings: "wght" 400, "wdth" 100, "opsz" 144, "slnt" 0;
+      font-variation-settings: "wght" 400, "wdth" 100, "opsz" 12, "slnt" 0;
     }
 
     .cut__copy {
@@ -780,6 +780,123 @@
       line-height: 1.55;
     }
 
+    .download-grid {
+      display: grid;
+      margin-top: 30px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-top: 1px solid var(--rule);
+      border-left: 1px solid var(--rule);
+    }
+
+    .download-card {
+      display: flex;
+      min-width: 0;
+      min-height: 220px;
+      padding: 22px;
+      flex-direction: column;
+      align-items: flex-start;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      background: #f7f1e7;
+    }
+
+    .download-card--bundle {
+      display: grid;
+      min-height: 0;
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 32px;
+      background:
+        repeating-linear-gradient(94deg, transparent 0 71px, rgb(255 255 255 / 0.028) 72px 73px),
+        var(--key);
+      color: var(--paper);
+    }
+
+    .download-card__format {
+      margin: 0 0 14px;
+      color: var(--coach);
+    }
+
+    .download-card--bundle .download-card__format { color: #d9be93; }
+
+    .download-card h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 400;
+      line-height: 1.25;
+    }
+
+    .download-card__copy {
+      margin: 10px 0 24px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .download-card--bundle .download-card__copy {
+      max-width: 680px;
+      margin-bottom: 0;
+      color: #d9be93;
+    }
+
+    .download-card__actions {
+      display: flex;
+      align-items: center;
+      gap: 12px 20px;
+      margin-top: auto;
+      flex-wrap: wrap;
+    }
+
+    .download-card--bundle .download-card__actions { justify-content: flex-end; }
+
+    .download-button {
+      display: inline-flex;
+      min-height: 42px;
+      padding: 11px 14px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      border: 1px solid var(--key);
+      background: var(--key);
+      color: var(--paper);
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.11em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .download-button:hover {
+      border-color: var(--coach);
+      background: var(--coach);
+    }
+
+    .download-card--bundle .download-button {
+      border-color: var(--face);
+      background: var(--face);
+      color: var(--key);
+    }
+
+    .download-card--bundle .download-button:hover {
+      border-color: #edb66b;
+      background: #edb66b;
+    }
+
+    .download-release-link {
+      color: #ead9b8;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 5px;
+      text-transform: uppercase;
+    }
+
+    .download-release-link:hover { color: var(--face); }
+
     .spec-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -859,6 +976,7 @@
       .palette-layout { grid-template-columns: 1fr; }
       .swatch__colour { height: 110px; }
       .charset-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .download-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     @media (max-width: 760px) {
@@ -936,6 +1054,14 @@
       .charset-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
       .swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .swatch:last-child { grid-column: span 2; }
+      .download-grid { grid-template-columns: 1fr; }
+      .download-card { min-height: 0; }
+      .download-card--bundle {
+        grid-column: auto;
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+      .download-card--bundle .download-card__actions { justify-content: flex-start; }
       .spec-grid { grid-template-columns: 1fr; gap: 36px; }
       .footer__inner { grid-template-columns: 1fr; align-items: end; }
       .footer__word { min-width: 0; font-size: clamp(2.3rem, 10vw, 4.5rem); overflow-wrap: anywhere; }
@@ -965,7 +1091,7 @@
     }
 
     @media (forced-colors: active) {
-      .site-header, .playground, .variant-card--colour, .site-footer, .layer-stack { border: 1px solid CanvasText; }
+      .site-header, .playground, .variant-card--colour, .site-footer, .layer-stack, .download-card--bundle { border: 1px solid CanvasText; }
       .font-status::before { border: 1px solid currentColor; }
     }
   </style>
@@ -991,6 +1117,7 @@
           <a href="#waterfall">Waterfall</a>
           <a href="#charset">Character set</a>
           <a href="#colour">Colour</a>
+          <a href="#downloads">Downloads</a>
         </nav>
         <span class="font-status mono-label" id="font-status" data-state="loading" role="status" aria-live="polite">Loading local font</span>
       </div>
@@ -1033,7 +1160,7 @@
           <label class="mono-label" for="axis-opsz">Optical size</label>
           <output id="value-opsz" for="axis-opsz">12</output>
         </div>
-        <input class="range" id="axis-opsz" data-axis="opsz" type="range" min="8" max="144" step="1" value="12">
+        <input class="range" id="axis-opsz" data-axis="opsz" type="range" min="8" max="12" step="1" value="12">
       </div>
       <div class="axis-control">
         <div class="axis-control__top">
@@ -1128,7 +1255,7 @@
           <p class="cut__copy">Designed for compact reading: a leaner stroke, narrower skeleton, tighter fit, and shorter extrusion vector.</p>
         </article>
         <article class="cut cut--display">
-          <div class="cut__meta mono-label"><span>Display</span><span>opsz 144</span></div>
+          <div class="cut__meta mono-label"><span>Display</span><span>opsz 12</span></div>
           <div class="cut__sample typeface feature-base editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable display optical size sample" data-fit-line data-fit-min="18" data-single-line="true">SIMPLON</div>
           <p class="cut__copy">Designed for locomotive-scale lettering: broad proportions, full stroke, and the most expansive spacing.</p>
         </article>
@@ -1250,9 +1377,64 @@
       </div>
     </section>
 
-    <section class="section section--last" id="specifications" aria-labelledby="specifications-title">
+    <section class="section" id="downloads" aria-labelledby="downloads-title">
       <div class="section-head">
         <span class="section-head__number mono-label">07</span>
+        <h2 id="downloads-title">Take the typeface</h2>
+        <span class="section-head__note mono-label">Desktop · Web · Complete package</span>
+      </div>
+      <p class="section-intro">Choose an individual production font or take the complete release archive. The colour variable builds retain all four axes, both style sets, and the live COLRv1 extrusion.</p>
+
+      <div class="download-grid">
+        <article class="download-card">
+          <p class="download-card__format mono-label">TTF · Variable colour</p>
+          <h3>Primary desktop font</h3>
+          <p class="download-card__copy">Glyf outlines, COLRv1, CPAL, ss01, and ss02.</p>
+          <div class="download-card__actions">
+            <a class="download-button" href="./Loetschberg-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.ttf" download>Download <span aria-hidden="true">↓</span></a>
+          </div>
+        </article>
+        <article class="download-card">
+          <p class="download-card__format mono-label">OTF · Variable text</p>
+          <h3>CFF2 text sidecar</h3>
+          <p class="download-card__copy">Monochrome base and handdrawn forms for text workflows.</p>
+          <div class="download-card__actions">
+            <a class="download-button" href="./Loetschberg-Text-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.otf" download>Download <span aria-hidden="true">↓</span></a>
+          </div>
+        </article>
+        <article class="download-card">
+          <p class="download-card__format mono-label">WOFF2 · Preferred web</p>
+          <h3>Compressed colour webfont</h3>
+          <p class="download-card__copy">The smallest web build and the specimen’s primary source.</p>
+          <div class="download-card__actions">
+            <a class="download-button" href="./Loetschberg-VF.woff2" download>Download <span aria-hidden="true">↓</span></a>
+          </div>
+        </article>
+        <article class="download-card">
+          <p class="download-card__format mono-label">WOFF · Web fallback</p>
+          <h3>Compatible colour webfont</h3>
+          <p class="download-card__copy">A broader fallback carrying the same variable tables.</p>
+          <div class="download-card__actions">
+            <a class="download-button" href="./Loetschberg-VF.woff" download>Download <span aria-hidden="true">↓</span></a>
+          </div>
+        </article>
+        <article class="download-card download-card--bundle">
+          <div>
+            <p class="download-card__format mono-label">ZIP · Release 1.0.0</p>
+            <h3>Complete Lötschberg package</h3>
+            <p class="download-card__copy">All four production font files together with the build and variant documentation.</p>
+          </div>
+          <div class="download-card__actions">
+            <a class="download-button" href="./Loetschberg-1.0.0.zip" download>Download ZIP <span aria-hidden="true">↓</span></a>
+            <a class="download-release-link" href="https://github.com/xadcv/loetschberg/releases/tag/v1.0.0" target="_blank" rel="noopener noreferrer">GitHub release ↗</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section--last" id="specifications" aria-labelledby="specifications-title">
+      <div class="section-head">
+        <span class="section-head__number mono-label">08</span>
         <h2 id="specifications-title">Production particulars</h2>
         <span class="section-head__note mono-label">Live text · Web + modern apps</span>
       </div>
@@ -1261,7 +1443,7 @@
           <tbody>
             <tr><th scope="row">Weight</th><td>wght 100–900 · default 400</td></tr>
             <tr><th scope="row">Width</th><td>wdth 75–125 · default 100</td></tr>
-            <tr><th scope="row">Optical size</th><td>opsz 8–144 · default 12</td></tr>
+            <tr><th scope="row">Optical size</th><td>opsz 8–12 · default 12</td></tr>
             <tr><th scope="row">Slant</th><td>slnt −12–0 · default 0</td></tr>
             <tr><th scope="row">Vertical metrics</th><td>960 / 700 / 0 / −300</td></tr>
           </tbody>

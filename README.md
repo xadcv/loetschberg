@@ -32,6 +32,7 @@ The completed build exposes these user-facing files at the repository root:
 | `Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf` | CFF2 mono text sidecar with base outlines and `ss01`; no COLR/CPAL or `ss02` (install family `Lötschberg Text`) |
 | `Loetschberg-VF.woff2` | Compressed web alias of the primary variable colour font, preferred by the specimen |
 | `Loetschberg-VF.woff` | WOFF web alias of the primary variable colour font and specimen fallback |
+| `Loetschberg-1.0.0.zip` | Versioned release package containing all four production fonts plus `README.md` and `VARIANTS.md` |
 | `index.html` | GitHub Pages type specimen; its `@font-face` loads the root WOFF file |
 | `README.md` | Build, source-governance, and validation contract |
 | `VARIANTS.md` | Axes, features, colour construction, and compatibility contract |
