@@ -44,6 +44,48 @@
     "name",
     "post"
   ],
+  "regularCompatTables": [
+    "GDEF",
+    "GPOS",
+    "GSUB",
+    "GlyphOrder",
+    "HVAR",
+    "MVAR",
+    "OS/2",
+    "STAT",
+    "cmap",
+    "fvar",
+    "glyf",
+    "gvar",
+    "head",
+    "hhea",
+    "hmtx",
+    "loca",
+    "maxp",
+    "name",
+    "post"
+  ],
+  "extrudedCompatTables": [
+    "GDEF",
+    "GPOS",
+    "GSUB",
+    "GlyphOrder",
+    "HVAR",
+    "MVAR",
+    "OS/2",
+    "STAT",
+    "cmap",
+    "fvar",
+    "glyf",
+    "gvar",
+    "head",
+    "hhea",
+    "hmtx",
+    "loca",
+    "maxp",
+    "name",
+    "post"
+  ],
   "axes": {
     "wght": [
       100.0,
@@ -67,8 +109,10 @@
     ]
   },
   "cmapCount": 192,
-  "primaryBytes": 14074884,
-  "sidecarBytes": 2204616,
-  "woffBytes": 6094276,
-  "woff2Bytes": 4059096
+  "primaryBytes": 14075664,
+  "sidecarBytes": 2205500,
+  "regularCompatBytes": 2194036,
+  "extrudedCompatBytes": 11210936,
+  "woffBytes": 6094452,
+  "woff2Bytes": 4058652
 }

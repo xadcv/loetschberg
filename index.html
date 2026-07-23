@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Lötschberg variable colour typeface specimen — four axes, handdrawn and extruded OpenType variants, Basic Latin and Latin-1.">
+  <meta name="description" content="Lötschberg variable colour typeface specimen — four axes, handdrawn and extruded OpenType variants, Basic Latin and Latin-1." data-i18n-content="meta.description">
   <meta name="theme-color" content="#7c453b">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%237c453b'/%3E%3Cpath d='M15 10h10v34h25v10H15z' fill='%23e2a250'/%3E%3C/svg%3E">
-  <title>Lötschberg — Variable Colour Typeface</title>
+  <title data-i18n="meta.title">Lötschberg — Variable Colour Typeface</title>
   <style>
     @font-face {
       font-family: "Loetschberg";
@@ -194,6 +194,43 @@
     }
 
     .nav-links a:hover { color: var(--face); }
+
+    .language-menu {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-left: auto;
+      color: #d9be93;
+      white-space: nowrap;
+    }
+
+    .language-menu label {
+      font-size: 0.62rem;
+    }
+
+    .language-menu select {
+      min-height: 32px;
+      padding: 5px 30px 5px 9px;
+      border: 1px solid rgb(243 236 223 / 0.36);
+      border-radius: 0;
+      background-color: transparent;
+      color: var(--paper);
+      cursor: pointer;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .language-menu select:hover {
+      border-color: var(--face);
+    }
+
+    .language-menu option {
+      background: var(--key);
+      color: var(--paper);
+    }
 
     .hero {
       display: grid;
@@ -783,9 +820,42 @@
     .download-grid {
       display: grid;
       margin-top: 30px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       border-top: 1px solid var(--rule);
       border-left: 1px solid var(--rule);
+    }
+
+    .download-advisory {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 14px;
+      max-width: 940px;
+      margin: 24px 0 0 88px;
+      padding: 15px 18px;
+      border-left: 3px solid var(--coach);
+      background: rgb(124 69 59 / 0.07);
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+
+    .download-advisory::before {
+      content: "F";
+      display: grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border: 1px solid var(--coach);
+      border-radius: 50%;
+      color: var(--coach);
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .download-advisory strong {
+      color: var(--key);
+      font-weight: 600;
     }
 
     .download-card {
@@ -985,6 +1055,7 @@
       .route-data { display: none; }
       .topline__nav { align-items: start; flex-direction: column; }
       .nav-links { gap: 8px 14px; }
+      .language-menu { margin-left: 0; }
       .font-status { margin-top: 3px; }
       .hero { min-height: calc(88svh - 148px); padding-block: 46px 38px; }
       .hero__word { font-size: clamp(2.3rem, 10vw, 4.5rem); white-space: normal; overflow-wrap: normal; }
@@ -995,6 +1066,7 @@
       .section-head { grid-template-columns: 38px minmax(0, 1fr); }
       .section-head__note { grid-column: 2; text-align: left; }
       .section-intro { margin-left: 54px; }
+      .download-advisory { margin-left: 54px; }
       .variant-grid { grid-template-columns: 1fr; }
       .variant-card { min-height: 270px; }
       .variant-card__sample { min-height: 175px; }
@@ -1055,6 +1127,7 @@
       .swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .swatch:last-child { grid-column: span 2; }
       .download-grid { grid-template-columns: 1fr; }
+      .download-advisory { margin-left: 0; }
       .download-card { min-height: 0; }
       .download-card--bundle {
         grid-column: auto;
@@ -1097,121 +1170,128 @@
   </style>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to specimen</a>
+  <a class="skip-link" href="#main" data-i18n="skip">Skip to specimen</a>
 
   <header class="site-header" id="top">
     <div class="topline">
       <div class="topline__meta">
-        <p class="catalogue mono-label">Variable colour type specimen · No. 151</p>
-        <div class="route-data mono-label" aria-label="Typeface specifications">
+        <p class="catalogue mono-label" data-i18n="header.catalogue">Variable colour type specimen · No. 151</p>
+        <div class="route-data mono-label" aria-label="Typeface specifications" data-i18n-aria="header.specificationsAria">
           <span>CAP 700 / EM 1000</span>
           <span>GLYF + COLRv1</span>
           <span>2026</span>
         </div>
       </div>
       <div class="topline__nav">
-        <nav class="nav-links" aria-label="Specimen sections">
-          <a href="#variants">Variants</a>
-          <a href="#axes">Axes</a>
-          <a href="#optical">Optical cuts</a>
-          <a href="#waterfall">Waterfall</a>
-          <a href="#charset">Character set</a>
-          <a href="#colour">Colour</a>
-          <a href="#downloads">Downloads</a>
+        <nav class="nav-links" aria-label="Specimen sections" data-i18n-aria="nav.aria">
+          <a href="#variants" data-i18n="nav.variants">Variants</a>
+          <a href="#axes" data-i18n="nav.axes">Axes</a>
+          <a href="#optical" data-i18n="nav.optical">Optical cuts</a>
+          <a href="#waterfall" data-i18n="nav.waterfall">Waterfall</a>
+          <a href="#charset" data-i18n="nav.charset">Character set</a>
+          <a href="#colour" data-i18n="nav.colour">Colour</a>
+          <a href="#downloads" data-i18n="nav.downloads">Downloads</a>
         </nav>
-        <span class="font-status mono-label" id="font-status" data-state="loading" role="status" aria-live="polite">Loading local font</span>
+        <div class="language-menu">
+          <label class="mono-label" for="language-select" data-i18n="language.label">Language</label>
+          <select id="language-select" aria-label="Choose language" data-i18n-aria="language.aria">
+            <option value="en" data-i18n="language.english">English</option>
+            <option value="gsw-CH" data-i18n="language.swissGerman">Swiss German</option>
+          </select>
+        </div>
+        <span class="font-status mono-label" id="font-status" data-state="loading" data-i18n="font.loading" role="status" aria-live="polite">Loading local font</span>
       </div>
     </div>
 
     <div class="hero">
       <div class="hero__title-wrap">
         <div class="hero__eyebrow mono-label">Bern · Lötschberg · Simplon</div>
-        <h1 class="hero__word typeface axis-target editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable Lötschberg title" data-single-line="true">LÖTSCHBERG</h1>
+        <h1 class="hero__word typeface axis-target editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable Lötschberg title" data-i18n-aria="hero.titleAria" data-single-line="true">LÖTSCHBERG</h1>
       </div>
       <div class="hero__footer">
-        <p class="hero__intro">A parametric railway sans rebuilt as one four-axis variable font. Its austere monoline face can become hand-painted, extruded, or both—without leaving live, selectable text.</p>
-        <p class="hero__note mono-label">Edit the title · Move the axes<br>Enable ss01 + ss02 independently</p>
+        <p class="hero__intro" data-i18n="hero.intro">A parametric railway sans rebuilt as one four-axis variable font. Its austere monoline face can become hand-painted, extruded, or both—without leaving live, selectable text.</p>
+        <p class="hero__note mono-label" data-i18n-html="hero.note">Edit the title · Move the axes<br>Enable ss01 + ss02 independently</p>
       </div>
     </div>
   </header>
 
-  <form class="axis-console" aria-label="Global variable font controls" onsubmit="return false">
+  <form class="axis-console" aria-label="Global variable font controls" data-i18n-aria="controls.aria" onsubmit="return false">
     <div class="axis-console__heading">
-      <p class="mono-label">Live designspace controls</p>
+      <p class="mono-label" data-i18n="controls.heading">Live designspace controls</p>
       <p class="mono-label" id="axis-summary">wght 400 · wdth 100 · opsz 12 · slnt 0</p>
     </div>
     <div class="axis-console__body">
       <div class="axis-control">
         <div class="axis-control__top">
-          <label class="mono-label" for="axis-wght">Weight</label>
+          <label class="mono-label" for="axis-wght" data-i18n="axes.weight">Weight</label>
           <output id="value-wght" for="axis-wght">400</output>
         </div>
         <input class="range" id="axis-wght" data-axis="wght" type="range" min="100" max="900" step="1" value="400">
       </div>
       <div class="axis-control">
         <div class="axis-control__top">
-          <label class="mono-label" for="axis-wdth">Width</label>
+          <label class="mono-label" for="axis-wdth" data-i18n="axes.width">Width</label>
           <output id="value-wdth" for="axis-wdth">100</output>
         </div>
         <input class="range" id="axis-wdth" data-axis="wdth" type="range" min="75" max="125" step="1" value="100">
       </div>
       <div class="axis-control">
         <div class="axis-control__top">
-          <label class="mono-label" for="axis-opsz">Optical size</label>
+          <label class="mono-label" for="axis-opsz" data-i18n="axes.opticalSize">Optical size</label>
           <output id="value-opsz" for="axis-opsz">12</output>
         </div>
         <input class="range" id="axis-opsz" data-axis="opsz" type="range" min="8" max="12" step="1" value="12">
       </div>
       <div class="axis-control">
         <div class="axis-control__top">
-          <label class="mono-label" for="axis-slnt">Slant</label>
+          <label class="mono-label" for="axis-slnt" data-i18n="axes.slant">Slant</label>
           <output id="value-slnt" for="axis-slnt">0°</output>
         </div>
         <input class="range" id="axis-slnt" data-axis="slnt" type="range" min="-12" max="0" step="1" value="0">
       </div>
-      <button class="reset-button" id="reset-axes" type="button">Reset axes</button>
+      <button class="reset-button" id="reset-axes" type="button" data-i18n="controls.reset">Reset axes</button>
     </div>
   </form>
 
-  <noscript><p class="noscript">The type remains visible, but axis controls and generated character grids require JavaScript.</p></noscript>
+  <noscript><p class="noscript" data-i18n="noscript">The type remains visible, but axis controls and generated character grids require JavaScript.</p></noscript>
 
   <main id="main">
     <section class="section" id="variants" aria-labelledby="variants-title">
       <div class="section-head">
         <span class="section-head__number mono-label">01</span>
-        <h2 id="variants-title">Two switches, four voices</h2>
-        <span class="section-head__note mono-label">Orthogonal OpenType features</span>
+        <h2 id="variants-title" data-i18n="variants.title">Two switches, four voices</h2>
+        <span class="section-head__note mono-label" data-i18n="variants.note">Orthogonal OpenType features</span>
       </div>
-      <p class="section-intro">The plain face is the default. <strong>ss01</strong> introduces the signwriter’s controlled hand; <strong>ss02</strong> adds the variable COLRv1 depth. Apply either feature alone or combine them in either order.</p>
+      <p class="section-intro" data-i18n-html="variants.intro">The plain face is the default. <strong>ss01</strong> introduces the signwriter’s controlled hand; <strong>ss02</strong> adds the variable COLRv1 depth. Apply either feature alone or combine them in either order.</p>
 
       <div class="variant-grid">
         <article class="variant-card">
           <div class="variant-card__top">
-            <h3 class="variant-card__name">Regular · Flat</h3>
-            <span class="variant-card__code mono-label">Default</span>
+            <h3 class="variant-card__name" data-i18n="variants.regularFlat">Regular · Flat</h3>
+            <span class="variant-card__code mono-label" data-i18n="common.default">Default</span>
           </div>
-          <div class="variant-card__sample typeface axis-target feature-base editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable regular flat sample">BERN 151</div>
+          <div class="variant-card__sample typeface axis-target feature-base editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable regular flat sample" data-i18n-aria="variants.regularFlatAria">BERN 151</div>
         </article>
         <article class="variant-card">
           <div class="variant-card__top">
-            <h3 class="variant-card__name">Handdrawn · Flat</h3>
+            <h3 class="variant-card__name" data-i18n="variants.handFlat">Handdrawn · Flat</h3>
             <span class="variant-card__code mono-label">ss01</span>
           </div>
-          <div class="variant-card__sample typeface axis-target feature-hand editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable handdrawn flat sample">BERN 151</div>
+          <div class="variant-card__sample typeface axis-target feature-hand editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable handdrawn flat sample" data-i18n-aria="variants.handFlatAria">BERN 151</div>
         </article>
         <article class="variant-card variant-card--colour">
           <div class="variant-card__top">
-            <h3 class="variant-card__name">Regular · Extruded</h3>
+            <h3 class="variant-card__name" data-i18n="variants.regularExtruded">Regular · Extruded</h3>
             <span class="variant-card__code mono-label">ss02</span>
           </div>
-          <div class="variant-card__sample typeface axis-target feature-ext editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable regular extruded sample">BERN 151</div>
+          <div class="variant-card__sample typeface axis-target feature-ext editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable regular extruded sample" data-i18n-aria="variants.regularExtrudedAria">BERN 151</div>
         </article>
         <article class="variant-card variant-card--colour">
           <div class="variant-card__top">
-            <h3 class="variant-card__name">Handdrawn · Extruded</h3>
+            <h3 class="variant-card__name" data-i18n="variants.handExtruded">Handdrawn · Extruded</h3>
             <span class="variant-card__code mono-label">ss01 + ss02</span>
           </div>
-          <div class="variant-card__sample typeface axis-target feature-hand-ext editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable handdrawn extruded sample">BERN 151</div>
+          <div class="variant-card__sample typeface axis-target feature-hand-ext editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable handdrawn extruded sample" data-i18n-aria="variants.handExtrudedAria">BERN 151</div>
         </article>
       </div>
     </section>
@@ -1219,45 +1299,45 @@
     <section class="section" id="axes" aria-labelledby="axes-title">
       <div class="section-head">
         <span class="section-head__number mono-label">02</span>
-        <h2 id="axes-title">Drive the whole machine</h2>
+        <h2 id="axes-title" data-i18n="designspace.title">Drive the whole machine</h2>
         <span class="section-head__note mono-label">wght · wdth · opsz · slnt</span>
       </div>
-      <p class="section-intro">The controls above address four registered axes. Every colour layer follows the same interpolation-compatible outlines, so the depth remains live while weight, width, optical size, and slant change.</p>
+      <p class="section-intro" data-i18n="designspace.intro">The controls above address four registered axes. Every colour layer follows the same interpolation-compatible outlines, so the depth remains live while weight, width, optical size, and slant change.</p>
 
       <div class="playground">
         <div class="playground__controls">
-          <h3 class="mono-label">Feature switches</h3>
+          <h3 class="mono-label" data-i18n="designspace.switches">Feature switches</h3>
           <label class="switch" for="toggle-hand">
             <input id="toggle-hand" type="checkbox">
-            <span><strong>Handdrawn</strong><small>ss01 · point-preserving variation</small></span>
+            <span><strong data-i18n="features.handdrawn">Handdrawn</strong><small data-i18n="features.handdrawnNote">ss01 · point-preserving variation</small></span>
           </label>
           <label class="switch" for="toggle-depth">
             <input id="toggle-depth" type="checkbox" checked>
-            <span><strong>Extruded</strong><small>ss02 · COLRv1 with seven hatches</small></span>
+            <span><strong data-i18n="features.extruded">Extruded</strong><small data-i18n="features.extrudedNote">ss02 · COLRv1 with seven hatches</small></span>
           </label>
         </div>
-        <div class="playground__sample typeface axis-target editable" id="playground-sample" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable live variable font sample" data-placeholder="Type here">GOPPENSTEIN</div>
+        <div class="playground__sample typeface axis-target editable" id="playground-sample" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable live variable font sample" data-i18n-aria="designspace.sampleAria" data-placeholder="Type here" data-i18n-placeholder="designspace.placeholder">GOPPENSTEIN</div>
       </div>
     </section>
 
     <section class="section" id="optical" aria-labelledby="optical-title">
       <div class="section-head">
         <span class="section-head__number mono-label">03</span>
-        <h2 id="optical-title">Caption and display cuts</h2>
-        <span class="section-head__note mono-label">Not simple scaling</span>
+        <h2 id="optical-title" data-i18n="optical.title">Caption and display cuts</h2>
+        <span class="section-head__note mono-label" data-i18n="optical.note">Not simple scaling</span>
       </div>
-      <p class="section-intro">At small optical sizes the face becomes narrower and lighter, spacing tightens, and the depth becomes shallower. The hatch count does not change: seven marks are retained and compressed to preserve the painted transition.</p>
+      <p class="section-intro" data-i18n="optical.intro">At small optical sizes the face becomes narrower and lighter, spacing tightens, and the depth becomes shallower. The hatch count does not change: seven marks are retained and compressed to preserve the painted transition.</p>
 
       <div class="cut-comparison">
         <article class="cut cut--caption">
-          <div class="cut__meta mono-label"><span>Caption</span><span>opsz 8</span></div>
-          <div class="cut__sample typeface feature-base editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable caption optical size sample" data-fit-line data-fit-min="18" data-single-line="true">BERN · SIMPLON 151</div>
-          <p class="cut__copy">Designed for compact reading: a leaner stroke, narrower skeleton, tighter fit, and shorter extrusion vector.</p>
+          <div class="cut__meta mono-label"><span data-i18n="optical.caption">Caption</span><span>opsz 8</span></div>
+          <div class="cut__sample typeface feature-base editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable caption optical size sample" data-i18n-aria="optical.captionAria" data-fit-line data-fit-min="18" data-single-line="true">BERN · SIMPLON 151</div>
+          <p class="cut__copy" data-i18n="optical.captionCopy">Designed for compact reading: a leaner stroke, narrower skeleton, tighter fit, and shorter extrusion vector.</p>
         </article>
         <article class="cut cut--display">
-          <div class="cut__meta mono-label"><span>Display</span><span>opsz 12</span></div>
-          <div class="cut__sample typeface feature-base editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable display optical size sample" data-fit-line data-fit-min="18" data-single-line="true">SIMPLON</div>
-          <p class="cut__copy">Designed for locomotive-scale lettering: broad proportions, full stroke, and the most expansive spacing.</p>
+          <div class="cut__meta mono-label"><span data-i18n="optical.display">Display</span><span>opsz 12</span></div>
+          <div class="cut__sample typeface feature-base editable" contenteditable="plaintext-only" spellcheck="false" aria-label="Editable display optical size sample" data-i18n-aria="optical.displayAria" data-fit-line data-fit-min="18" data-single-line="true">SIMPLON</div>
+          <p class="cut__copy" data-i18n="optical.displayCopy">Designed for locomotive-scale lettering: broad proportions, full stroke, and the most expansive spacing.</p>
         </article>
       </div>
     </section>
@@ -1265,41 +1345,41 @@
     <section class="section" id="waterfall" aria-labelledby="waterfall-title">
       <div class="section-head">
         <span class="section-head__number mono-label">04</span>
-        <h2 id="waterfall-title">Weight × width</h2>
-        <span class="section-head__note mono-label">Twelve positions · opsz 12</span>
+        <h2 id="waterfall-title" data-i18n="waterfall.title">Weight × width</h2>
+        <span class="section-head__note mono-label" data-i18n="waterfall.note">Twelve positions · opsz 12</span>
       </div>
-      <p class="section-intro">Width moves the skeleton while stems hold their authority. Weight grows independently from Thin 100 to Black 900.</p>
+      <p class="section-intro" data-i18n="waterfall.intro">Width moves the skeleton while stems hold their authority. Weight grows independently from Thin 100 to Black 900.</p>
 
-      <div class="waterfall" role="table" aria-label="Weight by width specimen grid">
+      <div class="waterfall" role="table" aria-label="Weight by width specimen grid" data-i18n-aria="waterfall.aria">
         <div class="waterfall__head mono-label" role="row">
           <span role="columnheader">wght</span>
-          <span role="columnheader">Condensed · 75</span>
-          <span role="columnheader">Normal · 100</span>
-          <span role="columnheader">Expanded · 125</span>
+          <span role="columnheader" data-i18n="waterfall.condensed">Condensed · 75</span>
+          <span role="columnheader" data-i18n="waterfall.normal">Normal · 100</span>
+          <span role="columnheader" data-i18n="waterfall.expanded">Expanded · 125</span>
         </div>
         <div class="waterfall__row" role="row">
           <span class="waterfall__weight mono-label" role="rowheader">100</span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" style="font-variation-settings:'wght' 100,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" style="font-variation-settings:'wght' 100,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" style="font-variation-settings:'wght' 100,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 100,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 100,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 100,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
         </div>
         <div class="waterfall__row" role="row">
           <span class="waterfall__weight mono-label" role="rowheader">400</span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" style="font-variation-settings:'wght' 400,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" style="font-variation-settings:'wght' 400,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" style="font-variation-settings:'wght' 400,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 400,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 400,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 400,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
         </div>
         <div class="waterfall__row" role="row">
           <span class="waterfall__weight mono-label" role="rowheader">700</span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" style="font-variation-settings:'wght' 700,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" style="font-variation-settings:'wght' 700,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" style="font-variation-settings:'wght' 700,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 700,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 700,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 700,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
         </div>
         <div class="waterfall__row" role="row">
           <span class="waterfall__weight mono-label" role="rowheader">900</span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" style="font-variation-settings:'wght' 900,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" style="font-variation-settings:'wght' 900,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
-          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" style="font-variation-settings:'wght' 900,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Condensed · 75" data-i18n-axis="waterfall.condensed" style="font-variation-settings:'wght' 900,'wdth' 75,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Normal · 100" data-i18n-axis="waterfall.normal" style="font-variation-settings:'wght' 900,'wdth' 100,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
+          <span class="waterfall__sample" role="cell" data-axis-label="Expanded · 125" data-i18n-axis="waterfall.expanded" style="font-variation-settings:'wght' 900,'wdth' 125,'opsz' 12,'slnt' 0"><span class="waterfall__sample-text" data-fit-line data-fit-min="12">LÖTSCHBERG</span></span>
         </div>
       </div>
     </section>
@@ -1307,25 +1387,25 @@
     <section class="section" id="charset" aria-labelledby="charset-title">
       <div class="section-head">
         <span class="section-head__number mono-label">05</span>
-        <h2 id="charset-title">Basic Latin + Latin-1</h2>
-        <span class="section-head__note mono-label">Full working alphabet</span>
+        <h2 id="charset-title" data-i18n="charset.title">Basic Latin + Latin-1</h2>
+        <span class="section-head__note mono-label" data-i18n="charset.note">Full working alphabet</span>
       </div>
-      <p class="section-intro">The original locomotive inscriptions supplied the voice, not the limit. The production font extends the same parametric construction through letters, figures, punctuation, symbols, and Western European diacritics.</p>
+      <p class="section-intro" data-i18n="charset.intro">The original locomotive inscriptions supplied the voice, not the limit. The production font extends the same parametric construction through letters, figures, punctuation, symbols, and Western European diacritics.</p>
 
       <div class="charset-groups">
         <article class="charset-panel">
           <div class="charset-panel__top">
-            <h3>Basic Latin</h3>
+            <h3 data-i18n="charset.basicLatin">Basic Latin</h3>
             <span class="charset-panel__range mono-label">U+0020–007E</span>
           </div>
-          <div class="charset-grid" id="basic-latin-grid" role="list" aria-label="Basic Latin characters"></div>
+          <div class="charset-grid" id="basic-latin-grid" role="list" aria-label="Basic Latin characters" data-i18n-aria="charset.basicLatinAria"></div>
         </article>
         <article class="charset-panel">
           <div class="charset-panel__top">
-            <h3>Latin-1 Supplement</h3>
+            <h3 data-i18n="charset.latinOne">Latin-1 Supplement</h3>
             <span class="charset-panel__range mono-label">U+00A0–00FF</span>
           </div>
-          <div class="charset-grid" id="latin-one-grid" role="list" aria-label="Latin-1 Supplement characters"></div>
+          <div class="charset-grid" id="latin-one-grid" role="list" aria-label="Latin-1 Supplement characters" data-i18n-aria="charset.latinOneAria"></div>
         </article>
       </div>
     </section>
@@ -1333,46 +1413,46 @@
     <section class="section" id="colour" aria-labelledby="colour-title">
       <div class="section-head">
         <span class="section-head__number mono-label">06</span>
-        <h2 id="colour-title">Paint, light, and depth</h2>
-        <span class="section-head__note mono-label">One CPAL palette · five paints</span>
+        <h2 id="colour-title" data-i18n="colour.title">Paint, light, and depth</h2>
+        <span class="section-head__note mono-label" data-i18n="colour.note">One CPAL palette · five paints</span>
       </div>
-      <p class="section-intro">The coach brown is environmental—it belongs behind the glyph, not inside it. Four font palette colours describe the gold face, two kinds of side plane, and the fine separating keyline.</p>
+      <p class="section-intro" data-i18n="colour.intro">The coach brown is environmental—it belongs behind the glyph, not inside it. Four font palette colours describe the gold face, two kinds of side plane, and the fine separating keyline.</p>
 
       <div class="palette-layout">
-        <div class="swatches" aria-label="Typeface colour palette">
+        <div class="swatches" aria-label="Typeface colour palette" data-i18n-aria="colour.paletteAria">
           <div class="swatch" style="--swatch:#7c453b">
             <div class="swatch__colour"></div>
-            <div class="swatch__caption"><strong>Coach brown</strong><span class="mono-label">#7C453B · Ground</span></div>
+            <div class="swatch__caption"><strong data-i18n="colour.coachBrown">Coach brown</strong><span class="mono-label" data-i18n="colour.ground">#7C453B · Ground</span></div>
           </div>
           <div class="swatch" style="--swatch:#e2a250">
             <div class="swatch__colour"></div>
-            <div class="swatch__caption"><strong>Signwriting gold</strong><span class="mono-label">#E2A250 · Face</span></div>
+            <div class="swatch__caption"><strong data-i18n="colour.gold">Signwriting gold</strong><span class="mono-label" data-i18n="colour.face">#E2A250 · Face</span></div>
           </div>
           <div class="swatch" style="--swatch:#b07a41">
             <div class="swatch__colour"></div>
-            <div class="swatch__caption"><strong>Bronze</strong><span class="mono-label">#B07A41 · Lit wall</span></div>
+            <div class="swatch__caption"><strong data-i18n="colour.bronze">Bronze</strong><span class="mono-label" data-i18n="colour.litWall">#B07A41 · Lit wall</span></div>
           </div>
           <div class="swatch" style="--swatch:#3a332a">
             <div class="swatch__colour"></div>
-            <div class="swatch__caption"><strong>Charcoal</strong><span class="mono-label">#3A332A · Shade + hatch</span></div>
+            <div class="swatch__caption"><strong data-i18n="colour.charcoal">Charcoal</strong><span class="mono-label" data-i18n="colour.shadeHatch">#3A332A · Shade + hatch</span></div>
           </div>
           <div class="swatch" style="--swatch:#2a2016">
             <div class="swatch__colour"></div>
-            <div class="swatch__caption"><strong>Near-black</strong><span class="mono-label">#2A2016 · Keyline</span></div>
+            <div class="swatch__caption"><strong data-i18n="colour.nearBlack">Near-black</strong><span class="mono-label" data-i18n="colour.keyline">#2A2016 · Keyline</span></div>
           </div>
         </div>
 
         <aside class="layer-stack" aria-labelledby="layer-title">
           <div class="layer-stack__title">
-            <span class="mono-label" id="layer-title">COLRv1 paint order</span>
-            <span class="mono-label">Back → front</span>
+            <span class="mono-label" id="layer-title" data-i18n="colour.paintOrder">COLRv1 paint order</span>
+            <span class="mono-label" data-i18n="colour.backFront">Back → front</span>
           </div>
-          <div class="layer-row"><span class="layer-row__number mono-label">01</span><span class="layer-row__chip" style="--layer:#3a332a"></span><span class="layer-row__name">Dark wall</span></div>
-          <div class="layer-row"><span class="layer-row__number mono-label">02</span><span class="layer-row__chip" style="--layer:#b07a41"></span><span class="layer-row__name">Bronze wall</span></div>
-          <div class="layer-row"><span class="layer-row__number mono-label">03</span><span class="layer-row__chip" style="--layer:repeating-linear-gradient(135deg,#3a332a 0 3px,transparent 3px 7px)"></span><span class="layer-row__name">Seven clipped hatches</span></div>
-          <div class="layer-row"><span class="layer-row__number mono-label">04</span><span class="layer-row__chip" style="--layer:#2a2016"></span><span class="layer-row__name">Face keyline</span></div>
-          <div class="layer-row"><span class="layer-row__number mono-label">05</span><span class="layer-row__chip" style="--layer:#e2a250"></span><span class="layer-row__name">Ochre face</span></div>
-          <p class="layer-note">The frozen layer recipe is decomposed once at the default master and replayed everywhere. Constant contour and hatch counts keep every layer interpolation-compatible.</p>
+          <div class="layer-row"><span class="layer-row__number mono-label">01</span><span class="layer-row__chip" style="--layer:#3a332a"></span><span class="layer-row__name" data-i18n="colour.darkWall">Dark wall</span></div>
+          <div class="layer-row"><span class="layer-row__number mono-label">02</span><span class="layer-row__chip" style="--layer:#b07a41"></span><span class="layer-row__name" data-i18n="colour.bronzeWall">Bronze wall</span></div>
+          <div class="layer-row"><span class="layer-row__number mono-label">03</span><span class="layer-row__chip" style="--layer:repeating-linear-gradient(135deg,#3a332a 0 3px,transparent 3px 7px)"></span><span class="layer-row__name" data-i18n="colour.hatches">Seven clipped hatches</span></div>
+          <div class="layer-row"><span class="layer-row__number mono-label">04</span><span class="layer-row__chip" style="--layer:#2a2016"></span><span class="layer-row__name" data-i18n="colour.faceKeyline">Face keyline</span></div>
+          <div class="layer-row"><span class="layer-row__number mono-label">05</span><span class="layer-row__chip" style="--layer:#e2a250"></span><span class="layer-row__name" data-i18n="colour.ochreFace">Ochre face</span></div>
+          <p class="layer-note" data-i18n="colour.layerNote">The frozen layer recipe is decomposed once at the default master and replayed everywhere. Constant contour and hatch counts keep every layer interpolation-compatible.</p>
         </aside>
       </div>
     </section>
@@ -1380,53 +1460,70 @@
     <section class="section" id="downloads" aria-labelledby="downloads-title">
       <div class="section-head">
         <span class="section-head__number mono-label">07</span>
-        <h2 id="downloads-title">Take the typeface</h2>
-        <span class="section-head__note mono-label">Desktop · Web · Complete package</span>
+        <h2 id="downloads-title" data-i18n="downloads.title">Take the typeface</h2>
+        <span class="section-head__note mono-label" data-i18n="downloads.note">Desktop · Web · Complete package</span>
       </div>
-      <p class="section-intro">Choose an individual production font or take the complete release archive. The colour variable builds retain all four axes, both style sets, and the live COLRv1 extrusion.</p>
+      <p class="section-intro" data-i18n="downloads.intro">Choose the two-font Figma pair, an individual colour or text build, or the complete release archive. Every variable build retains all four registered axes; the primary colour font keeps the live COLRv1 extrusion for the web and modern colour-font applications.</p>
+      <p class="download-advisory" data-i18n-html="downloads.figmaAdvisory"><span><strong>For Figma, install only the Regular and Extruded compatibility TTFs.</strong> Remove or disable the primary colour TTF first: it shares the Lötschberg family name with the Regular compatibility build.</span></p>
 
       <div class="download-grid">
         <article class="download-card">
-          <p class="download-card__format mono-label">TTF · Variable colour</p>
-          <h3>Primary desktop font</h3>
-          <p class="download-card__copy">Glyf outlines, COLRv1, CPAL, ss01, and ss02.</p>
+          <p class="download-card__format mono-label" data-i18n="downloads.figmaRegularFormat">TTF · Figma compatibility</p>
+          <h3 data-i18n="downloads.figmaRegularTitle">Lötschberg Regular</h3>
+          <p class="download-card__copy" data-i18n="downloads.figmaRegularCopy">Four-axis monochrome glyf family with Handdrawn available through ss01.</p>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.ttf" download>Download <span aria-hidden="true">↓</span></a>
+            <a class="download-button" href="./Loetschberg-Regular-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.ttf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
           </div>
         </article>
         <article class="download-card">
-          <p class="download-card__format mono-label">OTF · Variable text</p>
-          <h3>CFF2 text sidecar</h3>
-          <p class="download-card__copy">Monochrome base and handdrawn forms for text workflows.</p>
+          <p class="download-card__format mono-label" data-i18n="downloads.figmaExtrudedFormat">TTF · Figma compatibility</p>
+          <h3 data-i18n="downloads.figmaExtrudedTitle">Lötschberg Extruded</h3>
+          <p class="download-card__copy" data-i18n="downloads.figmaExtrudedCopy">Separate monochrome family with the extruded silhouette, seven hatch knockouts, and Handdrawn through ss01.</p>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-Text-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.otf" download>Download <span aria-hidden="true">↓</span></a>
+            <a class="download-button" href="./Loetschberg-Extruded-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.ttf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
           </div>
         </article>
         <article class="download-card">
-          <p class="download-card__format mono-label">WOFF2 · Preferred web</p>
-          <h3>Compressed colour webfont</h3>
-          <p class="download-card__copy">The smallest web build and the specimen’s primary source.</p>
+          <p class="download-card__format mono-label" data-i18n="downloads.ttfFormat">TTF · Variable colour</p>
+          <h3 data-i18n="downloads.ttfTitle">Primary COLRv1 font</h3>
+          <p class="download-card__copy" data-i18n="downloads.ttfCopy">Full-colour web and modern-app build with glyf outlines, CPAL, ss01, and ss02.</p>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-VF.woff2" download>Download <span aria-hidden="true">↓</span></a>
+            <a class="download-button" href="./Loetschberg-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.ttf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
           </div>
         </article>
         <article class="download-card">
-          <p class="download-card__format mono-label">WOFF · Web fallback</p>
-          <h3>Compatible colour webfont</h3>
-          <p class="download-card__copy">A broader fallback carrying the same variable tables.</p>
+          <p class="download-card__format mono-label" data-i18n="downloads.otfFormat">OTF · Variable text</p>
+          <h3 data-i18n="downloads.otfTitle">CFF2 text sidecar</h3>
+          <p class="download-card__copy" data-i18n="downloads.otfCopy">Monochrome base and handdrawn forms for text workflows.</p>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-VF.woff" download>Download <span aria-hidden="true">↓</span></a>
+            <a class="download-button" href="./Loetschberg-Text-VF%5Bwght%2Cwdth%2Copsz%2Cslnt%5D.otf" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
+          </div>
+        </article>
+        <article class="download-card">
+          <p class="download-card__format mono-label" data-i18n="downloads.woff2Format">WOFF2 · Preferred web</p>
+          <h3 data-i18n="downloads.woff2Title">Compressed colour webfont</h3>
+          <p class="download-card__copy" data-i18n="downloads.woff2Copy">The smallest web build and the specimen’s primary source.</p>
+          <div class="download-card__actions">
+            <a class="download-button" href="./Loetschberg-VF.woff2" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
+          </div>
+        </article>
+        <article class="download-card">
+          <p class="download-card__format mono-label" data-i18n="downloads.woffFormat">WOFF · Web fallback</p>
+          <h3 data-i18n="downloads.woffTitle">Compatible colour webfont</h3>
+          <p class="download-card__copy" data-i18n="downloads.woffCopy">A broader fallback carrying the same variable tables.</p>
+          <div class="download-card__actions">
+            <a class="download-button" href="./Loetschberg-VF.woff" download><span data-i18n="downloads.download">Download</span> <span aria-hidden="true">↓</span></a>
           </div>
         </article>
         <article class="download-card download-card--bundle">
           <div>
-            <p class="download-card__format mono-label">ZIP · Release 1.0.0</p>
-            <h3>Complete Lötschberg package</h3>
-            <p class="download-card__copy">All four production font files together with the build and variant documentation.</p>
+            <p class="download-card__format mono-label" data-i18n="downloads.zipFormat">ZIP · Release 1.0.1</p>
+            <h3 data-i18n="downloads.zipTitle">Complete Lötschberg package</h3>
+            <p class="download-card__copy" data-i18n="downloads.zipCopy">All six production font files, including the Figma pair, with English and Swiss German build and variant documentation.</p>
           </div>
           <div class="download-card__actions">
-            <a class="download-button" href="./Loetschberg-1.0.0.zip" download>Download ZIP <span aria-hidden="true">↓</span></a>
-            <a class="download-release-link" href="https://github.com/xadcv/loetschberg/releases/tag/v1.0.0" target="_blank" rel="noopener noreferrer">GitHub release ↗</a>
+            <a class="download-button" href="./Loetschberg-1.0.1.zip" download><span data-i18n="downloads.downloadZip">Download ZIP</span> <span aria-hidden="true">↓</span></a>
+            <a class="download-release-link" href="https://github.com/xadcv/loetschberg/releases/tag/v1.0.1" target="_blank" rel="noopener noreferrer" data-i18n="downloads.githubRelease">GitHub release ↗</a>
           </div>
         </article>
       </div>
@@ -1435,27 +1532,31 @@
     <section class="section section--last" id="specifications" aria-labelledby="specifications-title">
       <div class="section-head">
         <span class="section-head__number mono-label">08</span>
-        <h2 id="specifications-title">Production particulars</h2>
-        <span class="section-head__note mono-label">Live text · Web + modern apps</span>
+        <h2 id="specifications-title" data-i18n="specs.title">Production particulars</h2>
+        <span class="section-head__note mono-label" data-i18n="specs.note">Live text · Web + modern apps</span>
       </div>
       <div class="spec-grid">
-        <table class="spec-table" aria-label="Variable axes">
+        <table class="spec-table" aria-label="Variable axes" data-i18n-aria="specs.tableAria">
           <tbody>
-            <tr><th scope="row">Weight</th><td>wght 100–900 · default 400</td></tr>
-            <tr><th scope="row">Width</th><td>wdth 75–125 · default 100</td></tr>
-            <tr><th scope="row">Optical size</th><td>opsz 8–12 · default 12</td></tr>
-            <tr><th scope="row">Slant</th><td>slnt −12–0 · default 0</td></tr>
-            <tr><th scope="row">Vertical metrics</th><td>960 / 700 / 0 / −300</td></tr>
+            <tr><th scope="row" data-i18n="axes.weight">Weight</th><td data-i18n="specs.weightValue">wght 100–900 · default 400</td></tr>
+            <tr><th scope="row" data-i18n="axes.width">Width</th><td data-i18n="specs.widthValue">wdth 75–125 · default 100</td></tr>
+            <tr><th scope="row" data-i18n="axes.opticalSize">Optical size</th><td data-i18n="specs.opticalValue">opsz 8–12 · default 12</td></tr>
+            <tr><th scope="row" data-i18n="axes.slant">Slant</th><td data-i18n="specs.slantValue">slnt −12–0 · default 0</td></tr>
+            <tr><th scope="row" data-i18n="specs.verticalMetrics">Vertical metrics</th><td>960 / 700 / 0 / −300</td></tr>
           </tbody>
         </table>
         <div>
           <article class="production-note">
-            <h3 class="mono-label">Primary font</h3>
-            <p>A glyf-flavoured variable font carries ss01, ss02, COLRv1, CPAL, and outline deltas for all colour layers. Unsupported colour renderers still receive a usable monochrome outline.</p>
+            <h3 class="mono-label" data-i18n="specs.primaryTitle">Primary font</h3>
+            <p data-i18n="specs.primaryCopy">A glyf-flavoured variable font carries ss01, ss02, COLRv1, CPAL, and outline deltas for all colour layers. Unsupported colour renderers still receive a usable monochrome outline.</p>
           </article>
           <article class="production-note">
-            <h3 class="mono-label">Text sidecar</h3>
-            <p>A CFF2 variable OTF keeps the base and handdrawn forms for pure text workflows, with colour tables intentionally removed.</p>
+            <h3 class="mono-label" data-i18n="specs.sidecarTitle">Text sidecar</h3>
+            <p data-i18n="specs.sidecarCopy">A CFF2 variable OTF keeps the base and handdrawn forms for pure text workflows, with colour tables intentionally removed.</p>
+          </article>
+          <article class="production-note">
+            <h3 class="mono-label" data-i18n="specs.figmaTitle">Figma compatibility pair</h3>
+            <p data-i18n="specs.figmaCopy">Regular and Extruded are separate, palette-free glyf families for applications without COLRv1 rendering. Both retain all four axes and Handdrawn through ss01.</p>
           </article>
         </div>
       </div>
@@ -1465,7 +1566,7 @@
   <footer class="site-footer">
     <div class="footer__inner">
       <p class="footer__word typeface axis-target" aria-label="Lötschberg 151">LÖTSCHBERG 151</p>
-      <p class="footer__meta mono-label">Parametric outlines · frozen depth recipe<br>Four axes · two independent features</p>
+      <p class="footer__meta mono-label" data-i18n-html="footer.meta">Parametric outlines · frozen depth recipe<br>Four axes · two independent features</p>
     </div>
   </footer>
 
@@ -1482,6 +1583,240 @@
       var heroFitFrame;
       var lineFitFrame;
       var lineFitTargets = Array.prototype.slice.call(document.querySelectorAll("[data-fit-line]"));
+      var languageSelect = document.getElementById("language-select");
+      var currentLanguage = "en";
+      var languageStorageKey = "loetschberg-language";
+      var englishDynamic = {
+        "font.ready": "Local webfont loaded",
+        "font.error": "Font unavailable · fallback shown",
+        "font.statusUnavailable": "Font loading status unavailable"
+      };
+      var gswCH = {
+        "meta.title": "Lötschberg — Variabli Farbschrift",
+        "meta.description": "Schriftmuster vo de variable Lötschberg-Farbschrift — vier Achse, handzeichneti und extrudierti OpenType-Variante, Basis-Lateinisch und Latin-1.",
+        "skip": "Zum Schriftmuster springe",
+        "header.catalogue": "Muster vo ere variable Farbschrift · Nr. 151",
+        "header.specificationsAria": "Spezifikatione vo de Schrift",
+        "nav.aria": "Bereich vom Schriftmuster",
+        "nav.variants": "Variante",
+        "nav.axes": "Achse",
+        "nav.optical": "Optischi Grösse",
+        "nav.waterfall": "Kaskade",
+        "nav.charset": "Zeichesatz",
+        "nav.colour": "Farb",
+        "nav.downloads": "Downloads",
+        "language.label": "Sproch",
+        "language.aria": "Sproch uswähle",
+        "language.english": "English",
+        "language.swissGerman": "Schwiizerdütsch",
+        "font.loading": "Lokali Schrift wird glade",
+        "font.ready": "Lokali Webschrift glade",
+        "font.error": "Schrift nöd verfügbar · Ersatzschrift wird aazeigt",
+        "font.statusUnavailable": "Status vom Schriftlade nöd verfügbar",
+        "hero.titleAria": "Lötschberg-Titel zum Bearbeite",
+        "hero.intro": "E parametrischi Iisebahn-Grotesk, neu ufbaut als variabli Schrift mit vier Achse. Sis strenge monolineare Schriftbild cha handgmalt, extrudiert oder beides werde – und bliibt debii live und uswählbar.",
+        "hero.note": "Titel bearbeite · Achse bewege<br>ss01 + ss02 unabhängig aktiviere",
+        "controls.aria": "Globali Stüürig vo de variable Schrift",
+        "controls.heading": "Interaktivi Designspace-Stüürig",
+        "controls.reset": "Achse zruggsetze",
+        "axes.weight": "Gwicht",
+        "axes.width": "Breiti",
+        "axes.opticalSize": "Optischi Grössi",
+        "axes.slant": "Neiig",
+        "noscript": "D Schrift bliibt sichtbar, aber d Achsestüürig und die generierte Zeichetabelle bruuched JavaScript.",
+        "variants.title": "Zwei Schalter, vier Stimme",
+        "variants.note": "Unabhängigi OpenType-Features",
+        "variants.intro": "D schlichti Form isch de Standard. <strong>ss01</strong> bringt d kontrollierti Hand vom Schriftemaler ine; <strong>ss02</strong> füegt d variabli COLRv1-Tüüfi dezue. Beidi Features lönd sich einzel oder i beliebiger Reihefolg kombiniere.",
+        "variants.regularFlat": "Regular · Flach",
+        "variants.handFlat": "Handzeichnet · Flach",
+        "variants.regularExtruded": "Regular · Extrudiert",
+        "variants.handExtruded": "Handzeichnet · Extrudiert",
+        "variants.regularFlatAria": "Bearbeitbars Muster: regulär und flach",
+        "variants.handFlatAria": "Bearbeitbars Muster: handzeichnet und flach",
+        "variants.regularExtrudedAria": "Bearbeitbars Muster: regulär und extrudiert",
+        "variants.handExtrudedAria": "Bearbeitbars Muster: handzeichnet und extrudiert",
+        "common.default": "Standard",
+        "designspace.title": "D ganzi Maschine stüüre",
+        "designspace.intro": "D Stüürig obe bedient vier registrierti Achse. Jedi Farbebeni folgt de gliiche interpolationskompatible Umriss, drum bliibt d Tüüfi live, während sich Gwicht, Breiti, optischi Grössi und Neiig veränderet.",
+        "designspace.switches": "Feature-Schalter",
+        "features.handdrawn": "Handzeichnet",
+        "features.handdrawnNote": "ss01 · Variation mit de gliiche Pünktstruktur",
+        "features.extruded": "Extrudiert",
+        "features.extrudedNote": "ss02 · COLRv1 mit siebe Schraffure",
+        "designspace.sampleAria": "Bearbeitbars Live-Muster vo de variable Schrift",
+        "designspace.placeholder": "Da schriibe",
+        "optical.title": "Caption- und Display-Schnitt",
+        "optical.note": "Nöd eifach skaliert",
+        "optical.intro": "Bi chline optische Grösse wird s Schriftbild schmaler und liechter, d Abständ werded enger und d Tüüfi flacher. D Aazahl Schraffure änderet nöd: Siebe Strich bliibed erhalte und werded verdichtet, damit de gmalt Übergang bliibt.",
+        "optical.caption": "Caption",
+        "optical.display": "Display",
+        "optical.captionAria": "Bearbeitbars Muster vom optische Caption-Schnitt",
+        "optical.displayAria": "Bearbeitbars Muster vom optische Display-Schnitt",
+        "optical.captionCopy": "Für s kompakte Läse gestaltet: en schlankere Strich, es schmalers Skelett, e engeri Zurichtig und en chürzere Extrusionsvektor.",
+        "optical.displayCopy": "Für Beschriftige im Lokomotiv-Massstab gestaltet: breiti Proportione, de volli Strich und die grosszügigschte Abständ.",
+        "waterfall.title": "Gwicht × Breiti",
+        "waterfall.note": "Zwölf Positione · opsz 12",
+        "waterfall.intro": "D Breiti verschiebt s Skelett, während d Stämm ihri Autorität bhalted. S Gwicht wachst unabhängig vo Thin 100 bis Black 900.",
+        "waterfall.aria": "Schriftmuster für Gwicht und Breiti",
+        "waterfall.condensed": "Schmal · 75",
+        "waterfall.normal": "Normal · 100",
+        "waterfall.expanded": "Breit · 125",
+        "charset.title": "Basis-Lateinisch + Latin-1",
+        "charset.note": "Vollständig bruchbars Alphabet",
+        "charset.intro": "D ursprüngliche Lokomotiv-Aaschrifte händ d Stimm glieferet, nöd d Gränze. D Produktionsschrift füehrt die gliichi parametrischi Konstruktion dur Buechstabe, Ziffere, Satzzeiche, Symbol und westeuropäischi diakritischi Zeiche wiiter.",
+        "charset.basicLatin": "Basis-Lateinisch",
+        "charset.latinOne": "Latin-1, Ergänzig",
+        "charset.basicLatinAria": "Basis-lateinischi Zeiche",
+        "charset.latinOneAria": "Zeiche vo de Latin-1-Ergänzig",
+        "colour.title": "Farb, Liecht und Tüüfi",
+        "colour.note": "E CPAL-Palette · fünf Farbebeene",
+        "colour.intro": "S Wagebruun ghört zur Umgebig – hinder d Glyph, nöd i d Glyph ine. Vier Farbe vo de Schriftpalette beschriibed die goldigi Vordersite, zwei Arte vo Wandfläche und d fiini trennendi Keyline.",
+        "colour.paletteAria": "Farbpalette vo de Schrift",
+        "colour.coachBrown": "Wagebruun",
+        "colour.ground": "#7C453B · Hintergrund",
+        "colour.gold": "Aaschrifte-Gold",
+        "colour.face": "#E2A250 · Vordersite",
+        "colour.bronze": "Bronze",
+        "colour.litWall": "#B07A41 · Beleuchteti Wand",
+        "colour.charcoal": "Anthrazit",
+        "colour.shadeHatch": "#3A332A · Schatte + Schraffur",
+        "colour.nearBlack": "Fascht Schwarz",
+        "colour.keyline": "#2A2016 · Keyline",
+        "colour.paintOrder": "COLRv1-Paint-Reihefolg",
+        "colour.backFront": "Hinde → vorne",
+        "colour.darkWall": "Dunkli Wand",
+        "colour.bronzeWall": "Bronzefarbigi Wand",
+        "colour.hatches": "Siebe abgschnittni Schraffure",
+        "colour.faceKeyline": "Keyline vo de Vordersite",
+        "colour.ochreFace": "Ocker-Vordersite",
+        "colour.layerNote": "S fixiert Ebenerezept wird einmal am Standard-Master zerleit und überall abgspielt. D konstanti Aazahl Konture und Schraffure haltet jedi Ebeni interpolationskompatibel.",
+        "downloads.title": "Schrift abelade",
+        "downloads.note": "Desktop · Web · Komplettpaket",
+        "downloads.intro": "Wähl s Figma-Paar us zwei Schrifte, e einzelni Farb- oder Textversion oder lad s vollständige Release-Archiv abe. Jedi variabli Version bhaltet all vier registrierte Achse; d primäri Farbschrift bhaltet d live COLRv1-Extrusion fürs Web und moderni Farbfont-Apps.",
+        "downloads.figmaAdvisory": "<span><strong>Für Figma nume die kompatible Regular- und Extruded-TTF installiere.</strong> D primäri Farb-TTF vorher entferne oder deaktiviere: Si teilt de Familiename Lötschberg mit de kompatible Regular-Version.</span>",
+        "downloads.figmaRegularFormat": "TTF · Figma-kompatibel",
+        "downloads.figmaRegularTitle": "Lötschberg Regular",
+        "downloads.figmaRegularCopy": "Monochromi glyf-Familie mit vier Achse und Handdrawn über ss01.",
+        "downloads.figmaExtrudedFormat": "TTF · Figma-kompatibel",
+        "downloads.figmaExtrudedTitle": "Lötschberg Extruded",
+        "downloads.figmaExtrudedCopy": "Separati monochromi Familie mit extrudierter Silhouette, siebe usgsparte Schraffure und Handdrawn über ss01.",
+        "downloads.ttfFormat": "TTF · Variabli Farbschrift",
+        "downloads.ttfTitle": "Primäri COLRv1-Schrift",
+        "downloads.ttfCopy": "Vollfarbigi Version fürs Web und moderni Apps mit glyf-Umriss, CPAL, ss01 und ss02.",
+        "downloads.otfFormat": "OTF · Variabli Textschrift",
+        "downloads.otfTitle": "CFF2-Textversion",
+        "downloads.otfCopy": "Monochromi Basis- und handzeichneti Forme für Text-Workflows.",
+        "downloads.woff2Format": "WOFF2 · Bevorzugts Webformat",
+        "downloads.woff2Title": "Komprimierti Farb-Webschrift",
+        "downloads.woff2Copy": "D chlinschti Webversion und d primäri Quälle vom Schriftmuster.",
+        "downloads.woffFormat": "WOFF · Web-Fallback",
+        "downloads.woffTitle": "Kompatibli Farb-Webschrift",
+        "downloads.woffCopy": "En breiter kompatible Fallback mit de gliiche variable Tabelle.",
+        "downloads.zipFormat": "ZIP · Version 1.0.1",
+        "downloads.zipTitle": "Vollständigs Lötschberg-Paket",
+        "downloads.zipCopy": "All sechs Produktionsschriftdateie inklusive em Figma-Paar, mit de englische und schwiizerdütsche Build- und Variantendokumentation.",
+        "downloads.download": "Abelade",
+        "downloads.downloadZip": "ZIP abelade",
+        "downloads.githubRelease": "GitHub-Release ↗",
+        "specs.title": "Produktionsdetail",
+        "specs.note": "Live Text · Web + moderni Apps",
+        "specs.tableAria": "Variabli Achse",
+        "specs.weightValue": "wght 100–900 · Standard 400",
+        "specs.widthValue": "wdth 75–125 · Standard 100",
+        "specs.opticalValue": "opsz 8–12 · Standard 12",
+        "specs.slantValue": "slnt −12–0 · Standard 0",
+        "specs.verticalMetrics": "Vertikali Metrike",
+        "specs.primaryTitle": "Primäri Schrift",
+        "specs.primaryCopy": "E variabli Schrift mit glyf-Umriss enthaltet ss01, ss02, COLRv1, CPAL und Umriss-Delta für all Farbebeene. Farb-Renderer ohni Unterstützig überchömed trotzdem en bruchbare monochrome Umriss.",
+        "specs.sidecarTitle": "Textversion",
+        "specs.sidecarCopy": "E variabli CFF2-OTF bhaltet d Basis- und handzeichnete Forme für reini Text-Workflows; d Farbtabellen sind absichtlich entfernt.",
+        "specs.figmaTitle": "Figma-kompatibles Paar",
+        "specs.figmaCopy": "Regular und Extruded sind separati glyf-Familie ohni Palette für Apps, wo COLRv1 nöd renderet. Beidi bhalted all vier Achse und Handdrawn über ss01.",
+        "footer.meta": "Parametrischi Umriss · fixierts Tüüferezept<br>Vier Achse · zwei unabhängigi Features"
+      };
+      var english = {
+        text: {},
+        html: {},
+        aria: {},
+        content: {},
+        placeholder: {},
+        axis: {}
+      };
+
+      function captureEnglish(selector, keyAttribute, valueAttribute, bucket) {
+        Array.prototype.forEach.call(document.querySelectorAll(selector), function (element) {
+          var key = element.getAttribute(keyAttribute);
+          if (Object.prototype.hasOwnProperty.call(english[bucket], key)) return;
+          english[bucket][key] = valueAttribute === "textContent"
+            ? element.textContent
+            : valueAttribute === "innerHTML"
+              ? element.innerHTML
+              : element.getAttribute(valueAttribute);
+        });
+      }
+
+      captureEnglish("[data-i18n]", "data-i18n", "textContent", "text");
+      captureEnglish("[data-i18n-html]", "data-i18n-html", "innerHTML", "html");
+      captureEnglish("[data-i18n-aria]", "data-i18n-aria", "aria-label", "aria");
+      captureEnglish("[data-i18n-content]", "data-i18n-content", "content", "content");
+      captureEnglish("[data-i18n-placeholder]", "data-i18n-placeholder", "data-placeholder", "placeholder");
+      captureEnglish("[data-i18n-axis]", "data-i18n-axis", "data-axis-label", "axis");
+
+      function normalizeLanguage(language) {
+        if (language === "gsw-CH" || language === "gsw" || language === "de-CH") return "gsw-CH";
+        return "en";
+      }
+
+      function localizedValue(key, bucket) {
+        if (currentLanguage === "gsw-CH" && Object.prototype.hasOwnProperty.call(gswCH, key)) return gswCH[key];
+        if (bucket === "text" && Object.prototype.hasOwnProperty.call(englishDynamic, key)) return englishDynamic[key];
+        return english[bucket][key];
+      }
+
+      function localizeElements(selector, keyAttribute, valueAttribute, bucket) {
+        Array.prototype.forEach.call(document.querySelectorAll(selector), function (element) {
+          var value = localizedValue(element.getAttribute(keyAttribute), bucket);
+          if (typeof value !== "string") return;
+          if (valueAttribute === "textContent") element.textContent = value;
+          else if (valueAttribute === "innerHTML") element.innerHTML = value;
+          else element.setAttribute(valueAttribute, value);
+        });
+      }
+
+      function applyLanguage(language, persist) {
+        currentLanguage = normalizeLanguage(language);
+        root.lang = currentLanguage;
+        languageSelect.value = currentLanguage;
+        localizeElements("[data-i18n]", "data-i18n", "textContent", "text");
+        localizeElements("[data-i18n-html]", "data-i18n-html", "innerHTML", "html");
+        localizeElements("[data-i18n-aria]", "data-i18n-aria", "aria-label", "aria");
+        localizeElements("[data-i18n-content]", "data-i18n-content", "content", "content");
+        localizeElements("[data-i18n-placeholder]", "data-i18n-placeholder", "data-placeholder", "placeholder");
+        localizeElements("[data-i18n-axis]", "data-i18n-axis", "data-axis-label", "axis");
+        if (persist) {
+          try {
+            window.localStorage.setItem(languageStorageKey, currentLanguage);
+          } catch (error) {
+            /* Language selection still works when storage is unavailable. */
+          }
+        }
+        fitHero();
+        scheduleLineFit();
+      }
+
+      try {
+        var storedLanguage = window.localStorage.getItem(languageStorageKey);
+        currentLanguage = normalizeLanguage(storedLanguage);
+        if (storedLanguage === "de-CH" || storedLanguage === "gsw") {
+          window.localStorage.setItem(languageStorageKey, "gsw-CH");
+        }
+      } catch (error) {
+        currentLanguage = "en";
+      }
+      applyLanguage(currentLanguage, false);
+      languageSelect.addEventListener("change", function () {
+        applyLanguage(languageSelect.value, true);
+      });
 
       function fitHero() {
         if (!heroWord) return;
@@ -1652,23 +1987,26 @@
       window.addEventListener("resize", scheduleLineFit);
 
       var fontStatus = document.getElementById("font-status");
+      function setFontStatus(key, state) {
+        fontStatus.setAttribute("data-i18n", key);
+        if (state) fontStatus.setAttribute("data-state", state);
+        fontStatus.textContent = localizedValue(key, "text");
+      }
+
       if (document.fonts && document.fonts.load) {
         document.fonts.load("400 32px Loetschberg", "Lötschberg").then(function (faces) {
           if (faces.length) {
-            fontStatus.textContent = "Local webfont loaded";
-            fontStatus.setAttribute("data-state", "ready");
+            setFontStatus("font.ready", "ready");
             fitHero();
             scheduleLineFit();
           } else {
-            fontStatus.textContent = "Font unavailable · fallback shown";
-            fontStatus.setAttribute("data-state", "error");
+            setFontStatus("font.error", "error");
           }
         }).catch(function () {
-          fontStatus.textContent = "Font unavailable · fallback shown";
-          fontStatus.setAttribute("data-state", "error");
+          setFontStatus("font.error", "error");
         });
       } else {
-        fontStatus.textContent = "Font loading status unavailable";
+        setFontStatus("font.statusUnavailable");
       }
 
       refreshAxes();

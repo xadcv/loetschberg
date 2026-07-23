@@ -21,6 +21,12 @@ from fontTools.varLib.instancer import instantiateVariableFont
 ROOT = Path(__file__).resolve().parents[1]
 PRIMARY_PATH = ROOT / "Loetschberg-VF[wght,wdth,opsz,slnt].ttf"
 SIDECAR_PATH = ROOT / "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf"
+REGULAR_COMPAT_PATH = (
+    ROOT / "Loetschberg-Regular-VF[wght,wdth,opsz,slnt].ttf"
+)
+EXTRUDED_COMPAT_PATH = (
+    ROOT / "Loetschberg-Extruded-VF[wght,wdth,opsz,slnt].ttf"
+)
 WOFF_PATH = ROOT / "Loetschberg-VF.woff"
 WOFF2_PATH = ROOT / "Loetschberg-VF.woff2"
 TOPOLOGY_PATH = ROOT / "sources" / "topology-report.json"
@@ -29,6 +35,8 @@ INTERPOLATABLE_PATH = ROOT / "interpolatable-report.json"
 ARTIFACTS = (
     PRIMARY_PATH,
     SIDECAR_PATH,
+    REGULAR_COMPAT_PATH,
+    EXTRUDED_COMPAT_PATH,
     WOFF_PATH,
     WOFF2_PATH,
     TOPOLOGY_PATH,
@@ -66,6 +74,20 @@ def primary_font() -> TTFont:
 @pytest.fixture(scope="session")
 def sidecar_font() -> TTFont:
     font = TTFont(SIDECAR_PATH, lazy=False)
+    yield font
+    font.close()
+
+
+@pytest.fixture(scope="session")
+def regular_compat_font() -> TTFont:
+    font = TTFont(REGULAR_COMPAT_PATH, lazy=False)
+    yield font
+    font.close()
+
+
+@pytest.fixture(scope="session")
+def extruded_compat_font() -> TTFont:
+    font = TTFont(EXTRUDED_COMPAT_PATH, lazy=False)
     yield font
     font.close()
 
@@ -310,12 +332,16 @@ def test_expected_root_artifacts_exist() -> None:
     assert not missing, f"missing build artifacts: {missing}"
 
 
-def test_primary_and_sidecar_table_contracts(
-    primary_font: TTFont, sidecar_font: TTFont
+def test_desktop_font_table_contracts(
+    primary_font: TTFont,
+    sidecar_font: TTFont,
+    regular_compat_font: TTFont,
+    extruded_compat_font: TTFont,
 ) -> None:
     common = {"head", "hhea", "maxp", "OS/2", "hmtx", "cmap", "name", "post", "fvar", "HVAR", "STAT", "GSUB"}
     primary_required = common | {"glyf", "loca", "gvar", "COLR", "CPAL"}
     sidecar_required = common | {"CFF2"}
+    compat_required = common | {"glyf", "loca", "gvar"}
 
     assert primary_required <= set(primary_font.keys())
     assert {"CFF ", "CFF2"}.isdisjoint(primary_font.keys())
@@ -323,9 +349,20 @@ def test_primary_and_sidecar_table_contracts(
     assert {"glyf", "loca", "gvar", "COLR", "CPAL", "CFF "}.isdisjoint(
         sidecar_font.keys()
     )
+    for compat_font in (regular_compat_font, extruded_compat_font):
+        assert compat_required <= set(compat_font.keys())
+        assert {"COLR", "CPAL", "CFF ", "CFF2"}.isdisjoint(compat_font.keys())
 
 
-@pytest.mark.parametrize("fixture_name", ["primary_font", "sidecar_font"])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "primary_font",
+        "sidecar_font",
+        "regular_compat_font",
+        "extruded_compat_font",
+    ],
+)
 def test_variable_axes_and_stat(request: pytest.FixtureRequest, fixture_name: str) -> None:
     font: TTFont = request.getfixturevalue(fixture_name)
     _assert_axes(font)
@@ -337,10 +374,18 @@ def test_variable_axes_and_stat(request: pytest.FixtureRequest, fixture_name: st
     assert set(tags) == set(AXES)
 
 
-def test_default_instance_is_regular_and_installable_families_do_not_collide(
-    primary_font: TTFont, sidecar_font: TTFont
+def test_default_instance_version_and_family_names(
+    primary_font: TTFont,
+    sidecar_font: TTFont,
+    regular_compat_font: TTFont,
+    extruded_compat_font: TTFont,
 ) -> None:
-    for font in (primary_font, sidecar_font):
+    for font in (
+        primary_font,
+        sidecar_font,
+        regular_compat_font,
+        extruded_compat_font,
+    ):
         defaults = {axis.axisTag: float(axis.defaultValue) for axis in font["fvar"].axes}
         matching = [
             instance
@@ -350,20 +395,79 @@ def test_default_instance_is_regular_and_installable_families_do_not_collide(
         ]
         assert len(matching) == 1
         assert font["name"].getDebugName(matching[0].subfamilyNameID) == "Regular"
+        assert font["name"].getDebugName(5) == "Version 1.001"
+        assert font["head"].fontRevision == pytest.approx(1.001, abs=0.00002)
 
     assert primary_font["name"].getDebugName(1) == "Lötschberg"
+    assert regular_compat_font["name"].getDebugName(1) == "Lötschberg"
+    assert extruded_compat_font["name"].getDebugName(1) == "Lötschberg Extruded"
     assert sidecar_font["name"].getDebugName(1) == "Lötschberg Text"
     assert primary_font["name"].getDebugName(16) == "Lötschberg"
+    assert regular_compat_font["name"].getDebugName(16) == "Lötschberg"
+    assert (
+        extruded_compat_font["name"].getDebugName(16)
+        == "Lötschberg Extruded"
+    )
     assert sidecar_font["name"].getDebugName(16) == "Lötschberg Text"
+    assert regular_compat_font["name"].getDebugName(17) == "Regular"
+    assert extruded_compat_font["name"].getDebugName(17) == "Regular"
     assert sidecar_font["name"].getDebugName(17) == "Regular"
+    assert primary_font["name"].getDebugName(6) == "LoetschbergVF"
+    assert regular_compat_font["name"].getDebugName(6) == "LoetschbergVF"
+    assert (
+        extruded_compat_font["name"].getDebugName(6)
+        == "LoetschbergExtrudedVF"
+    )
+    assert sidecar_font["name"].getDebugName(6) == "LoetschbergTextVF"
 
 
-@pytest.mark.parametrize("fixture_name", ["primary_font", "sidecar_font"])
+@pytest.mark.parametrize(
+    ("fixture_name", "postscript_prefix"),
+    [
+        ("primary_font", "Loetschberg"),
+        ("sidecar_font", "LoetschbergText"),
+        ("regular_compat_font", "Loetschberg"),
+        ("extruded_compat_font", "LoetschbergExtruded"),
+    ],
+)
+def test_named_instances_have_loadable_postscript_names(
+    request: pytest.FixtureRequest,
+    fixture_name: str,
+    postscript_prefix: str,
+) -> None:
+    """Figma and other font brokers address variable instances by PS name."""
+    font: TTFont = request.getfixturevalue(fixture_name)
+    names: list[str] = []
+    for instance in font["fvar"].instances:
+        assert instance.postscriptNameID != 0xFFFF
+        style_name = font["name"].getDebugName(instance.subfamilyNameID)
+        postscript_name = font["name"].getDebugName(instance.postscriptNameID)
+        assert style_name is not None
+        expected = (
+            f"{postscript_prefix}VF"
+            if style_name == "Regular"
+            else f"{postscript_prefix}-{style_name.replace(' ', '')}"
+        )
+        assert postscript_name == expected
+        names.append(postscript_name)
+    assert len(names) == len(set(names))
+
+
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "primary_font",
+        "sidecar_font",
+        "regular_compat_font",
+        "extruded_compat_font",
+    ],
+)
 def test_vertical_metrics(request: pytest.FixtureRequest, fixture_name: str) -> None:
     font: TTFont = request.getfixturevalue(fixture_name)
     assert font["head"].unitsPerEm == 1000
 
     os2 = font["OS/2"]
+    assert os2.fsType == 0
     assert os2.sCapHeight == 700
     assert os2.sxHeight == 500
     assert os2.sTypoAscender == 960
@@ -378,7 +482,15 @@ def test_vertical_metrics(request: pytest.FixtureRequest, fixture_name: str) -> 
     assert hhea.lineGap == 0
 
 
-@pytest.mark.parametrize("fixture_name", ["primary_font", "sidecar_font"])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "primary_font",
+        "sidecar_font",
+        "regular_compat_font",
+        "extruded_compat_font",
+    ],
+)
 def test_unicode_cmap_coverage(request: pytest.FixtureRequest, fixture_name: str) -> None:
     font: TTFont = request.getfixturevalue(fixture_name)
     unicode_formats = {table.format for table in font["cmap"].tables if table.isUnicode()}
@@ -503,12 +615,22 @@ def test_primary_marks_piecewise_outlines_as_overlapping(primary_font: TTFont) -
             assert glyph.flags[0] & flagOverlapSimple
 
 
-def test_gsub_feature_contract(primary_font: TTFont, sidecar_font: TTFont) -> None:
+def test_gsub_feature_contract(
+    primary_font: TTFont,
+    sidecar_font: TTFont,
+    regular_compat_font: TTFont,
+    extruded_compat_font: TTFont,
+) -> None:
     primary_features = _feature_tags(primary_font)
-    sidecar_features = _feature_tags(sidecar_font)
     assert {"ss01", "ss02"} <= primary_features
-    assert "ss01" in sidecar_features
-    assert "ss02" not in sidecar_features
+    for mono_font in (
+        sidecar_font,
+        regular_compat_font,
+        extruded_compat_font,
+    ):
+        mono_features = _feature_tags(mono_font)
+        assert "ss01" in mono_features
+        assert "ss02" not in mono_features
 
 
 def test_primary_shapes_all_four_variant_states(primary_font: TTFont) -> None:
@@ -529,6 +651,48 @@ def test_sidecar_shapes_handdrawn_but_has_no_extruded_state(sidecar_font: TTFont
     hand = _variant_name(sidecar_font, ord("A"), "hand")
     assert _shape_names(SIDECAR_PATH, sidecar_font, "A", {}) == [base]
     assert _shape_names(SIDECAR_PATH, sidecar_font, "A", {"ss01": True}) == [hand]
+
+
+@pytest.mark.parametrize(
+    ("path", "fixture_name"),
+    [
+        (REGULAR_COMPAT_PATH, "regular_compat_font"),
+        (EXTRUDED_COMPAT_PATH, "extruded_compat_font"),
+    ],
+)
+def test_compat_fonts_shape_handdrawn_as_ss01_only(
+    request: pytest.FixtureRequest,
+    path: Path,
+    fixture_name: str,
+) -> None:
+    font: TTFont = request.getfixturevalue(fixture_name)
+    base = _cmap_name(font, ord("A"))
+    hand = _variant_name(font, ord("A"), "hand")
+    assert _shape_names(path, font, "A", {}) == [base]
+    assert _shape_names(path, font, "A", {"ss01": True}) == [hand]
+    assert _shape_names(path, font, "A", {"ss02": True}) == [base]
+
+
+def test_extruded_compat_has_structurally_distinct_expanded_outlines(
+    regular_compat_font: TTFont,
+    extruded_compat_font: TTFont,
+) -> None:
+    """The second family must contain drawn depth, not renamed flat outlines."""
+
+    regular_name = _cmap_name(regular_compat_font, ord("O"))
+    extruded_name = _cmap_name(extruded_compat_font, ord("O"))
+    regular = regular_compat_font["glyf"][regular_name]
+    extruded = extruded_compat_font["glyf"][extruded_name]
+    regular.expand(regular_compat_font["glyf"])
+    extruded.expand(extruded_compat_font["glyf"])
+
+    assert _recording(regular_compat_font, regular_name) != _recording(
+        extruded_compat_font,
+        extruded_name,
+    )
+    assert extruded.numberOfContours > regular.numberOfContours
+    assert extruded.xMax > regular.xMax
+    assert extruded.yMin < regular.yMin
 
 
 def test_slnt_axis_changes_outlines(primary_font: TTFont) -> None:

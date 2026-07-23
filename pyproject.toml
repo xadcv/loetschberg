@@ -1,6 +1,6 @@
 [project]
 name = "loetschberg-font"
-version = "1.0.0"
+version = "1.0.1"
 description = "Reproducible build for the Lötschberg variable colour typeface"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"

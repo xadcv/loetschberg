@@ -229,7 +229,7 @@
     </source>
   </sources>
   <instances>
-    <instance familyname="Lötschberg" stylename="Thin Condensed">
+    <instance familyname="Lötschberg" stylename="Thin Condensed" postscriptfontname="Loetschberg-ThinCondensed">
       <location>
         <dimension name="Weight" xvalue="100"/>
         <dimension name="Width" xvalue="75"/>
@@ -237,7 +237,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Thin">
+    <instance familyname="Lötschberg" stylename="Thin" postscriptfontname="Loetschberg-Thin">
       <location>
         <dimension name="Weight" xvalue="100"/>
         <dimension name="Width" xvalue="100"/>
@@ -245,7 +245,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Thin Expanded">
+    <instance familyname="Lötschberg" stylename="Thin Expanded" postscriptfontname="Loetschberg-ThinExpanded">
       <location>
         <dimension name="Weight" xvalue="100"/>
         <dimension name="Width" xvalue="125"/>
@@ -253,7 +253,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Regular Condensed">
+    <instance familyname="Lötschberg" stylename="Regular Condensed" postscriptfontname="Loetschberg-RegularCondensed">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="75"/>
@@ -261,7 +261,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Regular">
+    <instance familyname="Lötschberg" stylename="Regular" postscriptfontname="LoetschbergVF">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="100"/>
@@ -269,7 +269,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Regular Expanded">
+    <instance familyname="Lötschberg" stylename="Regular Expanded" postscriptfontname="Loetschberg-RegularExpanded">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="125"/>
@@ -277,7 +277,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Bold Condensed">
+    <instance familyname="Lötschberg" stylename="Bold Condensed" postscriptfontname="Loetschberg-BoldCondensed">
       <location>
         <dimension name="Weight" xvalue="700"/>
         <dimension name="Width" xvalue="75"/>
@@ -285,7 +285,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Bold">
+    <instance familyname="Lötschberg" stylename="Bold" postscriptfontname="Loetschberg-Bold">
       <location>
         <dimension name="Weight" xvalue="700"/>
         <dimension name="Width" xvalue="100"/>
@@ -293,7 +293,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Bold Expanded">
+    <instance familyname="Lötschberg" stylename="Bold Expanded" postscriptfontname="Loetschberg-BoldExpanded">
       <location>
         <dimension name="Weight" xvalue="700"/>
         <dimension name="Width" xvalue="125"/>
@@ -301,7 +301,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Black Condensed">
+    <instance familyname="Lötschberg" stylename="Black Condensed" postscriptfontname="Loetschberg-BlackCondensed">
       <location>
         <dimension name="Weight" xvalue="900"/>
         <dimension name="Width" xvalue="75"/>
@@ -309,7 +309,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Black">
+    <instance familyname="Lötschberg" stylename="Black" postscriptfontname="Loetschberg-Black">
       <location>
         <dimension name="Weight" xvalue="900"/>
         <dimension name="Width" xvalue="100"/>
@@ -317,7 +317,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Black Expanded">
+    <instance familyname="Lötschberg" stylename="Black Expanded" postscriptfontname="Loetschberg-BlackExpanded">
       <location>
         <dimension name="Weight" xvalue="900"/>
         <dimension name="Width" xvalue="125"/>
@@ -325,7 +325,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Caption">
+    <instance familyname="Lötschberg" stylename="Caption" postscriptfontname="Loetschberg-Caption">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="100"/>
@@ -333,7 +333,7 @@
         <dimension name="Slant" xvalue="0"/>
       </location>
     </instance>
-    <instance familyname="Lötschberg" stylename="Display">
+    <instance familyname="Lötschberg" stylename="Display" postscriptfontname="Loetschberg-Display">
       <location>
         <dimension name="Weight" xvalue="400"/>
         <dimension name="Width" xvalue="100"/>

@@ -36,17 +36,23 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCES = ROOT / "sources"
 COLOR_SOURCES = SOURCES / "color"
 TEXT_SOURCES = SOURCES / "text"
+EXTRUDED_SOURCES = SOURCES / "extruded"
 BUILD = ROOT / "build"
 
 PRIMARY_NAME = "Loetschberg-VF[wght,wdth,opsz,slnt].ttf"
 SIDECAR_NAME = "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf"
+REGULAR_COMPAT_NAME = "Loetschberg-Regular-VF[wght,wdth,opsz,slnt].ttf"
+EXTRUDED_COMPAT_NAME = "Loetschberg-Extruded-VF[wght,wdth,opsz,slnt].ttf"
 PRIMARY = ROOT / PRIMARY_NAME
 SIDECAR = ROOT / SIDECAR_NAME
+REGULAR_COMPAT = ROOT / REGULAR_COMPAT_NAME
+EXTRUDED_COMPAT = ROOT / EXTRUDED_COMPAT_NAME
 WOFF = ROOT / "Loetschberg-VF.woff"
 WOFF2 = ROOT / "Loetschberg-VF.woff2"
 
 COLOR_DESIGNSPACE = SOURCES / "Loetschberg.designspace"
 TEXT_DESIGNSPACE = SOURCES / "Loetschberg-Text.designspace"
+EXTRUDED_DESIGNSPACE = SOURCES / "Loetschberg-Extruded.designspace"
 
 UPM = 1000
 CAP_HEIGHT = 700
@@ -55,6 +61,10 @@ ASCENDER = 960
 DESCENDER = -300
 HATCH_N = 7
 FIXED_OT_TIMESTAMP = 3867523200  # 2026-07-22 00:00:00 UTC, seconds from 1904.
+FONT_VERSION_MAJOR = 1
+FONT_VERSION_MINOR = 1
+FONT_VERSION_STRING = "1.001"
+FONT_REVISION = 1.001
 
 
 @dataclass(frozen=True, slots=True)
@@ -290,11 +300,13 @@ def _font_info(font: Font, spec: MasterSpec, *, text_only: bool) -> None:
     info.capHeight = CAP_HEIGHT
     info.xHeight = X_HEIGHT
     info.italicAngle = spec.slnt
-    info.versionMajor = 1
-    info.versionMinor = 0
+    info.versionMajor = FONT_VERSION_MAJOR
+    info.versionMinor = FONT_VERSION_MINOR
     info.year = 2026
-    info.openTypeNameVersion = "Version 1.000"
-    info.openTypeNameUniqueID = f"1.000;ADCV;Loetschberg-{spec.key}"
+    info.openTypeNameVersion = f"Version {FONT_VERSION_STRING}"
+    info.openTypeNameUniqueID = (
+        f"{FONT_VERSION_STRING};ADCV;Loetschberg-{spec.key}"
+    )
     info.openTypeNameDesigner = "ADCV"
     info.openTypeNameManufacturer = "ADCV"
     info.openTypeNameDescription = (
@@ -303,6 +315,11 @@ def _font_info(font: Font, spec: MasterSpec, *, text_only: bool) -> None:
         else "Lötschberg mono CFF2 text sidecar"
     )
     info.openTypeOS2VendorID = "ADCV"
+    # Installable embedding is encoded by a zero fsType value. Leaving this
+    # unset makes ufo2ft fall back to bit 2 ("Preview & Print"), which causes
+    # editable design applications such as Figma to list the family but reject
+    # the face when they try to load it into a document.
+    info.openTypeOS2Type = []
     info.openTypeOS2WeightClass = int(round(spec.wght))
     info.openTypeOS2WidthClass = max(1, min(9, round(5 + (spec.wdth - 100) / 12.5)))
     info.openTypeOS2TypoAscender = ASCENDER
@@ -553,19 +570,36 @@ def _build_master_fonts(
     topologies: Mapping[str, gen.GlyphTopology],
     regular_recipes: Mapping[str, gen.FrozenRecipe],
     hand_recipes: Mapping[str, gen.FrozenRecipe],
-) -> tuple[Font, Font, dict[str, tuple[int, tuple[int, ...]]]]:
+) -> tuple[Font, Font, Font, dict[str, tuple[int, tuple[int, ...]]]]:
     color = Font()
     text = Font()
+    extruded = Font()
     _font_info(color, spec, text_only=False)
     _font_info(text, spec, text_only=True)
+    _font_info(extruded, spec, text_only=False)
+    extruded.info.familyName = "Lötschberg Extruded"
+    extruded.info.styleMapFamilyName = "Lötschberg Extruded"
+    extruded.info.postscriptFontName = (
+        f"LoetschbergExtruded-{spec.key.replace('-', '')}"
+    )
+    extruded.info.postscriptFullName = (
+        f"Lötschberg Extruded {spec.style_name}"
+    )
+    extruded.info.openTypeNameDescription = (
+        "Lötschberg monochrome extruded glyf variable font"
+    )
     color.features.text = _feature_text(text_only=False, kern=spec.kern)
     text.features.text = _feature_text(text_only=True, kern=spec.kern)
+    extruded.features.text = _feature_text(text_only=True, kern=spec.kern)
     _notdef(color)
     _notdef(text)
+    _notdef(extruded)
     _new_glyph(color, "space", 430 * spec.wdth / 100, unicodes=[0x20])
     _new_glyph(text, "space", 430 * spec.wdth / 100, unicodes=[0x20])
+    _new_glyph(extruded, "space", 430 * spec.wdth / 100, unicodes=[0x20])
     _new_glyph(color, "nbspace", 430 * spec.wdth / 100, unicodes=[0xA0])
     _new_glyph(text, "nbspace", 430 * spec.wdth / 100, unicodes=[0xA0])
+    _new_glyph(extruded, "nbspace", 430 * spec.wdth / 100, unicodes=[0xA0])
 
     regular_params = spec.params(hand=False)
     hand_params = spec.params(hand=True)
@@ -657,6 +691,7 @@ def _build_master_fonts(
         _new_glyph(color, ext_name(name, True), width, components=[hand_name(name)])
         signatures[ext_name(name)] = signatures[ext_name(name, True)] = (0, ())
 
+        mono_extruded: dict[bool, list[list[tuple[float, float]]]] = {}
         for is_hand, recipe, params, layer_shift in (
             (False, regular_recipes[char], regular_params, shift),
             (True, hand_recipes[char], hand_params, hand_shift),
@@ -679,16 +714,69 @@ def _build_master_fonts(
                 lname = layer_name(name, role, is_hand)
                 _new_glyph(color, lname, width, font_contours)
                 signatures[lname] = _signature(source_contours)
+                if role == "hatch":
+                    mono_extruded.setdefault(is_hand, []).extend(
+                        [list(reversed(contour)) for contour in font_contours]
+                    )
+                else:
+                    mono_extruded.setdefault(is_hand, []).extend(font_contours)
+
+        _new_glyph(
+            extruded,
+            name,
+            width,
+            mono_extruded[False],
+            unicodes=[ord(char)],
+        )
+        _new_glyph(
+            extruded,
+            hand_name(name),
+            width,
+            mono_extruded[True],
+        )
+        signatures[f"extruded/{name}"] = _signature(mono_extruded[False])
+        signatures[f"extruded/{hand_name(name)}"] = _signature(
+            mono_extruded[True]
+        )
 
     for font, text_only in ((color, False), (text, True)):
         font.lib["public.glyphOrder"] = _glyph_order(text_only=text_only)
         font.lib["public.openTypeCategories"] = mark_categories
-    return color, text, signatures
+    base_names = [CHAR_TO_NAME[char] for char in DRAWN_CHARS]
+    extruded.lib["public.glyphOrder"] = [
+        ".notdef",
+        "space",
+        "nbspace",
+        *base_names,
+        *(hand_name(name) for name in base_names),
+    ]
+    return color, text, extruded, signatures
 
 
-def _write_designspace(specs: Sequence[MasterSpec], *, text_only: bool) -> Path:
+def _write_designspace(
+    specs: Sequence[MasterSpec],
+    *,
+    text_only: bool = False,
+    extruded: bool = False,
+) -> Path:
+    if text_only and extruded:
+        raise ValueError("a designspace cannot be both text-only and extruded")
     document = DesignSpaceDocument()
-    family_name = "Lötschberg Text" if text_only else "Lötschberg"
+    if text_only:
+        family_name = "Lötschberg Text"
+        postscript_prefix = "LoetschbergText"
+        source_dir = "text"
+        path = TEXT_DESIGNSPACE
+    elif extruded:
+        family_name = "Lötschberg Extruded"
+        postscript_prefix = "LoetschbergExtruded"
+        source_dir = "extruded"
+        path = EXTRUDED_DESIGNSPACE
+    else:
+        family_name = "Lötschberg"
+        postscript_prefix = "Loetschberg"
+        source_dir = "color"
+        path = COLOR_DESIGNSPACE
     axes = [
         ("wght", "Weight", 100, 400, 900),
         ("wdth", "Width", 75, 100, 125),
@@ -705,7 +793,6 @@ def _write_designspace(specs: Sequence[MasterSpec], *, text_only: bool) -> Path:
         axis.labelNames = {"en": name}
         document.addAxis(axis)
 
-    source_dir = "text" if text_only else "color"
     for spec in specs:
         source = SourceDescriptor()
         source.name = spec.key
@@ -729,6 +816,13 @@ def _write_designspace(specs: Sequence[MasterSpec], *, text_only: bool) -> Path:
             instance.styleName = (
                 weight_name if width == 100 else f"{weight_name} {width_name}"
             )
+            if weight == 400 and width == 100:
+                # The default instance must use the font's name ID 6 value.
+                instance.postScriptFontName = f"{postscript_prefix}VF"
+            else:
+                instance.postScriptFontName = (
+                    f"{postscript_prefix}-{instance.styleName.replace(' ', '')}"
+                )
             instance.designLocation = {
                 "Weight": weight,
                 "Width": width,
@@ -740,6 +834,7 @@ def _write_designspace(specs: Sequence[MasterSpec], *, text_only: bool) -> Path:
         instance = InstanceDescriptor()
         instance.familyName = family_name
         instance.styleName = name
+        instance.postScriptFontName = f"{postscript_prefix}-{name}"
         instance.designLocation = {
             "Weight": 400,
             "Width": 100,
@@ -748,7 +843,6 @@ def _write_designspace(specs: Sequence[MasterSpec], *, text_only: bool) -> Path:
         }
         document.addInstance(instance)
 
-    path = TEXT_DESIGNSPACE if text_only else COLOR_DESIGNSPACE
     document.write(path)
     return path
 
@@ -763,7 +857,7 @@ def generate_sources() -> dict[str, object]:
 
     for number, spec in enumerate(specs, 1):
         print(f"Generating source {number}/{len(specs)}: {spec.key}", flush=True)
-        color, text, signatures = _build_master_fonts(
+        color, text, extruded, signatures = _build_master_fonts(
             spec, topologies, regular_recipes, hand_recipes
         )
         if expected is None:
@@ -781,14 +875,17 @@ def generate_sources() -> dict[str, object]:
                     )
         color_path = COLOR_SOURCES / f"{spec.key}.ufo"
         text_path = TEXT_SOURCES / f"{spec.key}.ufo"
+        extruded_path = EXTRUDED_SOURCES / f"{spec.key}.ufo"
         color.save(color_path, overwrite=True)
         text.save(text_path, overwrite=True)
+        extruded.save(extruded_path, overwrite=True)
         master_summary.append({"name": spec.key, "location": spec.design_location})
 
     if mismatches:
         raise AssertionError(f"interpolation topology mismatches: {mismatches[:5]!r}")
     _write_designspace(specs, text_only=False)
     _write_designspace(specs, text_only=True)
+    _write_designspace(specs, extruded=True)
     signature_payload = {
         name: [signature[0], list(signature[1])]
         for name, signature in sorted((expected or {}).items())
@@ -824,6 +921,8 @@ def _run(command: Sequence[str]) -> None:
 
 def compile_fonts() -> None:
     uncolored = BUILD / "Loetschberg-uncolored.ttf"
+    regular_compat_unprocessed = BUILD / "Loetschberg-Regular-unprocessed.ttf"
+    extruded_compat_unprocessed = BUILD / "Loetschberg-Extruded-unprocessed.ttf"
     _run(
         [
             sys.executable,
@@ -864,8 +963,66 @@ def compile_fonts() -> None:
             "cffsubr",
         ]
     )
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "fontmake",
+            "-m",
+            str(TEXT_DESIGNSPACE),
+            "-o",
+            "variable",
+            "--output-path",
+            str(regular_compat_unprocessed),
+            "--validate-ufo",
+            "--check-compatibility",
+            "--no-production-names",
+            "--no-subset",
+            "--keep-overlaps",
+            "--ttf-curves",
+            "cu2qu",
+        ]
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "fontmake",
+            "-m",
+            str(EXTRUDED_DESIGNSPACE),
+            "-o",
+            "variable",
+            "--output-path",
+            str(extruded_compat_unprocessed),
+            "--validate-ufo",
+            "--check-compatibility",
+            "--no-production-names",
+            "--no-subset",
+            "--keep-overlaps",
+            "--ttf-curves",
+            "cu2qu",
+        ]
+    )
     _postprocess_primary(uncolored)
     _postprocess_sidecar()
+    _postprocess_compat(
+        regular_compat_unprocessed,
+        destination=REGULAR_COMPAT,
+        family="Lötschberg",
+        postscript_prefix="Loetschberg",
+        unique_id="LoetschbergRegularVF",
+        description="Lötschberg mono glyf variable compatibility font",
+    )
+    _postprocess_compat(
+        extruded_compat_unprocessed,
+        destination=EXTRUDED_COMPAT,
+        family="Lötschberg Extruded",
+        postscript_prefix="LoetschbergExtruded",
+        unique_id="LoetschbergExtrudedVF",
+        description=(
+            "Lötschberg monochrome extruded glyf variable compatibility font"
+        ),
+    )
     _write_web_fonts()
 
 
@@ -941,7 +1098,7 @@ def _common_postprocess(font: TTFont, *, text: bool) -> None:
     head = font["head"]
     head.created = FIXED_OT_TIMESTAMP
     head.modified = FIXED_OT_TIMESTAMP
-    head.fontRevision = 1.0
+    head.fontRevision = FONT_REVISION
     head.unitsPerEm = UPM
     head.macStyle = 0
     hhea = font["hhea"]
@@ -965,9 +1122,14 @@ def _common_postprocess(font: TTFont, *, text: bool) -> None:
     subfamily = "Regular"
     _set_name(font, 1, family)
     _set_name(font, 2, subfamily)
-    _set_name(font, 3, f"1.000;ADCV;{'LoetschbergTextVF' if text else 'LoetschbergVF'}")
+    _set_name(
+        font,
+        3,
+        f"{FONT_VERSION_STRING};ADCV;"
+        f"{'LoetschbergTextVF' if text else 'LoetschbergVF'}",
+    )
     _set_name(font, 4, f"{family} {subfamily}")
-    _set_name(font, 5, "Version 1.000")
+    _set_name(font, 5, f"Version {FONT_VERSION_STRING}")
     _set_name(font, 6, "LoetschbergTextVF" if text else "LoetschbergVF")
     _set_name(font, 16, family)
     _set_name(font, 17, subfamily)
@@ -1071,6 +1233,44 @@ def _postprocess_sidecar() -> None:
     font.save(SIDECAR, reorderTables=False)
 
 
+def _postprocess_compat(
+    unprocessed: Path,
+    *,
+    destination: Path,
+    family: str,
+    postscript_prefix: str,
+    unique_id: str,
+    description: str,
+) -> None:
+    """Build one mono glyf VF without the COLRv1 tables Figma rejects."""
+
+    font = TTFont(unprocessed, recalcTimestamp=False)
+    _common_postprocess(font, text=False)
+    _set_name(font, 1, family)
+    _set_name(font, 3, f"{FONT_VERSION_STRING};ADCV;{unique_id}")
+    _set_name(font, 4, f"{family} Regular")
+    _set_name(font, 6, f"{postscript_prefix}VF")
+    _set_name(font, 10, description)
+    _set_name(font, 16, family)
+    _set_name(font, 17, "Regular")
+    for instance in font["fvar"].instances:
+        style_name = font["name"].getDebugName(instance.subfamilyNameID)
+        if style_name is None or instance.postscriptNameID == 0xFFFF:
+            continue
+        postscript_name = (
+            f"{postscript_prefix}VF"
+            if style_name == "Regular"
+            else f"{postscript_prefix}-{style_name.replace(' ', '')}"
+        )
+        _set_name(font, instance.postscriptNameID, postscript_name)
+    glyf = font["glyf"]
+    for glyph in glyf.glyphs.values():
+        glyph.expand(glyf)
+        if glyph.numberOfContours > 0 and len(glyph.flags):
+            glyph.flags[0] |= flagOverlapSimple
+    font.save(destination, reorderTables=False)
+
+
 def _write_web_fonts() -> None:
     for flavor, path in (("woff", WOFF), ("woff2", WOFF2)):
         font = TTFont(PRIMARY, recalcTimestamp=False)
@@ -1081,6 +1281,8 @@ def _write_web_fonts() -> None:
 def validate_outputs(topology_report: Mapping[str, object]) -> dict[str, object]:
     primary = TTFont(PRIMARY)
     sidecar = TTFont(SIDECAR)
+    regular_compat = TTFont(REGULAR_COMPAT)
+    extruded_compat = TTFont(EXTRUDED_COMPAT)
     required_primary = {
         "glyf",
         "gvar",
@@ -1092,27 +1294,76 @@ def validate_outputs(topology_report: Mapping[str, object]) -> dict[str, object]
         "HVAR",
     }
     required_sidecar = {"CFF2", "GSUB", "fvar", "STAT", "HVAR"}
+    required_compat = {"glyf", "gvar", "GSUB", "fvar", "STAT", "HVAR"}
     errors: list[str] = []
     if missing := required_primary.difference(primary.keys()):
         errors.append(f"primary missing {sorted(missing)}")
     if missing := required_sidecar.difference(sidecar.keys()):
         errors.append(f"sidecar missing {sorted(missing)}")
+    for label, compat in (
+        ("regular compatibility font", regular_compat),
+        ("extruded compatibility font", extruded_compat),
+    ):
+        if missing := required_compat.difference(compat.keys()):
+            errors.append(f"{label} missing {sorted(missing)}")
     if {"COLR", "CPAL", "glyf"}.intersection(sidecar.keys()):
         errors.append("sidecar contains forbidden colour/glyf tables")
+    for label, compat in (
+        ("regular compatibility font", regular_compat),
+        ("extruded compatibility font", extruded_compat),
+    ):
+        if {"COLR", "CPAL", "CFF ", "CFF2"}.intersection(compat.keys()):
+            errors.append(f"{label} contains colour/CFF tables")
     if "COLR" in primary and primary["COLR"].version != 1:
         errors.append("primary COLR is not version 1")
-    axis_ranges = {
-        axis.axisTag: (axis.minValue, axis.defaultValue, axis.maxValue)
-        for axis in primary["fvar"].axes
-    }
+    for label, font in (
+        ("primary", primary),
+        ("sidecar", sidecar),
+        ("regular compatibility font", regular_compat),
+        ("extruded compatibility font", extruded_compat),
+    ):
+        if font["OS/2"].fsType != 0:
+            errors.append(
+                f"{label} is not installable/editable "
+                f"(fsType={font['OS/2'].fsType})"
+            )
+        if any(
+            instance.postscriptNameID == 0xFFFF
+            for instance in font["fvar"].instances
+        ):
+            errors.append(f"{label} has a named instance without a PostScript name")
     expected_axes = {
         "wght": (100, 400, 900),
         "wdth": (75, 100, 125),
         "opsz": (8, 12, 144),
         "slnt": (-12, 0, 0),
     }
-    if axis_ranges != expected_axes:
-        errors.append(f"axis ranges differ: {axis_ranges!r}")
+    axis_ranges: dict[str, tuple[float, float, float]] = {}
+    for label, font in (
+        ("primary", primary),
+        ("sidecar", sidecar),
+        ("regular compatibility font", regular_compat),
+        ("extruded compatibility font", extruded_compat),
+    ):
+        ranges = {
+            axis.axisTag: (axis.minValue, axis.defaultValue, axis.maxValue)
+            for axis in font["fvar"].axes
+        }
+        if ranges != expected_axes:
+            errors.append(f"{label} axis ranges differ: {ranges!r}")
+        if label == "primary":
+            axis_ranges = ranges
+    expected_families = {
+        "regular compatibility font": "Lötschberg",
+        "extruded compatibility font": "Lötschberg Extruded",
+    }
+    for label, font in (
+        ("regular compatibility font", regular_compat),
+        ("extruded compatibility font", extruded_compat),
+    ):
+        family = font["name"].getName(16, 3, 1, 0x409)
+        if family is None or family.toUnicode() != expected_families[label]:
+            errors.append(f"{label} has incorrect family name {family!r}")
     cmap = primary.getBestCmap()
     required_codepoints = set(range(0x20, 0x7F)) | set(range(0xA0, 0x100)) | {0x131}
     if missing := required_codepoints.difference(cmap):
@@ -1127,10 +1378,14 @@ def validate_outputs(topology_report: Mapping[str, object]) -> dict[str, object]
         "topologyCompatible": topology_report.get("compatible") is True,
         "primaryTables": sorted(primary.keys()),
         "sidecarTables": sorted(sidecar.keys()),
+        "regularCompatTables": sorted(regular_compat.keys()),
+        "extrudedCompatTables": sorted(extruded_compat.keys()),
         "axes": axis_ranges,
         "cmapCount": len(cmap),
         "primaryBytes": PRIMARY.stat().st_size,
         "sidecarBytes": SIDECAR.stat().st_size,
+        "regularCompatBytes": REGULAR_COMPAT.stat().st_size,
+        "extrudedCompatBytes": EXTRUDED_COMPAT.stat().st_size,
         "woffBytes": WOFF.stat().st_size,
         "woff2Bytes": WOFF2.stat().st_size,
     }
@@ -1148,6 +1403,7 @@ def _prepare_directories() -> None:
             shutil.rmtree(path)
     COLOR_SOURCES.mkdir(parents=True)
     TEXT_SOURCES.mkdir(parents=True)
+    EXTRUDED_SOURCES.mkdir(parents=True)
     BUILD.mkdir(parents=True)
 
 
@@ -1162,7 +1418,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     compile_fonts()
     report = validate_outputs(topology)
     print(
-        f"Built {PRIMARY.name}, {SIDECAR.name}, {WOFF.name}, and {WOFF2.name} "
+        f"Built {PRIMARY.name}, {SIDECAR.name}, "
+        f"{REGULAR_COMPAT.name}, {EXTRUDED_COMPAT.name}, "
+        f"{WOFF.name}, and {WOFF2.name} "
         f"({report['status']}).",
         flush=True,
     )

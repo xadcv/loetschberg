@@ -1,6 +1,8 @@
 # Lötschberg
 
-Lötschberg is a four-axis variable typeface generated from parametric geometry. The primary font is a `glyf`-flavoured variable COLRv1 font for live colour text; a mono CFF2 OTF is provided for text workflows that do not need colour. `ss01` selects the handdrawn construction and `ss02` selects the extruded colour construction. The two features are independent and work together.
+**Language:** English · [Schwiizerdütsch](README.de-CH.md)
+
+Lötschberg is a four-axis variable typeface generated from parametric geometry. The primary font is a `glyf`-flavoured variable COLRv1 font for live colour text; a mono CFF2 OTF is provided for text workflows that do not need colour. Two additional palette-free `glyf` TTFs expose Regular and Extruded as separate Figma-compatible families. `ss01` selects the handdrawn construction and, in the primary colour font, `ss02` selects the extruded colour construction. The two features are independent and work together in the primary font.
 
 ## Source governance (locked)
 
@@ -30,18 +32,34 @@ The completed build exposes these user-facing files at the repository root:
 |---|---|
 | `Loetschberg-VF[wght,wdth,opsz,slnt].ttf` | Primary `glyf` variable font with `ss01`, `ss02`, COLRv1, and CPAL |
 | `Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf` | CFF2 mono text sidecar with base outlines and `ss01`; no COLR/CPAL or `ss02` (install family `Lötschberg Text`) |
+| `Loetschberg-Regular-VF[wght,wdth,opsz,slnt].ttf` | Palette-free `glyf` variable font for Figma and conventional text applications; four axes plus `ss01` (install family `Lötschberg`) |
+| `Loetschberg-Extruded-VF[wght,wdth,opsz,slnt].ttf` | Palette-free extruded `glyf` variable font with silhouette and seven hatch knockouts; four axes plus `ss01` (install family `Lötschberg Extruded`) |
 | `Loetschberg-VF.woff2` | Compressed web alias of the primary variable colour font, preferred by the specimen |
 | `Loetschberg-VF.woff` | WOFF web alias of the primary variable colour font and specimen fallback |
-| `Loetschberg-1.0.0.zip` | Versioned release package containing all four production fonts plus `README.md` and `VARIANTS.md` |
+| `Loetschberg-1.0.1.zip` | Versioned release package containing all six production fonts plus `README.md`, `README.de-CH.md`, and `VARIANTS.md` |
 | `index.html` | GitHub Pages type specimen; its `@font-face` loads the root WOFF file |
 | `README.md` | Build, source-governance, and validation contract |
+| `README.de-CH.md` | Complete Swiss German localization of the README |
 | `VARIANTS.md` | Axes, features, colour construction, and compatibility contract |
 | `fontbakery-primary-report.{json,md}` | Full offline FontBakery report for the Lötschberg colour family |
 | `fontbakery-sidecar-report.{json,md}` | Full offline FontBakery report for the separately installable Lötschberg Text family |
+| `fontbakery-regular-report.{json,md}` | Full offline FontBakery report for the Figma-compatible Lötschberg family |
+| `fontbakery-extruded-report.{json,md}` | Full offline FontBakery report for the Figma-compatible Lötschberg Extruded family |
 | `interpolatable-report.json` | Full 26-master `varLib.interpolatable` diagnostic for source contours |
 | `validation-report.json` | Machine-readable release table/axis/artifact gate |
 
 The Python port, UFO masters, designspace, tests, and FontBakery report are engineering deliverables retained with the reproducible build. Generated intermediates should not be mistaken for alternate outline authorities.
+
+## Figma compatibility
+
+Use the two compatibility TTFs together in Figma:
+
+- **Lötschberg** — regular flat construction, with Handdrawn through `ss01`.
+- **Lötschberg Extruded** — monochrome extruded silhouette with seven hatch knockouts, with Handdrawn through `ss01`.
+
+Both are true four-axis variable `glyf` fonts. The Extruded compatibility family is intentionally monochrome because Figma does not render the COLRv1 palette construction; its extrusion and hatching are carried by ordinary outlines instead.
+
+For a clean Figma installation, install **only this compatibility pair**. Remove or disable `Loetschberg-VF[wght,wdth,opsz,slnt].ttf` first because the primary colour font and the Regular compatibility TTF intentionally share the family name `Lötschberg`. Keep the full COLRv1 TTF/WOFF builds for the specimen, the web, and modern colour-font applications.
 
 ## Designspace
 
@@ -91,6 +109,8 @@ Source coordinates are y-down. The font transform is `font_x = src_x` and `font_
 
 `hhea` mirrors the typo ascender, descender, and line gap. Round forms use 10–14 units of overshoot. Advances vary by master and are captured in HVAR.
 
+All four desktop font binaries use installable embedding with `fsType=0`. Every named `fvar` instance has an explicit PostScript name; each default Regular instance reuses name ID 6. Release 1.0.1 carries internal font version `1.001`, so font caches can distinguish it from the original build. The install families are `Lötschberg`, `Lötschberg Extruded`, and `Lötschberg Text`; the primary colour font and Regular compatibility build deliberately share `Lötschberg` and therefore must not be installed together.
+
 ## Validation contract
 
 The build fails if any glyph changes contour count, point count, point order, or start point between masters. This invariant applies to base, `.hand`, and every wall, hatch, keyline, and face layer used by `.ext` and `.hand.ext`. Source gates additionally require non-collapsing integer-quantized walls and seven correctly centred, full-thickness four-point hatches per frozen group. Compiled-font tests require the hatch `PaintComposite` to use `SRC_IN` against the two live wall paints.
@@ -98,7 +118,7 @@ The build fails if any glyph changes contour count, point count, point order, or
 Before release:
 
 1. Run `uv run pytest` and confirm topology, axis, cmap, GSUB convergence, COLR/CPAL, STAT, metrics, and root-artifact tests pass.
-2. Run FontBakery `check-opentype` and `ots-sanitize` on both desktop fonts; retain the FontBakery report.
+2. Run FontBakery `check-opentype` and `ots-sanitize` on all four desktop fonts; retain the FontBakery reports.
 3. Verify `hb-shape` swaps base glyphs with `ss01`, `ss02`, and `ss01,ss02` in either feature order.
 4. Freeze and render axis extrema and named instances, including `slnt=-12`, and compare waterfalls from 8–144 px with the grid references and the specimen photographs.
 5. Confirm the root `Loetschberg-VF.woff2`/`Loetschberg-VF.woff` aliases load in `index.html`, remain variable across all four axes, and render COLRv1 in current Chrome, Firefox, macOS, Illustrator, and InDesign. Mono fallback must remain readable where COLRv1 is unsupported.
@@ -107,11 +127,12 @@ The visual gate checks shape fidelity against the grid renders and design intent
 
 ## Release results
 
-- `uv run pytest -q`: 30 passed, including source and compiled-interpolation gates for the Thin `R`/`N`/`1` joins and all 380 COLRv1 paint graphs.
-- Topology report: 26 masters, 2,767 colour-source glyphs per master, zero signature mismatches, and seven hatches per frozen group.
-- FontBakery 1.1.0: primary 46 pass / 7 skip / 0 fail; CFF2 sidecar 43 pass / 10 skip / 0 fail. The two install families are checked separately by design.
-- OTS 9.2.0: both desktop fonts sanitize successfully.
+- `uv run pytest -q`: 37 passed, including source and compiled-interpolation gates for the Thin `R`/`N`/`1` joins, all 380 COLRv1 paint graphs, both compatibility-family contracts, and their `ss01` shaping.
+- Topology report: 26 masters, 3,147 checked outline signatures spanning the production colour layers and separate Extruded compatibility outlines, zero signature mismatches, and seven hatches per frozen group.
+- FontBakery 1.1.0: primary 46 pass / 7 skip / 0 fail; CFF2 sidecar 43 pass / 10 skip / 0 fail; Regular compatibility 46 pass / 7 skip / 0 fail; Extruded compatibility 43 pass / 10 skip / 0 fail. Every install family is checked separately by design.
+- OTS 9.2.0: all four desktop fonts sanitize successfully.
 - `varLib.interpolatable`: zero missing paths, open paths, path-count mismatches, node-count mismatches, node-type mismatches, or kinks. Its retained JSON report contains 616 start-point and 8 contour-order rematching suggestions concentrated in repeated colour-layer contours and display-to-slant comparisons; these are visual heuristics, not changes to the frozen contour/node sequence.
 - Chromium: the real WOFF2 and forced WOFF fallback both load; all four feature states, the 25-location Thin width/optical-size matrix, and the known `@`/`t`/`~` hatch-clipping probes render cleanly at desktop and 390px mobile sizes without specimen overflow.
+- Figma agent: both installed compatibility families are enumerated with all named instances and four variation axes; its font-file endpoint returns byte-identical TTFs and its SVG preview endpoint renders both default Regular faces successfully.
 
 Firefox, macOS, Illustrator, and InDesign remain external release-matrix checks because those runtimes are not available in this build environment.

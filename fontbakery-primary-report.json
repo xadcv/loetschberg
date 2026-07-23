@@ -424,38 +424,6 @@
                     "severity": null
                 },
                 {
-                    "description": "Check hhea.caretSlopeRise and hhea.caretSlopeRun",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/caret_slope>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.caret_slope",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/3670"
-                    ],
-                    "rationale": "\n        Checks whether hhea.caretSlopeRise and hhea.caretSlopeRun\n        match with post.italicAngle.\n\n        For Upright fonts, you can set hhea.caretSlopeRise to 1\n        and hhea.caretSlopeRun to 0.\n\n        For Italic fonts, you can set hhea.caretSlopeRise to head.unitsPerEm\n        and calculate hhea.caretSlopeRun like this:\n        round(math.tan(\n          math.radians(-1 * font[\"post\"].italicAngle)) * font[\"head\"].unitsPerEm)\n\n        This check allows for a 0.1\u00b0 rounding difference between the Italic angle\n        as calculated by the caret slope and post.italicAngle\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
                     "description": "Axes and named instances fall within correct ranges?",
                     "documentation": null,
                     "experimental": false,
@@ -553,13 +521,13 @@
                     "severity": null
                 },
                 {
-                    "description": "Check glyphs in mark glyph class are non-spacing.",
+                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
                     "documentation": null,
                     "experimental": false,
                     "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/gdef_spacing_marks>",
+                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
                         [
                             [
                                 "font",
@@ -570,18 +538,18 @@
                     "logs": [
                         {
                             "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
                             },
-                            "status": "PASS"
+                            "status": "SKIP"
                         }
                     ],
-                    "module": "opentype.gdef_spacing_marks",
+                    "module": "opentype.cff_ascii_strings",
                     "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/2877"
+                        "https://github.com/fonttools/fontbakery/issues/4619"
                     ],
-                    "rationale": "\n        Glyphs in the GDEF mark glyph class should be non-spacing.\n\n        Spacing glyphs in the GDEF mark glyph class may have incorrect anchor\n        positioning that was only intended for building composite glyphs during design.\n    ",
-                    "result": "PASS",
+                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
+                    "result": "SKIP",
                     "severity": null
                 },
                 {
@@ -614,6 +582,38 @@
                     ],
                     "rationale": "\n        Per \"The Type 2 Charstring Format, Technical Note #5177\",\n        the \"Subr nesting, stack limit\" is 10.\n    ",
                     "result": "SKIP",
+                    "severity": null
+                },
+                {
+                    "description": "Check glyphs in mark glyph class are non-spacing.",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/gdef_spacing_marks>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.gdef_spacing_marks",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/2877"
+                    ],
+                    "rationale": "\n        Glyphs in the GDEF mark glyph class should be non-spacing.\n\n        Spacing glyphs in the GDEF mark glyph class may have incorrect anchor\n        positioning that was only intended for building composite glyphs during design.\n    ",
+                    "result": "PASS",
                     "severity": null
                 },
                 {
@@ -978,6 +978,38 @@
                     "severity": null
                 },
                 {
+                    "description": "Check hhea.caretSlopeRise and hhea.caretSlopeRun",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/caret_slope>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.caret_slope",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/3670"
+                    ],
+                    "rationale": "\n        Checks whether hhea.caretSlopeRise and hhea.caretSlopeRun\n        match with post.italicAngle.\n\n        For Upright fonts, you can set hhea.caretSlopeRise to 1\n        and hhea.caretSlopeRun to 0.\n\n        For Italic fonts, you can set hhea.caretSlopeRise to head.unitsPerEm\n        and calculate hhea.caretSlopeRun like this:\n        round(math.tan(\n          math.radians(-1 * font[\"post\"].italicAngle)) * font[\"head\"].unitsPerEm)\n\n        This check allows for a 0.1\u00b0 rounding difference between the Italic angle\n        as calculated by the caret slope and post.italicAngle\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
                     "description": "Does full font name begin with the font family name?",
                     "documentation": null,
                     "experimental": false,
@@ -1323,6 +1355,38 @@
                     "severity": null
                 },
                 {
+                    "description": "Check for points out of bounds.",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/points_out_of_bounds>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.points_out_of_bounds",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/735"
+                    ],
+                    "rationale": "\n        The glyf table specifies a bounding box for each glyph. This check\n        ensures that all points in all glyph paths are within the bounding\n        box. Glyphs with out-of-bounds points can cause rendering issues in\n        some software, and should be corrected.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
                     "description": "Validate foundry-defined design-variation axis tag names.",
                     "documentation": null,
                     "experimental": false,
@@ -1577,70 +1641,6 @@
                     ],
                     "rationale": "\n        The OS/2.xAvgCharWidth field is used to calculate the width of a string of\n        characters. It is the average width of all non-zero width glyphs in the font.\n\n        This check ensures that the value is correct. A failure here may indicate\n        a bug in the font compiler, rather than something that the designer can\n        do anything about.\n    ",
                     "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Check for points out of bounds.",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/points_out_of_bounds>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.points_out_of_bounds",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/735"
-                    ],
-                    "rationale": "\n        The glyf table specifies a bounding box for each glyph. This check\n        ensures that all points in all glyph paths are within the bounding\n        box. Glyphs with out-of-bounds points can cause rendering issues in\n        some software, and should be corrected.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_ascii_strings",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4619"
-                    ],
-                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
-                    "result": "SKIP",
                     "severity": null
                 },
                 {

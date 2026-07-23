@@ -1,6 +1,6 @@
 # Lötschberg variants
 
-Lötschberg has two orthogonal OpenType toggles over one four-axis designspace. They are substitutions, not separate font families and not boolean variation axes.
+The primary Lötschberg colour font has two orthogonal OpenType toggles over one four-axis designspace. They are substitutions, not boolean variation axes. Separate Regular and Extruded families are supplied only as palette-free compatibility exports for applications that cannot render COLRv1.
 
 ## The two toggles
 
@@ -83,6 +83,19 @@ The primary `Loetschberg-VF[wght,wdth,opsz,slnt].ttf` is `glyf`-flavoured becaus
 
 `Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf` is a CFF2 mono sidecar in the separately installable **Lötschberg Text** family. It contains base and `.hand` outlines plus `ss01`; COLR/CPAL, `.ext`, `.hand.ext`, and `ss02` are stripped. The sidecar is a pure text font, not a fallback colour family.
 
+## Figma compatibility exports
+
+Two palette-free `glyf` variable TTFs make the same designspace usable in Figma and conventional monochrome text applications:
+
+| File | Install family | Default construction | OpenType variant |
+|---|---|---|---|
+| `Loetschberg-Regular-VF[wght,wdth,opsz,slnt].ttf` | **Lötschberg** | Regular flat outline | `ss01` → Handdrawn flat |
+| `Loetschberg-Extruded-VF[wght,wdth,opsz,slnt].ttf` | **Lötschberg Extruded** | Monochrome extruded silhouette with seven hatch knockouts | `ss01` → Handdrawn extruded |
+
+Both exports retain `wght`, `wdth`, `opsz`, and `slnt`. Neither contains COLR/CPAL or `ss02`: the extrusion is fixed at the family level, and Handdrawn remains the single user-selectable stylistic set. The Extruded export represents the extrusion and essential seven-mark hatching with ordinary outlines, so it does not reproduce the ochre/bronze/charcoal/keyline palette.
+
+Install only these two compatibility TTFs for Figma. The Regular compatibility export intentionally shares the **Lötschberg** family name with the primary COLRv1 font, so co-installing those two builds creates a family collision. The primary COLRv1 TTF and its WOFF aliases remain the authoritative full-colour deliverables for the web and modern colour-font applications.
+
 ## Interpolation invariant
 
 For every glyph family and every colour layer, all masters must have the same contour count, point count per contour, point order, and start point. Jitter moves existing points but never inserts or deletes them. The frozen recipe fixes wall and hatch cardinality; every hatch remains a four-point quad with the same point order. A mismatch or integer-quantized wall collapse is a hard build failure, not a warning. Paint-graph tests separately assert the `SRC_IN` wall mask used for rendered clipping.
@@ -91,4 +104,6 @@ For every glyph family and every colour layer, all masters must have the same co
 
 STAT describes the four registered variation axes and their named/elidable axis values and supports the named instances. OpenType stylistic sets are GSUB features: the STAT table cannot, by itself, encode `ss01` and `ss02` as independent style axes or guarantee that an operating-system font picker exposes them.
 
-The feature names **Handdrawn** and **Extruded** are therefore supplied through GSUB `featureNames`/name records. Applications with OpenType feature controls can expose both toggles; applications that only expose STAT axes will show the four continuous axes but may not show either stylistic set. Do not add fake variation axes or separate families to work around that UI limitation.
+The feature names **Handdrawn** and **Extruded** are therefore supplied through GSUB `featureNames`/name records in the primary font. Applications with OpenType feature controls can expose both toggles; applications that only expose STAT axes will show the four continuous axes but may not show either stylistic set.
+
+The two Figma compatibility exports are a deliberate renderer fallback, not fake variation axes: each keeps the same four-axis geometry, fixes Regular or Extruded at the family level, and exposes only **Handdrawn** through `ss01`.

@@ -222,44 +222,6 @@ fontbakery version: 1.1.0
 </details>
 
 <details>
-    <summary>✅ <b>PASS</b> Check hhea.caretSlopeRise and hhea.caretSlopeRun <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-caret-slope">opentype/caret_slope</a></summary>
-    <div>
-
-
->
-> Checks whether hhea.caretSlopeRise and hhea.caretSlopeRun
-> match with post.italicAngle.
->
-> For Upright fonts, you can set hhea.caretSlopeRise to 1
-> and hhea.caretSlopeRun to 0.
->
-> For Italic fonts, you can set hhea.caretSlopeRise to head.unitsPerEm
-> and calculate hhea.caretSlopeRun like this:
-> round(math.tan(
-> math.radians(-1 * font["post"].italicAngle)) * font["head"].unitsPerEm)
->
-> This check allows for a 0.1° rounding difference between the Italic angle
-> as calculated by the caret slope and post.italicAngle
->
-
-
-
-
-> Original proposal: https://github.com/fonttools/fontbakery/issues/3670
-
-
-
-
-
-* ✅ **PASS** <p>All looks good!</p>
- [code: ok]
-
-
-
-</div>
-</details>
-
-<details>
     <summary>✅ <b>PASS</b> Axes and named instances fall within correct ranges? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-fvar-regular-coords-correct">opentype/fvar/regular_coords_correct</a></summary>
     <div>
 
@@ -752,6 +714,44 @@ fontbakery version: 1.1.0
 </details>
 
 <details>
+    <summary>✅ <b>PASS</b> Check hhea.caretSlopeRise and hhea.caretSlopeRun <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-caret-slope">opentype/caret_slope</a></summary>
+    <div>
+
+
+>
+> Checks whether hhea.caretSlopeRise and hhea.caretSlopeRun
+> match with post.italicAngle.
+>
+> For Upright fonts, you can set hhea.caretSlopeRise to 1
+> and hhea.caretSlopeRun to 0.
+>
+> For Italic fonts, you can set hhea.caretSlopeRise to head.unitsPerEm
+> and calculate hhea.caretSlopeRun like this:
+> round(math.tan(
+> math.radians(-1 * font["post"].italicAngle)) * font["head"].unitsPerEm)
+>
+> This check allows for a 0.1° rounding difference between the Italic angle
+> as calculated by the caret slope and post.italicAngle
+>
+
+
+
+
+> Original proposal: https://github.com/fonttools/fontbakery/issues/3670
+
+
+
+
+
+* ✅ **PASS** <p>All looks good!</p>
+ [code: ok]
+
+
+
+</div>
+</details>
+
+<details>
     <summary>✅ <b>PASS</b> Does full font name begin with the font family name? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-name-match-familyname-fullfont">opentype/name/match_familyname_fullfont</a></summary>
     <div>
 
@@ -1035,6 +1035,35 @@ fontbakery version: 1.1.0
 </details>
 
 <details>
+    <summary>✅ <b>PASS</b> Check for points out of bounds. <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-points-out-of-bounds">opentype/points_out_of_bounds</a></summary>
+    <div>
+
+
+>
+> The glyf table specifies a bounding box for each glyph. This check
+> ensures that all points in all glyph paths are within the bounding
+> box. Glyphs with out-of-bounds points can cause rendering issues in
+> some software, and should be corrected.
+>
+
+
+
+
+> Original proposal: https://github.com/fonttools/fontbakery/issues/735
+
+
+
+
+
+* ✅ **PASS** <p>All looks good!</p>
+ [code: ok]
+
+
+
+</div>
+</details>
+
+<details>
     <summary>✅ <b>PASS</b> Validate foundry-defined design-variation axis tag names. <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-varfont-foundry-defined-tag-name">opentype/varfont/foundry_defined_tag_name</a></summary>
     <div>
 
@@ -1268,35 +1297,6 @@ fontbakery version: 1.1.0
 </details>
 
 <details>
-    <summary>✅ <b>PASS</b> Check for points out of bounds. <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-points-out-of-bounds">opentype/points_out_of_bounds</a></summary>
-    <div>
-
-
->
-> The glyf table specifies a bounding box for each glyph. This check
-> ensures that all points in all glyph paths are within the bounding
-> box. Glyphs with out-of-bounds points can cause rendering issues in
-> some software, and should be corrected.
->
-
-
-
-
-> Original proposal: https://github.com/fonttools/fontbakery/issues/735
-
-
-
-
-
-* ✅ **PASS** <p>All looks good!</p>
- [code: ok]
-
-
-
-</div>
-</details>
-
-<details>
     <summary>✅ <b>PASS</b> Checking post.italicAngle value. <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-italic-angle">opentype/italic_angle</a></summary>
     <div>
 
@@ -1370,6 +1370,32 @@ fontbakery version: 1.1.0
 
 
 > Original proposal: https://github.com/fonttools/fontbakery/pull/3033
+
+
+
+
+
+* ⏩ **SKIP** <p>Unfulfilled Conditions: is_cff</p>
+ [code: unfulfilled-conditions]
+
+
+
+</div>
+</details>
+
+<details>
+    <summary>⏩ <b>SKIP</b> Does the font's CFF table top dict strings fit into the ASCII range? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-ascii-strings">opentype/cff_ascii_strings</a></summary>
+    <div>
+
+
+>
+> All CFF Table top dict string chars should fit into the ASCII range.
+>
+
+
+
+
+> Original proposal: https://github.com/fonttools/fontbakery/issues/4619
 
 
 
@@ -1464,32 +1490,6 @@ fontbakery version: 1.1.0
 * ⏩ **SKIP** <p>Add the <code>vendor_id</code> key to a <code>fontbakery.yaml</code> file on your font project directory to enable this check.
 You'll also need to use the <code>--configuration</code> flag when invoking fontbakery.</p>
 
-
-
-
-</div>
-</details>
-
-<details>
-    <summary>⏩ <b>SKIP</b> Does the font's CFF table top dict strings fit into the ASCII range? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-ascii-strings">opentype/cff_ascii_strings</a></summary>
-    <div>
-
-
->
-> All CFF Table top dict string chars should fit into the ASCII range.
->
-
-
-
-
-> Original proposal: https://github.com/fonttools/fontbakery/issues/4619
-
-
-
-
-
-* ⏩ **SKIP** <p>Unfulfilled Conditions: is_cff</p>
- [code: unfulfilled-conditions]
 
 
 
