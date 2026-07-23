@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="grave.ext.wallDark" format="2">
+  <advance width="302.229075"/>
+  <outline>
+    <contour>
+      <point x="232.22907507492" y="540.0100306616204" type="line"/>
+      <point x="227.10930630618998" y="535.0050153308102" type="line"/>
+      <point x="221.98953753746002" y="530.0" type="line"/>
+      <point x="216.86976876873" y="524.9949846691898" type="line"/>
+      <point x="211.75" y="519.9899693383796" type="line"/>
+      <point x="196.0" y="536.1010804494907" type="line"/>
+      <point x="180.25" y="552.2121915606019" type="line"/>
+      <point x="164.5" y="568.323302671713" type="line"/>
+      <point x="148.75" y="584.4344137828241" type="line"/>
+      <point x="133.0" y="600.5455248939352" type="line"/>
+      <point x="117.25" y="616.6566360050463" type="line"/>
+      <point x="101.5" y="632.7677471161574" type="line"/>
+      <point x="85.75" y="648.8788582272686" type="line"/>
+      <point x="70.0" y="664.9899693383796" type="line"/>
+      <point x="116.0" y="610.9899693383796" type="line"/>
+      <point x="131.75" y="594.8788582272686" type="line"/>
+      <point x="147.5" y="578.7677471161574" type="line"/>
+      <point x="163.25" y="562.6566360050463" type="line"/>
+      <point x="179.0" y="546.5455248939352" type="line"/>
+      <point x="194.75" y="530.4344137828241" type="line"/>
+      <point x="210.5" y="514.323302671713" type="line"/>
+      <point x="226.25" y="498.21219156060187" type="line"/>
+      <point x="242.0" y="482.1010804494907" type="line"/>
+      <point x="257.75" y="465.98996933837964" type="line"/>
+      <point x="262.86976876873" y="470.9949846691898" type="line"/>
+      <point x="267.98953753746" y="476.0" type="line"/>
+      <point x="273.10930630619" y="481.0050153308102" type="line"/>
+      <point x="278.22907507492" y="486.01003066162036" type="line"/>
+    </contour>
+  </outline>
+</glyph>

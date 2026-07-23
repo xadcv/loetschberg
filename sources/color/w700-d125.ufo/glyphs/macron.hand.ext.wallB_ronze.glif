@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="macron.hand.ext.wallBronze" format="2">
+  <advance width="646.0"/>
+  <outline>
+    <contour>
+      <point x="550.5073356675132" y="687.9222530800712" type="line"/>
+      <point x="551.156759204958" y="653.633379532182" type="line"/>
+      <point x="551.283014092506" y="619.2143146566298" type="line"/>
+      <point x="550.8434920845278" y="584.6406283669112" type="line"/>
+      <point x="549.9865221846713" y="549.9028248982447" type="line"/>
+      <point x="609.9865221846713" y="479.9028248982447" type="line"/>
+      <point x="610.8434920845278" y="514.6406283669112" type="line"/>
+      <point x="611.283014092506" y="549.2143146566298" type="line"/>
+      <point x="611.156759204958" y="583.633379532182" type="line"/>
+      <point x="610.5073356675132" y="617.9222530800712" type="line"/>
+    </contour>
+  </outline>
+</glyph>

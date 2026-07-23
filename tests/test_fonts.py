@@ -13,6 +13,8 @@ import uharfbuzz as hb
 from fontTools import agl
 from fontTools.pens.recordingPen import RecordingPen
 from fontTools.ttLib import TTFont
+from fontTools.ttLib.tables import otTables as ot
+from fontTools.ttLib.tables._g_l_y_f import flagOverlapSimple
 from fontTools.varLib.instancer import instantiateVariableFont
 
 
@@ -22,8 +24,16 @@ SIDECAR_PATH = ROOT / "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf"
 WOFF_PATH = ROOT / "Loetschberg-VF.woff"
 WOFF2_PATH = ROOT / "Loetschberg-VF.woff2"
 TOPOLOGY_PATH = ROOT / "sources" / "topology-report.json"
+INTERPOLATABLE_PATH = ROOT / "interpolatable-report.json"
 
-ARTIFACTS = (PRIMARY_PATH, SIDECAR_PATH, WOFF_PATH, WOFF2_PATH, TOPOLOGY_PATH)
+ARTIFACTS = (
+    PRIMARY_PATH,
+    SIDECAR_PATH,
+    WOFF_PATH,
+    WOFF2_PATH,
+    TOPOLOGY_PATH,
+    INTERPOLATABLE_PATH,
+)
 
 AXES = {
     "wght": (100.0, 400.0, 900.0),
@@ -169,6 +179,69 @@ def _left_h_stem(font: TTFont) -> float:
     crossings = _horizontal_intersections(font, glyph_name, y=550.5)
     assert len(crossings) >= 4, f"unexpected H intersections: {crossings}"
     return crossings[1] - crossings[0]
+
+
+def _glyf_polygons(font: TTFont, glyph_name: str) -> list[tuple[tuple[float, float], ...]]:
+    glyf = font["glyf"]
+    coordinates, end_points, _flags = glyf[glyph_name].getCoordinates(glyf)
+    polygons: list[tuple[tuple[float, float], ...]] = []
+    start = 0
+    for end in end_points:
+        polygons.append(
+            tuple((float(x), float(y)) for x, y in coordinates[start : end + 1])
+        )
+        start = end + 1
+    return polygons
+
+
+def _compiled_polygons_attach(
+    first: tuple[tuple[float, float], ...],
+    second: tuple[tuple[float, float], ...],
+) -> bool:
+    epsilon = 1e-6
+
+    def cross(a: tuple[float, float], b: tuple[float, float], c: tuple[float, float]) -> float:
+        return (b[0] - a[0]) * (c[1] - a[1]) - (
+            b[1] - a[1]
+        ) * (c[0] - a[0])
+
+    def on_segment(
+        a: tuple[float, float],
+        b: tuple[float, float],
+        point: tuple[float, float],
+    ) -> bool:
+        return (
+            abs(cross(a, b, point)) <= epsilon
+            and min(a[0], b[0]) - epsilon <= point[0] <= max(a[0], b[0]) + epsilon
+            and min(a[1], b[1]) - epsilon <= point[1] <= max(a[1], b[1]) + epsilon
+        )
+
+    def intersects(
+        a: tuple[float, float],
+        b: tuple[float, float],
+        c: tuple[float, float],
+        d: tuple[float, float],
+    ) -> bool:
+        values = (cross(a, b, c), cross(a, b, d), cross(c, d, a), cross(c, d, b))
+        if (
+            ((values[0] > epsilon and values[1] < -epsilon)
+             or (values[0] < -epsilon and values[1] > epsilon))
+            and ((values[2] > epsilon and values[3] < -epsilon)
+                 or (values[2] < -epsilon and values[3] > epsilon))
+        ):
+            return True
+        return (
+            on_segment(a, b, c)
+            or on_segment(a, b, d)
+            or on_segment(c, d, a)
+            or on_segment(c, d, b)
+        )
+
+    return any(
+        intersects(a, b, c, d)
+        for a, b in zip(first, first[1:] + first[:1], strict=True)
+        for c, d in zip(second, second[1:] + second[:1], strict=True)
+    )
 
 
 def _normalise_key(key: object) -> str:
@@ -328,6 +401,108 @@ def test_primary_colrv1_palette_and_color_bases(primary_font: TTFont) -> None:
     assert _variant_name(primary_font, ord("A"), "hand.ext") in color_bases
 
 
+def _colr_layer_children(font: TTFont, paint: object) -> tuple[object, ...]:
+    if paint.Format != ot.PaintFormat.PaintColrLayers:
+        return ()
+    layer_list = font["COLR"].table.LayerList
+    assert layer_list is not None
+    start = paint.FirstLayerIndex
+    return tuple(layer_list.Paint[start : start + paint.NumLayers])
+
+
+def _walk_colr_paints(font: TTFont, paint: object) -> tuple[object, ...]:
+    descendants: list[object] = [paint]
+    if paint.Format == ot.PaintFormat.PaintColrLayers:
+        for child in _colr_layer_children(font, paint):
+            descendants.extend(_walk_colr_paints(font, child))
+    elif paint.Format == ot.PaintFormat.PaintComposite:
+        descendants.extend(_walk_colr_paints(font, paint.SourcePaint))
+        descendants.extend(_walk_colr_paints(font, paint.BackdropPaint))
+    elif paint.Format == ot.PaintFormat.PaintGlyph:
+        descendants.extend(_walk_colr_paints(font, paint.Paint))
+    return tuple(descendants)
+
+
+def _flatten_colr_layer_sequence(font: TTFont, paint: object) -> tuple[object, ...]:
+    if paint.Format != ot.PaintFormat.PaintColrLayers:
+        return (paint,)
+    layers: list[object] = []
+    for child in _colr_layer_children(font, paint):
+        layers.extend(_flatten_colr_layer_sequence(font, child))
+    return tuple(layers)
+
+
+def test_hatches_use_runtime_src_in_wall_clipping(primary_font: TTFont) -> None:
+    assert not any(
+        ".hatchSupport" in name for name in primary_font.getGlyphOrder()
+    )
+    base_list = primary_font["COLR"].table.BaseGlyphList
+    assert base_list is not None
+    records = base_list.BaseGlyphPaintRecord
+    assert len(records) == 380
+
+    for record in records:
+        base = record.BaseGlyph
+        layers = _flatten_colr_layer_sequence(primary_font, record.Paint)
+        assert [paint.Format for paint in layers] == [
+            ot.PaintFormat.PaintGlyph,
+            ot.PaintFormat.PaintGlyph,
+            ot.PaintFormat.PaintComposite,
+            ot.PaintFormat.PaintGlyph,
+            ot.PaintFormat.PaintGlyph,
+        ]
+        wall_dark, wall_bronze, composite, keyline, face = layers
+        for paint, role, palette_index in (
+            (wall_dark, "wallDark", 2),
+            (wall_bronze, "wallBronze", 1),
+            (keyline, "keyline", 3),
+            (face, "face", 0),
+        ):
+            assert paint.Glyph == f"{base}.{role}"
+            assert paint.Paint.Format == ot.PaintFormat.PaintSolid
+            assert paint.Paint.PaletteIndex == palette_index
+            assert paint.Paint.Alpha == 1.0
+
+        assert composite.CompositeMode == ot.CompositeMode.SRC_IN
+
+        source = composite.SourcePaint
+        assert source.Format == ot.PaintFormat.PaintGlyph
+        assert source.Glyph == f"{base}.hatch"
+        assert source.Paint.Format == ot.PaintFormat.PaintSolid
+        assert source.Paint.PaletteIndex == 2
+        assert source.Paint.Alpha == 1.0
+
+        backdrop = _flatten_colr_layer_sequence(
+            primary_font,
+            composite.BackdropPaint,
+        )
+        assert len(backdrop) == 2
+        for paint, role, palette_index in (
+            (backdrop[0], "wallDark", 2),
+            (backdrop[1], "wallBronze", 1),
+        ):
+            assert paint.Format == ot.PaintFormat.PaintGlyph
+            assert paint.Glyph == f"{base}.{role}"
+            assert paint.Paint.Format == ot.PaintFormat.PaintSolid
+            assert paint.Paint.PaletteIndex == palette_index
+            assert paint.Paint.Alpha == 1.0
+
+
+def test_primary_marks_piecewise_outlines_as_overlapping(primary_font: TTFont) -> None:
+    glyf = primary_font["glyf"]
+    for codepoint in map(ord, "BGH"):
+        for suffix in (None, "hand"):
+            name = (
+                _cmap_name(primary_font, codepoint)
+                if suffix is None
+                else _variant_name(primary_font, codepoint, suffix)
+            )
+            glyph = glyf[name]
+            glyph.expand(glyf)
+            assert glyph.numberOfContours > 1
+            assert glyph.flags[0] & flagOverlapSimple
+
+
 def test_gsub_feature_contract(primary_font: TTFont, sidecar_font: TTFont) -> None:
     primary_features = _feature_tags(primary_font)
     sidecar_features = _feature_tags(sidecar_font)
@@ -393,6 +568,55 @@ def test_h_left_stem_is_invariant_across_width(primary_font: TTFont) -> None:
         wide.close()
 
 
+def test_caption_weight_interactions_are_multiplicative(primary_font: TTFont) -> None:
+    thin = _static_primary(wght=100.0, wdth=125.0, opsz=8.0)
+    black = _static_primary(wght=900.0, wdth=75.0, opsz=8.0)
+    try:
+        assert _left_h_stem(thin) == pytest.approx(40 * 88 / 104, abs=1.0)
+        assert _left_h_stem(black) == pytest.approx(200 * 88 / 104, abs=1.0)
+    finally:
+        thin.close()
+        black.close()
+
+
+def test_thin_structural_joins_survive_interpolated_width_and_opsz(
+    primary_font: TTFont,
+) -> None:
+    for width, optical_size in ((87.5, 9.0), (112.5, 11.0)):
+        instance = _static_primary(
+            wght=100.0,
+            wdth=width,
+            opsz=optical_size,
+        )
+        try:
+            for suffix in (None, "hand"):
+                names = {
+                    character: (
+                        _cmap_name(instance, ord(character))
+                        if suffix is None
+                        else _variant_name(instance, ord(character), suffix)
+                    )
+                    for character in ("R", "N", "1")
+                }
+                r_polygons = _glyf_polygons(instance, names["R"])
+                assert any(
+                    _compiled_polygons_attach(body, r_polygons[-1])
+                    for body in r_polygons[:-1]
+                )
+
+                n_polygons = _glyf_polygons(instance, names["N"])
+                assert _compiled_polygons_attach(n_polygons[0], n_polygons[2])
+                assert _compiled_polygons_attach(n_polygons[1], n_polygons[2])
+
+                one_polygons = _glyf_polygons(instance, names["1"])
+                assert _compiled_polygons_attach(
+                    one_polygons[0],
+                    one_polygons[1],
+                )
+        finally:
+            instance.close()
+
+
 @pytest.mark.parametrize(
     ("path", "flavor"),
     [(WOFF_PATH, "woff"), (WOFF2_PATH, "woff2")],
@@ -415,3 +639,24 @@ def test_topology_report_has_zero_mismatches() -> None:
     signals, failures = _topology_signals(report)
     assert signals, "topology report has no explicit compatibility/mismatch result"
     assert not failures, "topology report records failures at: " + ", ".join(failures)
+
+
+def test_interpolatable_report_contains_only_advisory_rematching() -> None:
+    report = json.loads(INTERPOLATABLE_PATH.read_text(encoding="utf-8"))
+    problem_types: set[str] = set()
+
+    def visit(node: object) -> None:
+        if isinstance(node, Mapping):
+            problem_type = node.get("type")
+            if isinstance(problem_type, str):
+                problem_types.add(problem_type)
+            for value in node.values():
+                visit(value)
+        elif isinstance(node, Sequence) and not isinstance(
+            node, (str, bytes, bytearray)
+        ):
+            for value in node:
+                visit(value)
+
+    visit(report)
+    assert problem_types <= {"wrong_start_point", "contour_order"}

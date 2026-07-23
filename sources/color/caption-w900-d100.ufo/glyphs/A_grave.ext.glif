@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Agrave.ext" format="2">
+  <advance width="798.470769"/>
+  <outline>
+    <component base="Agrave"/>
+  </outline>
+</glyph>

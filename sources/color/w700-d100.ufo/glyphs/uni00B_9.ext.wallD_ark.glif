@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="uni00B9.ext.wallDark" format="2">
+  <advance width="327.7586"/>
+  <outline>
+    <contour>
+      <point x="229.7586" y="350.0" type="line"/>
+      <point x="202.82526666666666" y="350.0" type="line"/>
+      <point x="175.89193333333333" y="350.0" type="line"/>
+      <point x="148.95860000000002" y="350.0" type="line"/>
+      <point x="208.9586" y="280.0" type="line"/>
+      <point x="235.89193333333333" y="280.0" type="line"/>
+      <point x="262.82526666666666" y="280.0" type="line"/>
+      <point x="289.7586" y="280.0" type="line"/>
+    </contour>
+    <contour>
+      <point x="165.98645000000002" y="613.03355" type="line"/>
+      <point x="152.0552" y="600.4898" type="line"/>
+      <point x="134.03680000000003" y="620.5012666666667" type="line"/>
+      <point x="116.01840000000001" y="640.5127333333334" type="line"/>
+      <point x="98.0" y="660.5242" type="line"/>
+      <point x="158.0" y="590.5242" type="line"/>
+      <point x="176.01839999999999" y="570.5127333333334" type="line"/>
+      <point x="194.03680000000003" y="550.5012666666667" type="line"/>
+      <point x="212.0552" y="530.4898000000001" type="line"/>
+      <point x="225.98645000000005" y="543.03355" type="line"/>
+    </contour>
+  </outline>
+</glyph>

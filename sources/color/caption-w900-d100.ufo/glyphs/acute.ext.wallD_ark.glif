@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="acute.ext.wallDark" format="2">
+  <advance width="366.19653"/>
+  <outline>
+    <contour>
+      <point x="182.79652969186384" y="485.8926673549746" type="line"/>
+      <point x="154.59739726889788" y="507.9463336774873" type="line"/>
+      <point x="126.39826484593192" y="530.0" type="line"/>
+      <point x="98.19913242296596" y="552.0536663225128" type="line"/>
+      <point x="70.0" y="574.1073326450254" type="line"/>
+      <point x="116.0" y="520.1073326450254" type="line"/>
+      <point x="144.19913242296596" y="498.0536663225127" type="line"/>
+      <point x="172.39826484593192" y="476.0" type="line"/>
+      <point x="200.59739726889788" y="453.9463336774873" type="line"/>
+      <point x="228.79652969186384" y="431.8926673549746" type="line"/>
+    </contour>
+  </outline>
+</glyph>

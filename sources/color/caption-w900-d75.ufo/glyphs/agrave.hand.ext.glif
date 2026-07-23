@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="agrave.hand.ext" format="2">
+  <advance width="564.380769"/>
+  <outline>
+    <component base="agrave.hand"/>
+  </outline>
+</glyph>

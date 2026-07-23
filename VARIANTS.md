@@ -42,10 +42,12 @@ Thus `ss01` followed by `ss02` and `ss02` followed by `ss01` both finish at `.ha
 |---|---|---:|---:|---:|---|
 | `wght` | Weight | 100 | 400 | 900 | Stroke values follow the specified Thin→Regular→Black ramp |
 | `wdth` | Width | 75 | 100 | 125 | Specimen `w` controls skeleton/layout x positions while stems retain their weight |
-| `opsz` | Optical size | 8 | 12 | 144 | Interpolates small/display geometry and spacing parameters; hatch count is fixed |
+| `opsz` | Optical size | 8 | 12 | 144 | Caption applies the donor’s 81% skeleton plus optical stroke/spacing/depth values; hatch count is fixed |
 | `slnt` | Slant | -12 | 0 | 0 | Transform-only post-shear; upright is the default and maximum |
 
 Depth varies with optical size from the small `[46,54]` vector to the display `[60,70]` vector and is held constant across weight and width. At slanted locations the vector and all outline layers receive the same shear.
+
+Complete `wght` × `wdth` source planes at both `opsz=8` and `opsz=12` make the Caption ratios exact when axes are combined; they are not reconstructed as unrelated additive deltas.
 
 ## Three locked colour decisions
 
@@ -55,17 +57,21 @@ The extrusion is live text at every weight, width, optical size, and slant, so t
 
 ### 2. Seven hatch marks per group
 
-`HATCH_N = 7` everywhere in the designspace. Hatching is essential whenever depth is enabled; it is never removed at small optical sizes. Optical size may shrink hatch thickness, spacing, and length, but not count. The constant count preserves both the intended visual identity and interpolation-compatible contour topology.
+`HATCH_N = 7` everywhere in the designspace. Hatching is essential whenever depth is enabled; it is never removed at small optical sizes. Optical size selects the donor's nominal hatch thickness, while short projected walls compress spacing rather than dropping marks. Every emitted quad retains that per-master thickness and the nominal `0.8·|v|` length. The constant count preserves both the intended visual identity and interpolation-compatible contour topology.
 
 ### 3. Frozen decomposition recipe
 
 Wall runs, bronze/charcoal labels, hatch-group anchors, and layer ordering are computed once at the default master, separately for regular and handdrawn outlines. That recipe is replayed at every master. Recomputing visibility or run length at arbitrary locations could change contour counts or flip the decomposition, which would make variable layer outlines incompatible.
 
-Each frozen hatch group always emits seven clipped four-point quads. Wall contours are rebuilt from the recipe against the current compatible edge points and current extrusion vector. The keyline and face likewise preserve compatible topology. The required back-to-front order is:
+Each frozen hatch group always emits seven four-point quads. Wall contours are rebuilt from the recipe against the current compatible edge points and current extrusion vector. A strict geometric audit showed that some concave projected transitions cannot contain a full-width centred quad by longitudinal endpoint clipping alone without changing its point model. The production COLRv1 graph therefore clips the nominal hatch paint at render time with `PaintComposite(SRC_IN)`, using the live dark/bronze wall union as the alpha mask. The result is an exact variable intersection at arbitrary axis locations while the source hatch remains a compatible, non-folding four-point quad.
+
+This is a controlled implementation detail of the frozen-recipe clipping rule: the recipe, anchors, hatch count, and nominal mark geometry are still computed and frozen during the build; only the final intersection is delegated to the standard COLRv1 compositing operation so it remains valid between masters.
+
+The keyline and face likewise preserve compatible topology. The production back-to-front order is:
 
 1. dark wall (`#3A332A`)
 2. bronze wall (`#B07A41`)
-3. hatch (`#3A332A`)
+3. hatch (`#3A332A`), clipped to the live wall union with `SRC_IN`
 4. keyline (`#2A2016`)
 5. ochre face (`#E2A250`)
 
@@ -79,7 +85,7 @@ The primary `Loetschberg-VF[wght,wdth,opsz,slnt].ttf` is `glyf`-flavoured becaus
 
 ## Interpolation invariant
 
-For every glyph family and every colour layer, all masters must have the same contour count, point count per contour, point order, and start point. Jitter moves existing points but never inserts or deletes them. The frozen recipe fixes wall and hatch cardinality. A mismatch is a hard build failure, not a warning.
+For every glyph family and every colour layer, all masters must have the same contour count, point count per contour, point order, and start point. Jitter moves existing points but never inserts or deletes them. The frozen recipe fixes wall and hatch cardinality; every hatch remains a four-point quad with the same point order. A mismatch or integer-quantized wall collapse is a hard build failure, not a warning. Paint-graph tests separately assert the `SRC_IN` wall mask used for rendered clipping.
 
 ## STAT and application UI caveat
 

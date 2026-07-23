@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="parenright.hand.ext" format="2">
-  <advance width="489.663426"/>
+  <advance width="472.368193"/>
   <outline>
     <component base="parenright.hand"/>
   </outline>

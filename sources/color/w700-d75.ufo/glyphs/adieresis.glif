@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="adieresis" format="2">
+  <advance width="672.6"/>
+  <unicode hex="00E4"/>
+  <outline>
+    <component base="a"/>
+    <component base="_mark.adieresis.a.dier"/>
+  </outline>
+</glyph>

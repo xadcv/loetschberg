@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="ydieresis.hand" format="2">
+  <advance width="669.6"/>
+  <outline>
+    <component base="y.hand"/>
+    <component base="_mark.ydieresis.y.dier.hand"/>
+  </outline>
+</glyph>

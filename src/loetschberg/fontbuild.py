@@ -21,10 +21,12 @@ from fontTools.designspaceLib import (
     InstanceDescriptor,
     SourceDescriptor,
 )
+from fontTools.misc.roundTools import otRound
 from fontTools.otlLib.builder import buildStatTable
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables import otTables as ot
 from fontTools.ttLib.tables._c_m_a_p import CmapSubtable
+from fontTools.ttLib.tables._g_l_y_f import flagOverlapSimple
 from ufoLib2 import Font
 
 from . import generator as gen
@@ -97,12 +99,20 @@ class MasterSpec:
 
     def params(self, *, hand: bool = False) -> gen.GeneratorParams:
         s, sh = _weight_strokes(self.wght)
-        s += _opsz_value(self.opsz, -16, 0)
-        sh += _opsz_value(self.opsz, -15, 0)
+        # Optical-size compensation scales the selected weight instead of
+        # subtracting a fixed amount. A fixed subtraction made Caption Thin
+        # disproportionately fragile (24 units versus 184 at Black), whereas
+        # the donor's 88/104 and 85/100 ratios describe a coherent optical cut
+        # at every weight.
+        s *= _opsz_value(self.opsz, 88 / 104, 1)
+        sh *= _opsz_value(self.opsz, 85 / 100, 1)
         return gen.GeneratorParams(
             s=s,
             sh=sh,
-            w=self.wdth / 100,
+            # The donor's Caption cut uses an 81% skeleton. Multiplying it by
+            # the registered width location keeps the two controls orthogonal:
+            # wdth chooses the family width, opsz applies the optical cut.
+            w=(self.wdth / 100) * _opsz_value(self.opsz, 0.81, 1),
             v=(
                 _opsz_value(self.opsz, 46, 60),
                 _opsz_value(self.opsz, 54, 70),
@@ -134,21 +144,23 @@ def _opsz_value(opsz: float, small: float, display: float) -> float:
 
 
 def master_specs() -> list[MasterSpec]:
-    """Return a complete 3x3 core plane plus optical/slant support sources."""
+    """Return exact 4x3 core and Caption planes plus support sources."""
 
     specs = [MasterSpec("default")]
-    for weight in (100, 400, 900):
+    for weight in (100, 400, 700, 900):
         for width in (75, 100, 125):
             if (weight, width) == (400, 100):
                 continue
             specs.append(MasterSpec(f"w{weight}-d{width}", weight, width))
-    specs.extend(
-        [
-            MasterSpec("caption", opsz=8),
-            MasterSpec("display", opsz=144),
-            MasterSpec("slanted", slnt=-12),
-        ]
-    )
+    for weight in (100, 400, 700, 900):
+        for width in (75, 100, 125):
+            key = (
+                "caption"
+                if (weight, width) == (400, 100)
+                else f"caption-w{weight}-d{width}"
+            )
+            specs.append(MasterSpec(key, weight, width, opsz=8))
+    specs.extend([MasterSpec("display", opsz=144), MasterSpec("slanted", slnt=-12)])
     return specs
 
 
@@ -194,7 +206,13 @@ def mark_name(char: str, hand: bool = False) -> str:
 
 
 def _all_layer_names() -> list[str]:
-    roles = ("wallDark", "wallBronze", "hatch", "keyline", "face")
+    roles = (
+        "wallDark",
+        "wallBronze",
+        "hatch",
+        "keyline",
+        "face",
+    )
     return [
         layer_name(CHAR_TO_NAME[char], role, hand)
         for char in DRAWN_CHARS
@@ -338,6 +356,94 @@ def _font_contours(
             y = CAP_HEIGHT - point.y
             transformed.append((point.x + shift_x + shear * y, y))
         result.append(transformed)
+    return result
+
+
+def _polygon_area(points: Sequence[tuple[float, float]]) -> float:
+    return (
+        sum(
+            first[0] * second[1] - second[0] * first[1]
+            for first, second in zip(
+                points,
+                (*points[1:], points[0]),
+                strict=True,
+            )
+        )
+        / 2
+    )
+
+
+def _grid_safe_wall_contours(
+    contours: Sequence[Sequence[tuple[float, float]]],
+    *,
+    minimum_area: float = 8.0,
+) -> list[list[tuple[float, float]]]:
+    """Keep edge-on wall planes nonzero after the compiler's integer rounding.
+
+    A wall contour is a face-side run followed by the reversed, translated
+    rear run. When that run is nearly parallel to the depth vector, a valid
+    floating plane can quantize onto one line. In that exact case only, move
+    the complete rear run by the smallest integer lattice vector that retains
+    the raw winding and an explicit rounded-area margin. The shared face edge
+    and the contour topology remain untouched.
+
+    This protects generated source masters. A wall whose tangent genuinely
+    crosses the extrusion direction between masters may still pass smoothly
+    through an edge-on state; the frozen-recipe model intentionally permits
+    that physical transition instead of forcing a different visibility run.
+    """
+
+    result: list[list[tuple[float, float]]] = []
+    for source in contours:
+        contour = list(source)
+        if len(contour) < 4 or len(contour) % 2:
+            raise AssertionError(
+                f"wall contour must contain paired front/rear paths: {len(contour)}"
+            )
+        rounded = [(otRound(x), otRound(y)) for x, y in contour]
+        raw_area = _polygon_area(contour)
+        rounded_area = _polygon_area(rounded)
+        if raw_area and rounded_area == 0:
+            half = len(contour) // 2
+            candidates: list[
+                tuple[int, float, int, int, list[tuple[float, float]]]
+            ] = []
+            for dx in range(-2, 3):
+                for dy in range(-2, 3):
+                    if dx == dy == 0:
+                        continue
+                    candidate = [
+                        *contour[:half],
+                        *((x + dx, y + dy) for x, y in contour[half:]),
+                    ]
+                    candidate_area = _polygon_area(
+                        [(otRound(x), otRound(y)) for x, y in candidate]
+                    )
+                    if (
+                        candidate_area * raw_area > 0
+                        and abs(candidate_area) >= minimum_area
+                    ):
+                        candidates.append(
+                            (
+                                dx * dx + dy * dy,
+                                -abs(candidate_area),
+                                dx,
+                                dy,
+                                candidate,
+                            )
+                        )
+            if not candidates:
+                raise AssertionError(
+                    "unable to preserve a quantized wall plane within two units"
+                )
+            selected = min(candidates, key=lambda candidate: candidate[:4])
+            contour = selected[4]
+            rounded_area = _polygon_area(
+                [(otRound(x), otRound(y)) for x, y in contour]
+            )
+        if raw_area and rounded_area == 0:
+            raise AssertionError("quantized wall plane collapsed")
+        result.append(contour)
     return result
 
 
@@ -568,6 +674,8 @@ def _build_master_fonts(
                 font_contours = _font_contours(
                     source_contours, slnt=spec.slnt, shift_x=layer_shift
                 )
+                if role in {"wallDark", "wallBronze"}:
+                    font_contours = _grid_safe_wall_contours(font_contours)
                 lname = layer_name(name, role, is_hand)
                 _new_glyph(color, lname, width, font_contours)
                 signatures[lname] = _signature(source_contours)
@@ -877,6 +985,16 @@ def _hex_rgba(value: str) -> tuple[float, float, float, float]:
 def _postprocess_primary(uncolored: Path) -> None:
     font = TTFont(uncolored, recalcTimestamp=False)
     _common_postprocess(font, text=False)
+    glyf = font["glyf"]
+    # The source deliberately keeps compatible pieces separate. Advertise
+    # those overlaps to rasterizers so heavy junctions use the intended
+    # non-zero fill instead of dropping coincident regions.
+    for glyph in glyf.glyphs.values():
+        glyph.expand(glyf)
+        if glyph.numberOfContours <= 0:
+            continue
+        if len(glyph.flags):
+            glyph.flags[0] |= flagOverlapSimple
     palette = [
         _hex_rgba(gen.COLORS["face"]),
         _hex_rgba(gen.COLORS["bronze"]),
@@ -884,28 +1002,52 @@ def _postprocess_primary(uncolored: Path) -> None:
         _hex_rgba(gen.COLORS["key"]),
     ]
     color_glyphs: dict[str, dict[str, object]] = {}
+
+    def solid(palette_index: int) -> dict[str, object]:
+        return {
+            "Format": ot.PaintFormat.PaintSolid,
+            "PaletteIndex": palette_index,
+            "Alpha": 1.0,
+        }
+
+    def glyph_paint(glyph: str, palette_index: int) -> dict[str, object]:
+        return {
+            "Format": ot.PaintFormat.PaintGlyph,
+            "Glyph": glyph,
+            "Paint": solid(palette_index),
+        }
+
     for char in DRAWN_CHARS:
         name = CHAR_TO_NAME[char]
         for is_hand in (False, True):
             base = ext_name(name, is_hand)
-            layers = [
-                (layer_name(name, "wallDark", is_hand), 2),
-                (layer_name(name, "wallBronze", is_hand), 1),
-                (layer_name(name, "hatch", is_hand), 2),
-                (layer_name(name, "keyline", is_hand), 3),
-                (layer_name(name, "face", is_hand), 0),
-            ]
+            wall_dark = layer_name(name, "wallDark", is_hand)
+            wall_bronze = layer_name(name, "wallBronze", is_hand)
+            hatch = layer_name(name, "hatch", is_hand)
+            keyline = layer_name(name, "keyline", is_hand)
+            face = layer_name(name, "face", is_hand)
+            # The nominal hatch outlines stay full-thickness, four-point quads
+            # at every master. SRC_IN clips their rendered footprint to the
+            # union of the live wall outlines, so clipping remains exact at
+            # arbitrary interpolated locations without changing topology.
+            hatch_clipped = {
+                "Format": ot.PaintFormat.PaintComposite,
+                "SourcePaint": glyph_paint(hatch, 2),
+                "CompositeMode": ot.CompositeMode.SRC_IN,
+                "BackdropPaint": {
+                    "Format": ot.PaintFormat.PaintColrLayers,
+                    "Layers": [
+                        glyph_paint(wall_dark, 2),
+                        glyph_paint(wall_bronze, 1),
+                    ],
+                },
+            }
             paints = [
-                {
-                    "Format": ot.PaintFormat.PaintGlyph,
-                    "Glyph": glyph,
-                    "Paint": {
-                        "Format": ot.PaintFormat.PaintSolid,
-                        "PaletteIndex": palette_index,
-                        "Alpha": 1.0,
-                    },
-                }
-                for glyph, palette_index in layers
+                glyph_paint(wall_dark, 2),
+                glyph_paint(wall_bronze, 1),
+                hatch_clipped,
+                glyph_paint(keyline, 3),
+                glyph_paint(face, 0),
             ]
             color_glyphs[base] = {
                 "Format": ot.PaintFormat.PaintColrLayers,

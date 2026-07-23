@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="parenleft.hand.ext" format="2">
+  <advance width="570.60041"/>
+  <outline>
+    <component base="parenleft.hand"/>
+  </outline>
+</glyph>

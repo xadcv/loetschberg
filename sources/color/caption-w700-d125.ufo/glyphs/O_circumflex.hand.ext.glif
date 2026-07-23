@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Ocircumflex.hand.ext" format="2">
+  <advance width="904.488462"/>
+  <outline>
+    <component base="Ocircumflex.hand"/>
+  </outline>
+</glyph>

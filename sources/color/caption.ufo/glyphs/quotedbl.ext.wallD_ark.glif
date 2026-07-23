@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="quotedbl.ext.wallDark" format="2">
-  <advance width="393.076923"/>
+  <advance width="352.226923"/>
   <outline>
     <contour>
       <point x="146.15384615384613" y="490.0" type="line"/>
@@ -15,16 +15,16 @@
       <point x="192.15384615384613" y="436.0" type="line"/>
     </contour>
     <contour>
-      <point x="323.0769230769231" y="490.0" type="line"/>
-      <point x="304.03846153846155" y="490.0" type="line"/>
-      <point x="285.0" y="490.0" type="line"/>
-      <point x="265.96153846153845" y="490.0" type="line"/>
-      <point x="246.92307692307693" y="490.0" type="line"/>
-      <point x="292.9230769230769" y="436.0" type="line"/>
-      <point x="311.96153846153845" y="436.0" type="line"/>
-      <point x="331.0" y="436.0" type="line"/>
-      <point x="350.03846153846155" y="436.0" type="line"/>
-      <point x="369.0769230769231" y="436.0" type="line"/>
+      <point x="282.2269230769231" y="490.0" type="line"/>
+      <point x="263.1884615384615" y="490.0" type="line"/>
+      <point x="244.15" y="490.0" type="line"/>
+      <point x="225.1115384615385" y="490.0" type="line"/>
+      <point x="206.07307692307694" y="490.0" type="line"/>
+      <point x="252.07307692307694" y="436.0" type="line"/>
+      <point x="271.1115384615385" y="436.0" type="line"/>
+      <point x="290.15" y="436.0" type="line"/>
+      <point x="309.1884615384615" y="436.0" type="line"/>
+      <point x="328.2269230769231" y="436.0" type="line"/>
     </contour>
   </outline>
 </glyph>

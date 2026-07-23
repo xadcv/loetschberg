@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="guillemotright.ext" format="2">
+  <advance width="686.943439"/>
+  <outline>
+    <component base="guillemotright"/>
+  </outline>
+</glyph>

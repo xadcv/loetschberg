@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Eacute.hand" format="2">
-  <advance width="736.0"/>
+  <advance width="622.76"/>
   <outline>
     <component base="E.hand"/>
     <component base="_mark.Eacute.E.acute.hand"/>

@@ -69,14 +69,10 @@
       <point x="479.9230769230769" y="82.0" type="line"/>
     </contour>
     <contour>
-      <point x="498.5" y="700.0" type="line"/>
-      <point x="498.5" y="680.0" type="line"/>
-      <point x="498.5" y="660.0" type="line"/>
-      <point x="498.5" y="640.0" type="line"/>
-      <point x="558.5" y="570.0" type="line"/>
-      <point x="558.5" y="590.0" type="line"/>
-      <point x="558.5" y="610.0" type="line"/>
-      <point x="558.5" y="630.0" type="line"/>
+      <point x="114.47530864197529" y="180.0" type="line"/>
+      <point x="106.47530864197529" y="180.0" type="line"/>
+      <point x="166.4753086419753" y="110.0" type="line"/>
+      <point x="174.4753086419753" y="110.0" type="line"/>
     </contour>
   </outline>
 </glyph>

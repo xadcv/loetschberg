@@ -15,44 +15,6 @@ fontbakery version: 1.1.0
 <details><summary>[45] Loetschberg-VF[wght,wdth,opsz,slnt].ttf</summary>
 <div>
 <details>
-    <summary>✅ <b>PASS</b> Check hhea.caretSlopeRise and hhea.caretSlopeRun <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-caret-slope">opentype/caret_slope</a></summary>
-    <div>
-
-
->
-> Checks whether hhea.caretSlopeRise and hhea.caretSlopeRun
-> match with post.italicAngle.
->
-> For Upright fonts, you can set hhea.caretSlopeRise to 1
-> and hhea.caretSlopeRun to 0.
->
-> For Italic fonts, you can set hhea.caretSlopeRise to head.unitsPerEm
-> and calculate hhea.caretSlopeRun like this:
-> round(math.tan(
-> math.radians(-1 * font["post"].italicAngle)) * font["head"].unitsPerEm)
->
-> This check allows for a 0.1° rounding difference between the Italic angle
-> as calculated by the caret slope and post.italicAngle
->
-
-
-
-
-> Original proposal: https://github.com/fonttools/fontbakery/issues/3670
-
-
-
-
-
-* ✅ **PASS** <p>All looks good!</p>
- [code: ok]
-
-
-
-</div>
-</details>
-
-<details>
     <summary>✅ <b>PASS</b> Check code page character ranges <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-code-pages">opentype/code_pages</a></summary>
     <div>
 
@@ -260,6 +222,44 @@ fontbakery version: 1.1.0
 </details>
 
 <details>
+    <summary>✅ <b>PASS</b> Check hhea.caretSlopeRise and hhea.caretSlopeRun <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-caret-slope">opentype/caret_slope</a></summary>
+    <div>
+
+
+>
+> Checks whether hhea.caretSlopeRise and hhea.caretSlopeRun
+> match with post.italicAngle.
+>
+> For Upright fonts, you can set hhea.caretSlopeRise to 1
+> and hhea.caretSlopeRun to 0.
+>
+> For Italic fonts, you can set hhea.caretSlopeRise to head.unitsPerEm
+> and calculate hhea.caretSlopeRun like this:
+> round(math.tan(
+> math.radians(-1 * font["post"].italicAngle)) * font["head"].unitsPerEm)
+>
+> This check allows for a 0.1° rounding difference between the Italic angle
+> as calculated by the caret slope and post.italicAngle
+>
+
+
+
+
+> Original proposal: https://github.com/fonttools/fontbakery/issues/3670
+
+
+
+
+
+* ✅ **PASS** <p>All looks good!</p>
+ [code: ok]
+
+
+
+</div>
+</details>
+
+<details>
     <summary>✅ <b>PASS</b> Axes and named instances fall within correct ranges? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-fvar-regular-coords-correct">opentype/fvar/regular_coords_correct</a></summary>
     <div>
 
@@ -429,36 +429,6 @@ fontbakery version: 1.1.0
 
 
 * ✅ **PASS** <p>There is no unused data at the end of the glyf table.</p>
-
-
-
-
-</div>
-</details>
-
-<details>
-    <summary>✅ <b>PASS</b> Checking post.italicAngle value. <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-italic-angle">opentype/italic_angle</a></summary>
-    <div>
-
-
->
-> The 'post' table italicAngle property should be a reasonable amount, likely
-> not more than 30°. Note that in the OpenType specification, the value is
-> negative for a rightward lean.
->
-> https://docs.microsoft.com/en-us/typography/opentype/spec/post
->
-
-
-
-
-> Original proposal: https://github.com/fonttools/fontbakery/issues/4829
-
-
-
-
-
-* ✅ **PASS** <p>Value of post.italicAngle is 0.0 with style=&quot;Regular&quot;.</p>
 
 
 
@@ -838,35 +808,6 @@ fontbakery version: 1.1.0
 
 
 > Original proposal: https://github.com/fonttools/fontbakery/pull/2394
-
-
-
-
-
-* ✅ **PASS** <p>All looks good!</p>
- [code: ok]
-
-
-
-</div>
-</details>
-
-<details>
-    <summary>✅ <b>PASS</b> Check for points out of bounds. <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-points-out-of-bounds">opentype/points_out_of_bounds</a></summary>
-    <div>
-
-
->
-> The glyf table specifies a bounding box for each glyph. This check
-> ensures that all points in all glyph paths are within the bounding
-> box. Glyphs with out-of-bounds points can cause rendering issues in
-> some software, and should be corrected.
->
-
-
-
-
-> Original proposal: https://github.com/fonttools/fontbakery/issues/735
 
 
 
@@ -1327,6 +1268,65 @@ fontbakery version: 1.1.0
 </details>
 
 <details>
+    <summary>✅ <b>PASS</b> Check for points out of bounds. <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-points-out-of-bounds">opentype/points_out_of_bounds</a></summary>
+    <div>
+
+
+>
+> The glyf table specifies a bounding box for each glyph. This check
+> ensures that all points in all glyph paths are within the bounding
+> box. Glyphs with out-of-bounds points can cause rendering issues in
+> some software, and should be corrected.
+>
+
+
+
+
+> Original proposal: https://github.com/fonttools/fontbakery/issues/735
+
+
+
+
+
+* ✅ **PASS** <p>All looks good!</p>
+ [code: ok]
+
+
+
+</div>
+</details>
+
+<details>
+    <summary>✅ <b>PASS</b> Checking post.italicAngle value. <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-italic-angle">opentype/italic_angle</a></summary>
+    <div>
+
+
+>
+> The 'post' table italicAngle property should be a reasonable amount, likely
+> not more than 30°. Note that in the OpenType specification, the value is
+> negative for a rightward lean.
+>
+> https://docs.microsoft.com/en-us/typography/opentype/spec/post
+>
+
+
+
+
+> Original proposal: https://github.com/fonttools/fontbakery/issues/4829
+
+
+
+
+
+* ✅ **PASS** <p>Value of post.italicAngle is 0.0 with style=&quot;Regular&quot;.</p>
+
+
+
+
+</div>
+</details>
+
+<details>
     <summary>⏩ <b>SKIP</b> Is the CFF2 subr/gsubr call depth > 10? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff2-call-depth">opentype/cff2_call_depth</a></summary>
     <div>
 
@@ -1353,18 +1353,23 @@ fontbakery version: 1.1.0
 </details>
 
 <details>
-    <summary>⏩ <b>SKIP</b> Does the font's CFF table top dict strings fit into the ASCII range? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-ascii-strings">opentype/cff_ascii_strings</a></summary>
+    <summary>⏩ <b>SKIP</b> Does the font use deprecated CFF operators or operations? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-deprecated-operators">opentype/cff_deprecated_operators</a></summary>
     <div>
 
 
 >
-> All CFF Table top dict string chars should fit into the ASCII range.
+> The 'dotsection' operator and the use of 'endchar' to build accented characters
+> from the Adobe Standard Encoding Character Set ("seac") are deprecated in CFF.
+> Adobe recommends repairing any fonts that use these, especially endchar-as-seac,
+> because a rendering issue was discovered in Microsoft Word with a font that
+> makes use of this operation. The check treats that usage as a FAIL.
+> There are no known ill effects of using dotsection, so that check is a WARN.
 >
 
 
 
 
-> Original proposal: https://github.com/fonttools/fontbakery/issues/4619
+> Original proposal: https://github.com/fonttools/fontbakery/pull/3033
 
 
 
@@ -1392,37 +1397,6 @@ fontbakery version: 1.1.0
 
 
 > Original proposal: https://github.com/fonttools/fontbakery/pull/2425
-
-
-
-
-
-* ⏩ **SKIP** <p>Unfulfilled Conditions: is_cff</p>
- [code: unfulfilled-conditions]
-
-
-
-</div>
-</details>
-
-<details>
-    <summary>⏩ <b>SKIP</b> Does the font use deprecated CFF operators or operations? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-deprecated-operators">opentype/cff_deprecated_operators</a></summary>
-    <div>
-
-
->
-> The 'dotsection' operator and the use of 'endchar' to build accented characters
-> from the Adobe Standard Encoding Character Set ("seac") are deprecated in CFF.
-> Adobe recommends repairing any fonts that use these, especially endchar-as-seac,
-> because a rendering issue was discovered in Microsoft Word with a font that
-> makes use of this operation. The check treats that usage as a FAIL.
-> There are no known ill effects of using dotsection, so that check is a WARN.
->
-
-
-
-
-> Original proposal: https://github.com/fonttools/fontbakery/pull/3033
 
 
 
@@ -1490,6 +1464,32 @@ fontbakery version: 1.1.0
 * ⏩ **SKIP** <p>Add the <code>vendor_id</code> key to a <code>fontbakery.yaml</code> file on your font project directory to enable this check.
 You'll also need to use the <code>--configuration</code> flag when invoking fontbakery.</p>
 
+
+
+
+</div>
+</details>
+
+<details>
+    <summary>⏩ <b>SKIP</b> Does the font's CFF table top dict strings fit into the ASCII range? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-ascii-strings">opentype/cff_ascii_strings</a></summary>
+    <div>
+
+
+>
+> All CFF Table top dict string chars should fit into the ASCII range.
+>
+
+
+
+
+> Original proposal: https://github.com/fonttools/fontbakery/issues/4619
+
+
+
+
+
+* ⏩ **SKIP** <p>Unfulfilled Conditions: is_cff</p>
+ [code: unfulfilled-conditions]
 
 
 

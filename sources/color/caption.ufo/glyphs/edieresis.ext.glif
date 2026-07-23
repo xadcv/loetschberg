@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="edieresis.ext" format="2">
-  <advance width="663.861889"/>
+  <advance width="568.087139"/>
   <outline>
     <component base="edieresis"/>
   </outline>

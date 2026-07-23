@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="H.ext.wallDark" format="2">
-  <advance width="874.0"/>
+  <advance width="922.0"/>
   <outline>
     <contour>
       <point x="298.0" y="0.0" type="line"/>
@@ -17,18 +17,18 @@
       <point x="358.0" y="-70.0" type="line"/>
     </contour>
     <contour>
-      <point x="776.0" y="0.0" type="line"/>
-      <point x="736.0" y="0.0" type="line"/>
-      <point x="696.0" y="0.0" type="line"/>
-      <point x="656.0" y="0.0" type="line"/>
-      <point x="616.0" y="0.0" type="line"/>
-      <point x="576.0" y="0.0" type="line"/>
-      <point x="636.0" y="-70.0" type="line"/>
-      <point x="676.0" y="-70.0" type="line"/>
-      <point x="716.0" y="-70.0" type="line"/>
-      <point x="756.0" y="-70.0" type="line"/>
-      <point x="796.0" y="-70.0" type="line"/>
-      <point x="836.0" y="-70.0" type="line"/>
+      <point x="824.0" y="0.0" type="line"/>
+      <point x="784.0" y="0.0" type="line"/>
+      <point x="744.0" y="0.0" type="line"/>
+      <point x="704.0" y="0.0" type="line"/>
+      <point x="664.0" y="0.0" type="line"/>
+      <point x="624.0" y="0.0" type="line"/>
+      <point x="684.0" y="-70.0" type="line"/>
+      <point x="724.0" y="-70.0" type="line"/>
+      <point x="764.0" y="-70.0" type="line"/>
+      <point x="804.0" y="-70.0" type="line"/>
+      <point x="844.0" y="-70.0" type="line"/>
+      <point x="884.0" y="-70.0" type="line"/>
     </contour>
     <contour>
       <point x="624.0" y="231.0" type="line"/>

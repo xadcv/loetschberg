@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Yacute.ext.wallDark" format="2">
+  <advance width="553.62"/>
+  <outline>
+    <contour>
+      <point x="320.81" y="0.0" type="line"/>
+      <point x="303.21000000000004" y="0.0" type="line"/>
+      <point x="285.61" y="0.0" type="line"/>
+      <point x="268.01" y="0.0" type="line"/>
+      <point x="250.41" y="0.0" type="line"/>
+      <point x="232.81" y="0.0" type="line"/>
+      <point x="278.81" y="-54.0" type="line"/>
+      <point x="296.40999999999997" y="-54.0" type="line"/>
+      <point x="314.01" y="-54.0" type="line"/>
+      <point x="331.61" y="-54.0" type="line"/>
+      <point x="349.21000000000004" y="-54.0" type="line"/>
+      <point x="366.80999999999995" y="-54.0" type="line"/>
+    </contour>
+    <contour>
+      <point x="284.0129673278442" y="770.2883833044962" type="line"/>
+      <point x="266.7427336639221" y="780.1441916522481" type="line"/>
+      <point x="249.47250000000005" y="790.0" type="line"/>
+      <point x="232.202266336078" y="799.8558083477519" type="line"/>
+      <point x="214.93203267215594" y="809.7116166955038" type="line"/>
+      <point x="260.93203267215597" y="755.7116166955038" type="line"/>
+      <point x="278.20226633607797" y="745.8558083477519" type="line"/>
+      <point x="295.4725000000001" y="736.0" type="line"/>
+      <point x="312.7427336639221" y="726.1441916522481" type="line"/>
+      <point x="330.0129673278442" y="716.2883833044962" type="line"/>
+    </contour>
+  </outline>
+</glyph>

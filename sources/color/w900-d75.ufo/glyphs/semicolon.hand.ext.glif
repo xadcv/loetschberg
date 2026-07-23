@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="semicolon.hand.ext" format="2">
-  <advance width="377.826923"/>
+  <advance width="382.134615"/>
   <outline>
     <component base="semicolon.hand"/>
   </outline>

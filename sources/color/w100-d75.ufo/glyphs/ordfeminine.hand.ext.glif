@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="ordfeminine.hand.ext" format="2">
-  <advance width="412.15"/>
+  <advance width="391.25"/>
   <outline>
     <component base="ordfeminine.hand"/>
   </outline>

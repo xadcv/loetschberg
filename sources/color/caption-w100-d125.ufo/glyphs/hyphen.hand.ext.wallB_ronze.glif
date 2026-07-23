@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="hyphen.hand.ext.wallBronze" format="2">
+  <advance width="545.0"/>
+  <outline>
+    <contour>
+      <point x="475.50671466968026" y="352.4897250603929" type="line"/>
+      <point x="475.44421586241003" y="346.39655344229527" type="line"/>
+      <point x="475.39922931013007" y="340.3082792037071" type="line"/>
+      <point x="475.3722415226673" y="334.22480611914165" type="line"/>
+      <point x="475.36354436110355" y="328.1460234010223" type="line"/>
+      <point x="475.37323188142557" y="322.0718060357059" type="line"/>
+      <point x="521.3732318814256" y="268.0718060357059" type="line"/>
+      <point x="521.3635443611035" y="274.1460234010223" type="line"/>
+      <point x="521.3722415226673" y="280.22480611914165" type="line"/>
+      <point x="521.3992293101301" y="286.3082792037071" type="line"/>
+      <point x="521.44421586241" y="292.39655344229527" type="line"/>
+      <point x="521.5067146696803" y="298.4897250603929" type="line"/>
+    </contour>
+  </outline>
+</glyph>

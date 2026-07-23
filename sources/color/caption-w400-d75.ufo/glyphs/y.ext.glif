@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="y.ext" format="2">
+  <advance width="480.72"/>
+  <outline>
+    <component base="y"/>
+  </outline>
+</glyph>

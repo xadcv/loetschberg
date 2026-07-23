@@ -40,70 +40,6 @@
                     "severity": null
                 },
                 {
-                    "description": "Is the CFF2 subr/gsubr call depth > 10?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff2_call_depth>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.cff2_call_depth",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2425"
-                    ],
-                    "rationale": "\n        Per \"The CFF2 CharString Format\", the \"Subr nesting, stack limit\" is 10.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_ascii_strings",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4619"
-                    ],
-                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
                     "description": "Is the CFF subr/gsubr call depth > 10?",
                     "documentation": null,
                     "experimental": false,
@@ -132,38 +68,6 @@
                         "https://github.com/fonttools/fontbakery/pull/2425"
                     ],
                     "rationale": "\n        Per \"The Type 2 Charstring Format, Technical Note #5177\",\n        the \"Subr nesting, stack limit\" is 10.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Does the font use deprecated CFF operators or operations?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_deprecated_operators>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_deprecated_operators",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/3033"
-                    ],
-                    "rationale": "\n        The 'dotsection' operator and the use of 'endchar' to build accented characters\n        from the Adobe Standard Encoding Character Set (\"seac\") are deprecated in CFF.\n        Adobe recommends repairing any fonts that use these, especially endchar-as-seac,\n        because a rendering issue was discovered in Microsoft Word with a font that\n        makes use of this operation. The check treats that usage as a FAIL.\n        There are no known ill effects of using dotsection, so that check is a WARN.\n    ",
                     "result": "SKIP",
                     "severity": null
                 },
@@ -1672,6 +1576,102 @@
                         "https://github.com/fonttools/fontbakery/issues/4829"
                     ],
                     "rationale": "\n        The OS/2.xAvgCharWidth field is used to calculate the width of a string of\n        characters. It is the average width of all non-zero width glyphs in the font.\n\n        This check ensures that the value is correct. A failure here may indicate\n        a bug in the font compiler, rather than something that the designer can\n        do anything about.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.cff_ascii_strings",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4619"
+                    ],
+                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
+                    "description": "Does the font use deprecated CFF operators or operations?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff_deprecated_operators>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.cff_deprecated_operators",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/3033"
+                    ],
+                    "rationale": "\n        The 'dotsection' operator and the use of 'endchar' to build accented characters\n        from the Adobe Standard Encoding Character Set (\"seac\") are deprecated in CFF.\n        Adobe recommends repairing any fonts that use these, especially endchar-as-seac,\n        because a rendering issue was discovered in Microsoft Word with a font that\n        makes use of this operation. The check treats that usage as a FAIL.\n        There are no known ill effects of using dotsection, so that check is a WARN.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
+                    "description": "Is the CFF2 subr/gsubr call depth > 10?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth,opsz,slnt].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff2_call_depth>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.cff2_call_depth",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/2425"
+                    ],
+                    "rationale": "\n        Per \"The CFF2 CharString Format\", the \"Subr nesting, stack limit\" is 10.\n    ",
                     "result": "PASS",
                     "severity": null
                 }

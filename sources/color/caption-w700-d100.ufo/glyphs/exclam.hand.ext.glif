@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="exclam.hand.ext" format="2">
+  <advance width="305.803077"/>
+  <outline>
+    <component base="exclam.hand"/>
+  </outline>
+</glyph>

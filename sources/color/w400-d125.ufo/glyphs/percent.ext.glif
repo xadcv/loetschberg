@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="percent.ext" format="2">
-  <advance width="996.0"/>
+  <advance width="973.5"/>
   <outline>
     <component base="percent"/>
   </outline>

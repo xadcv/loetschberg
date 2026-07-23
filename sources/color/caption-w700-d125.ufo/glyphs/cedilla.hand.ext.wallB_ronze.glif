@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="cedilla.hand.ext.wallBronze" format="2">
+  <advance width="279.725"/>
+  <outline>
+    <contour>
+      <point x="213.91869545839916" y="13.082542836713287" type="line"/>
+      <point x="213.3796696756217" y="-7.609354359492841" type="line"/>
+      <point x="212.79158196952557" y="-28.34340604189265" type="line"/>
+      <point x="212.22513694581477" y="-49.111667607469826" type="line"/>
+      <point x="211.74843715388715" y="-69.90503323984501" type="line"/>
+      <point x="257.74843715388715" y="-123.90503323984501" type="line"/>
+      <point x="258.22513694581477" y="-103.11166760746983" type="line"/>
+      <point x="258.79158196952557" y="-82.34340604189265" type="line"/>
+      <point x="259.3796696756217" y="-61.60935435949284" type="line"/>
+      <point x="259.91869545839916" y="-40.91745716328671" type="line"/>
+    </contour>
+  </outline>
+</glyph>

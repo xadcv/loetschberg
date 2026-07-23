@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="backslash.hand.ext.wallDark" format="2">
+  <advance width="597.590769"/>
+  <outline>
+    <contour>
+      <point x="529.6887748608156" y="0.4177492121993964" type="line"/>
+      <point x="495.8011909007415" y="0.15253126114805582" type="line"/>
+      <point x="461.68803350319143" y="-0.4738044906119967" type="line"/>
+      <point x="427.3858872989741" y="-1.3032570150511447" type="line"/>
+      <point x="392.957232026595" y="-2.126586537504636" type="line"/>
+      <point x="358.4818816043056" y="-2.7360978871482757" type="line"/>
+      <point x="404.4818816043056" y="-56.736097887148276" type="line"/>
+      <point x="438.957232026595" y="-56.126586537504636" type="line"/>
+      <point x="473.3858872989741" y="-55.303257015051145" type="line"/>
+      <point x="507.68803350319143" y="-54.473804490612" type="line"/>
+      <point x="541.8011909007415" y="-53.847468738851944" type="line"/>
+      <point x="575.6887748608156" y="-53.582250787800604" type="line"/>
+    </contour>
+  </outline>
+</glyph>

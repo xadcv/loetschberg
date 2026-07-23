@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Udieresis.hand.ext" format="2">
+  <advance width="752.1"/>
+  <outline>
+    <component base="Udieresis.hand"/>
+  </outline>
+</glyph>

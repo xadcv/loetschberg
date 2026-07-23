@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="dotlessi.hand.ext" format="2">
+  <advance width="309.230769"/>
+  <outline>
+    <component base="dotlessi.hand"/>
+  </outline>
+</glyph>

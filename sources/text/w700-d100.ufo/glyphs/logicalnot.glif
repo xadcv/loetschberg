@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="logicalnot" format="2">
+  <advance width="680.369231"/>
+  <unicode hex="00AC"/>
+  <outline>
+    <contour>
+      <point x="98.0" y="405.344" type="line"/>
+      <point x="121.0" y="405.344" type="line"/>
+      <point x="144.0" y="405.344" type="line"/>
+      <point x="167.0" y="405.344" type="line"/>
+      <point x="190.0" y="405.344" type="line"/>
+      <point x="213.0" y="405.344" type="line"/>
+      <point x="236.0" y="405.344" type="line"/>
+      <point x="259.0" y="405.344" type="line"/>
+      <point x="282.0" y="405.344" type="line"/>
+      <point x="305.0" y="405.344" type="line"/>
+      <point x="328.0" y="405.344" type="line"/>
+      <point x="351.0" y="405.344" type="line"/>
+      <point x="374.0" y="405.344" type="line"/>
+      <point x="397.0" y="405.344" type="line"/>
+      <point x="420.0" y="405.344" type="line"/>
+      <point x="443.0" y="405.344" type="line"/>
+      <point x="466.0" y="405.344" type="line"/>
+      <point x="489.0" y="405.344" type="line"/>
+      <point x="512.0" y="405.344" type="line"/>
+      <point x="535.0" y="405.344" type="line"/>
+      <point x="558.0" y="405.344" type="line"/>
+      <point x="558.0" y="370.672" type="line"/>
+      <point x="558.0" y="336.0" type="line"/>
+      <point x="558.0" y="301.328" type="line"/>
+      <point x="558.0" y="266.656" type="line"/>
+      <point x="535.0" y="266.656" type="line"/>
+      <point x="512.0" y="266.656" type="line"/>
+      <point x="489.0" y="266.656" type="line"/>
+      <point x="466.0" y="266.656" type="line"/>
+      <point x="443.0" y="266.656" type="line"/>
+      <point x="420.0" y="266.656" type="line"/>
+      <point x="397.0" y="266.656" type="line"/>
+      <point x="374.0" y="266.656" type="line"/>
+      <point x="351.0" y="266.656" type="line"/>
+      <point x="328.0" y="266.656" type="line"/>
+      <point x="305.0" y="266.656" type="line"/>
+      <point x="282.0" y="266.656" type="line"/>
+      <point x="259.0" y="266.656" type="line"/>
+      <point x="236.0" y="266.656" type="line"/>
+      <point x="213.0" y="266.656" type="line"/>
+      <point x="190.0" y="266.656" type="line"/>
+      <point x="167.0" y="266.656" type="line"/>
+      <point x="144.0" y="266.656" type="line"/>
+      <point x="121.0" y="266.656" type="line"/>
+      <point x="98.0" y="266.656" type="line"/>
+      <point x="98.0" y="301.328" type="line"/>
+      <point x="98.0" y="336.0" type="line"/>
+      <point x="98.0" y="370.672" type="line"/>
+    </contour>
+    <contour>
+      <point x="445.63076923076926" y="292.0" type="line"/>
+      <point x="479.81538461538463" y="292.0" type="line"/>
+      <point x="514.0" y="292.0" type="line"/>
+      <point x="548.1846153846154" y="292.0" type="line"/>
+      <point x="582.3692307692307" y="292.0" type="line"/>
+      <point x="582.3692307692307" y="268.85714285714283" type="line"/>
+      <point x="582.3692307692307" y="245.71428571428572" type="line"/>
+      <point x="582.3692307692307" y="222.57142857142856" type="line"/>
+      <point x="582.3692307692307" y="199.42857142857144" type="line"/>
+      <point x="582.3692307692307" y="176.28571428571433" type="line"/>
+      <point x="582.3692307692307" y="153.1428571428571" type="line"/>
+      <point x="582.3692307692307" y="130.0" type="line"/>
+      <point x="548.1846153846154" y="130.0" type="line"/>
+      <point x="514.0" y="130.0" type="line"/>
+      <point x="479.81538461538463" y="130.0" type="line"/>
+      <point x="445.63076923076926" y="130.0" type="line"/>
+      <point x="445.63076923076926" y="153.1428571428571" type="line"/>
+      <point x="445.63076923076926" y="176.28571428571433" type="line"/>
+      <point x="445.63076923076926" y="199.42857142857144" type="line"/>
+      <point x="445.63076923076926" y="222.57142857142856" type="line"/>
+      <point x="445.63076923076926" y="245.71428571428572" type="line"/>
+      <point x="445.63076923076926" y="268.8571428571429" type="line"/>
+    </contour>
+  </outline>
+</glyph>

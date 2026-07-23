@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="L.ext.wallBronze" format="2">
-  <advance width="755.0"/>
+  <advance width="638.15"/>
   <outline>
     <contour>
       <point x="158.0" y="700.0" type="line"/>
@@ -59,18 +59,18 @@
       <point x="204.0" y="646.0" type="line"/>
     </contour>
     <contour>
-      <point x="685.0" y="85.0" type="line"/>
-      <point x="685.0" y="68.0" type="line"/>
-      <point x="685.0" y="51.0" type="line"/>
-      <point x="685.0" y="34.0" type="line"/>
-      <point x="685.0" y="17.0" type="line"/>
-      <point x="685.0" y="0.0" type="line"/>
-      <point x="731.0" y="-54.0" type="line"/>
-      <point x="731.0" y="-37.0" type="line"/>
-      <point x="731.0" y="-20.0" type="line"/>
-      <point x="731.0" y="-3.0" type="line"/>
-      <point x="731.0" y="14.0" type="line"/>
-      <point x="731.0" y="31.0" type="line"/>
+      <point x="568.1500000000001" y="85.0" type="line"/>
+      <point x="568.1500000000001" y="68.0" type="line"/>
+      <point x="568.1500000000001" y="51.0" type="line"/>
+      <point x="568.1500000000001" y="34.0" type="line"/>
+      <point x="568.1500000000001" y="17.0" type="line"/>
+      <point x="568.1500000000001" y="0.0" type="line"/>
+      <point x="614.1500000000001" y="-54.0" type="line"/>
+      <point x="614.1500000000001" y="-37.0" type="line"/>
+      <point x="614.1500000000001" y="-20.0" type="line"/>
+      <point x="614.1500000000001" y="-3.0" type="line"/>
+      <point x="614.1500000000001" y="14.0" type="line"/>
+      <point x="614.1500000000001" y="31.0" type="line"/>
     </contour>
   </outline>
 </glyph>

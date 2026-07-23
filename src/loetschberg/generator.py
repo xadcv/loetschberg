@@ -67,6 +67,103 @@ class Piece:
     holes: list[Contour]
 
 
+def _raw_contours_touch(
+    first: Sequence[RawPoint],
+    second: Sequence[RawPoint],
+    *,
+    epsilon: float = 1e-7,
+) -> bool:
+    """Return whether two closed raw contours intersect or contain a vertex."""
+
+    first_xy = tuple((point[0], point[1]) for point in first)
+    second_xy = tuple((point[0], point[1]) for point in second)
+
+    def cross(
+        a: tuple[float, float],
+        b: tuple[float, float],
+        c: tuple[float, float],
+    ) -> float:
+        return (b[0] - a[0]) * (c[1] - a[1]) - (
+            b[1] - a[1]
+        ) * (c[0] - a[0])
+
+    def on_segment(
+        a: tuple[float, float],
+        b: tuple[float, float],
+        point: tuple[float, float],
+    ) -> bool:
+        return (
+            abs(cross(a, b, point)) <= epsilon
+            and min(a[0], b[0]) - epsilon
+            <= point[0]
+            <= max(a[0], b[0]) + epsilon
+            and min(a[1], b[1]) - epsilon
+            <= point[1]
+            <= max(a[1], b[1]) + epsilon
+        )
+
+    def segments_intersect(
+        a: tuple[float, float],
+        b: tuple[float, float],
+        c: tuple[float, float],
+        d: tuple[float, float],
+    ) -> bool:
+        ab_c, ab_d = cross(a, b, c), cross(a, b, d)
+        cd_a, cd_b = cross(c, d, a), cross(c, d, b)
+        if (
+            ((ab_c > epsilon and ab_d < -epsilon) or
+             (ab_c < -epsilon and ab_d > epsilon))
+            and ((cd_a > epsilon and cd_b < -epsilon) or
+                 (cd_a < -epsilon and cd_b > epsilon))
+        ):
+            return True
+        return (
+            on_segment(a, b, c)
+            or on_segment(a, b, d)
+            or on_segment(c, d, a)
+            or on_segment(c, d, b)
+        )
+
+    for a, b in zip(
+        first_xy,
+        first_xy[1:] + first_xy[:1],
+        strict=True,
+    ):
+        for c, d in zip(
+            second_xy,
+            second_xy[1:] + second_xy[:1],
+            strict=True,
+        ):
+            if segments_intersect(a, b, c, d):
+                return True
+
+    def contains(
+        point: tuple[float, float],
+        polygon: tuple[tuple[float, float], ...],
+    ) -> bool:
+        inside = False
+        previous = polygon[-1]
+        for current in polygon:
+            if on_segment(previous, current, point):
+                return True
+            if (current[1] > point[1]) != (previous[1] > point[1]):
+                crossing_x = (
+                    (previous[0] - current[0])
+                    * (point[1] - current[1])
+                    / (previous[1] - current[1])
+                    + current[0]
+                )
+                if point[0] < crossing_x:
+                    inside = not inside
+            previous = current
+        return inside
+
+    return contains(first_xy[0], second_xy) or contains(
+        second_xy[0],
+        first_xy,
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class GeneratorParams:
     """Parameters consumed by the canonical grid generator."""
@@ -269,22 +366,66 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
     S, SH, W = p.s, p.sh, p.w
     weight_ratio = S / 104.0
 
+    def protected_curve_strokes(
+        ro: float,
+        ri: float,
+    ) -> tuple[float, float, float, float]:
+        """Return skeleton-scaled x radii and counter-safe y radii.
+
+        Width acts on the round stroke's centreline rather than its outer
+        boundary.  This keeps the physical stroke independent from ``wdth``.
+        Weight grows into the counter, but compact bowls retain a deliberate
+        aperture instead of collapsing or inverting at Black Condensed.
+        """
+
+        base_stroke = ro - ri
+        desired_stroke = base_stroke * weight_ratio
+
+        skeleton_rx = (ro + ri) * W / 2
+        counter_floor_x = max(16.0, ri * W * 0.35)
+        stroke_x = min(
+            desired_stroke,
+            max(1.0, 2 * (skeleton_rx - counter_floor_x)),
+        )
+        outer_rx = skeleton_rx + stroke_x / 2
+        inner_rx = skeleton_rx - stroke_x / 2
+
+        # Preserve the canonical vertical silhouette and overshoot.  Curves
+        # receive ordinary optical compensation at weights where a literal
+        # 200-unit stroke cannot fit inside a compact bowl.
+        counter_floor_y = max(18.0, ri * 0.35)
+        stroke_y = min(desired_stroke, max(1.0, ro - counter_floor_y))
+        inner_ry = ro - stroke_y
+        return outer_rx, inner_rx, ro, inner_ry
+
     # ``w`` is applied to the canonical grid geometry, never to stale specimen
-    # outlines.  Coordinates that place skeleton features scale in x.  Narrow
-    # vertical rectangles retain their physical x-width, and rings scale their
-    # outer x-radius while subtracting the unscaled source stroke for the inner
-    # x-radius.  Thus H's stems and O's horizontal stroke stay invariant.
+    # outlines. Coordinates that place skeleton features scale in x while
+    # physical stroke thickness is controlled by weight. The tests below use
+    # the canonical rectangle dimensions, not the current weight, so a heavy
+    # short stem cannot accidentally change from a stem into a layout box.
     def R(x0: float, y0: float, x1: float, y1: float) -> Contour:
         width, height = abs(x1 - x0), abs(y1 - y0)
-        if width <= max(150.0, 1.5 * S) and height > 1.5 * width:
-            target_width = width if abs(width - S) < 1e-9 else width * weight_ratio
+        is_horizontal = (
+            (abs(height - S) < 1e-9 or abs(height - SH) < 1e-9)
+            and width > 1.01 * min(height, 104.0)
+        ) or (height <= 150.0 and width > 1.5 * height)
+        is_vertical = (
+            (abs(width - S) < 1e-9 or abs(width - 104.0) < 1e-9)
+            and height > 1.01 * min(width, 104.0)
+        ) or (width <= 150.0 and height > 1.5 * width)
+        if is_vertical and not is_horizontal:
+            target_width = (
+                width
+                if abs(width - S) < 1e-9
+                else width * weight_ratio
+            )
             if x0 == 0:
                 xx0, xx1 = 0.0, target_width
             else:
                 center = (x0 + x1) * W / 2
                 xx0, xx1 = center - target_width / 2, center + target_width / 2
             return rect(xx0, y0, xx1, y1)
-        if height <= max(150.0, 1.5 * SH) and width > 1.5 * height:
+        if is_horizontal:
             if abs(height - S) < 1e-9 or abs(height - SH) < 1e-9:
                 target_height = height
             elif abs(height - 104.0) < 1e-9:
@@ -302,6 +443,29 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
                 yy0, yy1 = center - target_height / 2, center + target_height / 2
             return rect(x0 * W, yy0, x1 * W, yy1)
         return rect(x0 * W, y0, x1 * W, y1)
+
+    def vstem(
+        center: float,
+        y0: float,
+        y1: float,
+        canonical_width: float = 104.0,
+    ) -> Contour:
+        """Build a vertical stroke about an explicitly scaled skeleton."""
+
+        width = canonical_width * weight_ratio
+        cx = center * W
+        return rect(cx - width / 2, y0, cx + width / 2, y1)
+
+    def hstem(
+        x0: float,
+        x1: float,
+        center: float,
+        canonical_height: float = 100.0,
+    ) -> Contour:
+        """Build a horizontal stroke with explicit attachment coordinates."""
+
+        height = canonical_height * (SH / 100.0)
+        return rect(x0, center - height / 2, x1, center + height / 2)
 
     def Q(points: Sequence[Sequence[float]]) -> Contour:
         if (
@@ -321,7 +485,144 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
                 )
             # The second pair was traversed 3 -> 2; restore source point order.
             return quad([transformed[0], transformed[1], transformed[3], transformed[2]])
+
+        if len(points) == 4:
+            # General four-point strokes (R leg, 1 flag, comma tail, etc.)
+            # need the same skeleton/weight treatment as horizontal-paired
+            # diagonals.  Preserve the canonical default bit-for-bit.
+            if abs(W - 1.0) < 1e-12 and abs(weight_ratio - 1.0) < 1e-12:
+                return quad(points)
+
+            source = [(float(q[0]), float(q[1])) for q in points]
+
+            def edge_length(index: int) -> float:
+                first, second = source[index], source[(index + 1) % 4]
+                return _js_hypot(second[0] - first[0], second[1] - first[1])
+
+            # Opposite short edges are the stroke caps.
+            cap_start = min(
+                (0, 1),
+                key=lambda index: edge_length(index) + edge_length(index + 2),
+            )
+            cap_indices = (cap_start, (cap_start + 2) % 4)
+            base_width = sum(edge_length(index) for index in cap_indices) / 2
+            target_width = max(1.0, base_width * weight_ratio)
+            transformed: list[tuple[float, float] | None] = [None] * 4
+
+            cap_midpoints = []
+            for index in cap_indices:
+                first, second = source[index], source[(index + 1) % 4]
+                cap_midpoints.append(
+                    (
+                        (first[0] + second[0]) * W / 2,
+                        (first[1] + second[1]) / 2,
+                    )
+                )
+            dx = cap_midpoints[1][0] - cap_midpoints[0][0]
+            dy = cap_midpoints[1][1] - cap_midpoints[0][1]
+            length = _js_hypot(dx, dy) or 1.0
+            normal = (-dy / length, dx / length)
+
+            for index, midpoint in zip(cap_indices, cap_midpoints):
+                next_index = (index + 1) % 4
+                original_vector = (
+                    source[next_index][0] * W - source[index][0] * W,
+                    source[next_index][1] - source[index][1],
+                )
+                orientation = (
+                    1.0
+                    if original_vector[0] * normal[0]
+                    + original_vector[1] * normal[1]
+                    >= 0
+                    else -1.0
+                )
+                half_x = normal[0] * target_width / 2 * orientation
+                half_y = normal[1] * target_width / 2 * orientation
+                transformed[index] = (midpoint[0] - half_x, midpoint[1] - half_y)
+                transformed[next_index] = (
+                    midpoint[0] + half_x,
+                    midpoint[1] + half_y,
+                )
+            if all(point is not None for point in transformed):
+                return quad([point for point in transformed if point is not None])
+
         return quad([(q[0] * W, q[1]) for q in points])
+
+    def diagonal_strip_hex(
+        center_a: tuple[float, float],
+        center_b: tuple[float, float],
+        base_thickness: float,
+        bounds: tuple[float, float, float, float],
+        canonical: Sequence[Sequence[float]],
+    ) -> Contour:
+        """Clip a constant-width diagonal skeleton to a rectangular box.
+
+        The selected Z/z geometry always has the same six intersections:
+        top edge, top-right corner, right edge, bottom edge,
+        bottom-left corner, and left edge. Keeping those semantic vertices
+        fixed gives interpolation a stable point order at every axis corner.
+        """
+
+        if abs(W - 1.0) < 1e-12 and abs(weight_ratio - 1.0) < 1e-12:
+            return quad(canonical)
+
+        ax, ay = center_a[0] * W, center_a[1]
+        bx, by = center_b[0] * W, center_b[1]
+        dx, dy = bx - ax, by - ay
+        length = _js_hypot(dx, dy) or 1.0
+        nx, ny = -dy / length, dx / length
+        half = base_thickness * weight_ratio / 2
+        left, right, top, bottom = (
+            bounds[0] * W,
+            bounds[1] * W,
+            bounds[2],
+            bounds[3],
+        )
+
+        def x_at(y: float, offset: float) -> float:
+            return ax + (offset - ny * (y - ay)) / nx
+
+        def y_at(x: float, offset: float) -> float:
+            return ay + (offset - nx * (x - ax)) / ny
+
+        return quad(
+            [
+                (x_at(top, half), top),
+                (right, top),
+                (right, y_at(right, -half)),
+                (x_at(bottom, -half), bottom),
+                (left, bottom),
+                (left, y_at(left, half)),
+            ]
+        )
+
+    def vertically_clipped_band(
+        top_center: tuple[float, float],
+        bottom_center: tuple[float, float],
+        top: float,
+        bottom: float,
+        canonical_cap_width: float = 104.0,
+    ) -> Contour:
+        """A diagonal band clipped to horizontal joins at both ends."""
+
+        ax, ay = top_center[0] * W, top_center[1]
+        bx, by = bottom_center[0] * W, bottom_center[1]
+        if abs(by - ay) < 1e-9:
+            raise ValueError("clipped band requires a non-horizontal skeleton")
+
+        def center_x(y: float) -> float:
+            return ax + (bx - ax) * (y - ay) / (by - ay)
+
+        half = canonical_cap_width * weight_ratio / 2
+        top_x, bottom_x = center_x(top), center_x(bottom)
+        return quad(
+            [
+                (top_x - half, top),
+                (top_x + half, top),
+                (bottom_x + half, bottom),
+                (bottom_x - half, bottom),
+            ]
+        )
 
     def RS(
         cx: float,
@@ -335,30 +636,150 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         _sx: float | None = None,
         caps: object = None,
     ) -> Contour:
-        stroke = (ro - ri) * weight_ratio
-        outer_rx = ro * W
-        inner_rx = max(1.0, outer_rx - stroke)
-        inner_ry = max(1.0, ro - stroke)
-        outer = arc_pts(cx * W, cy, outer_rx, ro, oa0, oa1)
+        outer_rx, inner_rx, outer_ry, inner_ry = protected_curve_strokes(ro, ri)
+        outer = arc_pts(cx * W, cy, outer_rx, outer_ry, oa0, oa1)
         inner = arc_pts(cx * W, cy, inner_rx, inner_ry, ia0, ia1)
         if caps:
             outer[-1] = (outer[-1][0], outer[-1][1], 2)
             inner[-1] = (inner[-1][0], inner[-1][1], 2)
         return Contour(outer + inner)
 
+    def RSXY(
+        cx: float,
+        cy: float,
+        rox: float,
+        rix: float,
+        roy: float,
+        riy: float,
+        oa0: float,
+        oa1: float,
+        ia0: float,
+        ia1: float,
+        caps: object = None,
+    ) -> Contour:
+        """Anisotropic ring sector with skeleton-scaled x and explicit y."""
+
+        outer_rx, inner_rx, _outer_ry, _inner_ry = protected_curve_strokes(
+            rox, rix
+        )
+        outer = arc_pts(cx * W, cy, outer_rx, roy, oa0, oa1)
+        inner = arc_pts(cx * W, cy, inner_rx, riy, ia0, ia1)
+        if caps:
+            outer[-1] = (outer[-1][0], outer[-1][1], 2)
+            inner[-1] = (inner[-1][0], inner[-1][1], 2)
+        return Contour(outer + inner)
+
+    def connected_half_bowl(
+        cx: float,
+        first_center: float,
+        second_center: float,
+        rox: float,
+        rix: float,
+        oa0: float,
+        oa1: float,
+        ia0: float,
+        ia1: float,
+    ) -> Contour:
+        """Build a half-bowl whose caps share the adjoining stroke centres."""
+
+        cy = (first_center + second_center) / 2
+        skeleton_ry = abs(second_center - first_center) / 2
+        counter_floor = max(18.0, skeleton_ry * 0.18)
+        stroke_y = min(S, max(1.0, 2 * (skeleton_ry - counter_floor)))
+        outer_ry = skeleton_ry + stroke_y / 2
+        inner_ry = skeleton_ry - stroke_y / 2
+        return RSXY(
+            cx,
+            cy,
+            rox,
+            rix,
+            outer_ry,
+            inner_ry,
+            oa0,
+            oa1,
+            ia0,
+            ia1,
+        )
+
     def pc(outer: Contour, holes: Sequence[Contour] | None = None) -> Piece:
         return _piece(outer, holes)
 
+    def attach_quad_cap(
+        body: Sequence[Piece],
+        contour: Contour,
+        moving_indices: Sequence[int],
+        direction: tuple[float, float],
+    ) -> Contour:
+        """Extend one quad cap only enough to overlap its parent stroke."""
+
+        length = _js_hypot(*direction) or 1.0
+        ux, uy = direction[0] / length, direction[1] / length
+        moving = frozenset(moving_indices)
+
+        def extended(distance: float) -> Contour:
+            return Contour(
+                [
+                    (
+                        point[0] + (ux * distance if index in moving else 0),
+                        point[1] + (uy * distance if index in moving else 0),
+                        point[2],
+                    )
+                    for index, point in enumerate(contour.pts)
+                ]
+            )
+
+        def touches(candidate: Contour) -> bool:
+            return any(
+                _raw_contours_touch(piece.outer.pts, candidate.pts)
+                for piece in body
+            )
+
+        if touches(contour):
+            return contour
+
+        lower, upper = 0.0, 1.0
+        while upper < 256 and not touches(extended(upper)):
+            lower, upper = upper, upper * 2
+        if not touches(extended(upper)):
+            raise AssertionError("attachment cap cannot reach its parent stroke")
+        for _ in range(40):
+            middle = (lower + upper) / 2
+            if touches(extended(middle)):
+                upper = middle
+            else:
+                lower = middle
+
+        # A positive overlap survives integer rounding and ordinary gvar
+        # interpolation between the explicit width/weight source planes.
+        return extended(upper + max(2.0, 0.08 * S))
+
     def disc(cx: float, cy: float, radius: float) -> Piece:
-        return pc(ellipse(cx * W, cy, radius, radius))
+        weighted_radius = max(8.0, radius + (S - 104.0) * 0.25)
+        return pc(ellipse(cx * W, cy, weighted_radius, weighted_radius))
 
     def ring_p(cx: float, cy: float, ro: float, ri: float) -> Piece:
-        stroke = (ro - ri) * weight_ratio
-        outer_rx = ro * W
-        inner_rx = max(1.0, outer_rx - stroke)
-        inner_ry = max(1.0, ro - stroke)
+        outer_rx, inner_rx, outer_ry, inner_ry = protected_curve_strokes(ro, ri)
         return pc(
-            ellipse(cx * W, cy, outer_rx, ro),
+            ellipse(cx * W, cy, outer_rx, outer_ry),
+            [ellipse(cx * W, cy, inner_rx, inner_ry)],
+        )
+
+    def ellipse_ring_p(
+        cx: float,
+        cy: float,
+        rox: float,
+        rix: float,
+        roy: float,
+        riy: float,
+    ) -> Piece:
+        outer_rx, inner_rx, _unused_outer_y, _unused_inner_y = (
+            protected_curve_strokes(rox, rix)
+        )
+        _unused_outer_x, _unused_inner_x, outer_ry, inner_ry = (
+            protected_curve_strokes(roy, riy)
+        )
+        return pc(
+            ellipse(cx * W, cy, outer_rx, outer_ry),
             [ellipse(cx * W, cy, inner_rx, inner_ry)],
         )
 
@@ -425,6 +846,13 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
     def wave(cx: float, cy: float, half_len: float, amp: float, half_w: float) -> Piece:
         top: list[RawPoint] = []
         bottom: list[RawPoint] = []
+        # Bound the offset by the sinusoid's minimum radius of curvature.
+        # Without this cap, Black Condensed tildes fold back through themselves.
+        curvature_radius = (half_len * W) ** 2 / (amp * pi**2)
+        effective_half_w = min(
+            half_w * weight_ratio,
+            0.72 * curvature_radius,
+        )
         for i in range(41):
             t = i / 40
             x = (cx - half_len + 2 * half_len * t) * W
@@ -432,9 +860,8 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
             d = -amp * cos(2 * pi * t) * pi / (half_len * W)
             length = _js_hypot(1, d)
             nx, ny = d / length, -1 / length
-            weighted_half_w = half_w * weight_ratio
-            top.append((x + nx * weighted_half_w, y + ny * weighted_half_w, 1))
-            bottom.append((x - nx * weighted_half_w, y - ny * weighted_half_w, 1))
+            top.append((x + nx * effective_half_w, y + ny * effective_half_w, 1))
+            bottom.append((x - nx * effective_half_w, y - ny * effective_half_w, 1))
         return pc(Contour(top + list(reversed(bottom))))
 
     def chev(
@@ -454,51 +881,85 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
             return dx / length, dy / length
 
         u1, u2 = arm(b1), arm(b2)
-        n1, n2 = (-u1[1], u1[0]), (-u2[1], u2[0])
-        if n1[0] * u2[0] + n1[1] * u2[1] > 0:
-            n1 = (-n1[0], -n1[1])
-        if n2[0] * u1[0] + n2[1] * u1[1] > 0:
-            n2 = (-n2[0], -n2[1])
-        nn1 = (n1[0] * width / 2, n1[1] * width / 2)
-        nn2 = (n2[0] * width / 2, n2[1] * width / 2)
-
-        def intersect(
-            point: Sequence[float],
-            direction: Sequence[float],
-            other: Sequence[float],
-            other_direction: Sequence[float],
+        # The contour path is b1 → apex → b2. With both helpers expressed as
+        # apex → endpoint, the incoming arm's normal must be reversed.
+        n1, n2 = (u1[1], -u1[0]), (-u2[1], u2[0])
+        def intersect_offsets(
+            first: tuple[float, float],
+            first_direction: tuple[float, float],
+            second: tuple[float, float],
+            second_direction: tuple[float, float],
         ) -> tuple[float, float]:
-            den = direction[0] * other_direction[1] - direction[1] * other_direction[0]
+            den = (
+                first_direction[0] * second_direction[1]
+                - first_direction[1] * second_direction[0]
+            )
             if abs(den) < 1e-9:
-                return (point[0] + other[0]) / 2, (point[1] + other[1]) / 2
+                return (first[0] + second[0]) / 2, (first[1] + second[1]) / 2
             t = (
-                (other[0] - point[0]) * other_direction[1]
-                - (other[1] - point[1]) * other_direction[0]
+                (second[0] - first[0]) * second_direction[1]
+                - (second[1] - first[1]) * second_direction[0]
             ) / den
-            return point[0] + direction[0] * t, point[1] + direction[1] * t
+            return (
+                first[0] + first_direction[0] * t,
+                first[1] + first_direction[1] * t,
+            )
 
-        outer_apex = intersect(
-            (ax + nn1[0], ay + nn1[1]),
-            u1,
-            (ax + nn2[0], ay + nn2[1]),
-            u2,
+        incoming = (-u1[0], -u1[1])
+
+        def joins(
+            active_width: float,
+        ) -> tuple[
+            tuple[float, float],
+            tuple[float, float],
+            tuple[float, float],
+            tuple[float, float],
+        ]:
+            first_normal = (
+                n1[0] * active_width / 2,
+                n1[1] * active_width / 2,
+            )
+            second_normal = (
+                n2[0] * active_width / 2,
+                n2[1] * active_width / 2,
+            )
+            plus = intersect_offsets(
+                (ax + first_normal[0], ay + first_normal[1]),
+                incoming,
+                (ax + second_normal[0], ay + second_normal[1]),
+                u2,
+            )
+            minus = intersect_offsets(
+                (ax - first_normal[0], ay - first_normal[1]),
+                incoming,
+                (ax - second_normal[0], ay - second_normal[1]),
+                u2,
+            )
+            return first_normal, second_normal, plus, minus
+
+        nn1, nn2, plus_join, minus_join = joins(width)
+        miter = max(
+            _js_hypot(plus_join[0] - ax, plus_join[1] - ay),
+            _js_hypot(minus_join[0] - ax, minus_join[1] - ay),
         )
-        inner_apex = intersect(
-            (ax - nn1[0], ay - nn1[1]),
-            u1,
-            (ax - nn2[0], ay - nn2[1]),
-            u2,
+        arm_limit = 0.8 * min(
+            _js_hypot(b1[0] - ax, b1[1] - ay),
+            _js_hypot(b2[0] - ax, b2[1] - ay),
         )
+        if miter > arm_limit and miter > 0:
+            nn1, nn2, plus_join, minus_join = joins(width * arm_limit / miter)
+
+        points = [
+            (b1[0] + nn1[0], b1[1] + nn1[1]),
+            plus_join,
+            (b2[0] + nn2[0], b2[1] + nn2[1]),
+            (b2[0] - nn2[0], b2[1] - nn2[1]),
+            minus_join,
+            (b1[0] - nn1[0], b1[1] - nn1[1]),
+        ]
         return pc(
             Contour(
-                [
-                    (b1[0] + nn1[0], b1[1] + nn1[1], 0),
-                    (outer_apex[0], outer_apex[1], 0),
-                    (b2[0] + nn2[0], b2[1] + nn2[1], 0),
-                    (b2[0] - nn2[0], b2[1] - nn2[1], 0),
-                    (inner_apex[0], inner_apex[1], 0),
-                    (b1[0] - nn1[0], b1[1] - nn1[1], 0),
-                ]
+                [(x, y, 0) for x, y in points]
             )
         )
 
@@ -508,41 +969,150 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
     G["O"] = lambda: [ring_p(362, 350, 362, 258)]
     G["Ö"] = lambda: G["O"]() + [disc(225.5, -115, 63), disc(498.5, -115, 63)]
     G["C"] = lambda: [pc(RS(362, 350, 362, 258, -38, -322, -330, -30, 1, 1))]
-    G["G"] = lambda: [
-        pc(RS(362, 350, 362, 258, -38, -322, -345, -30, 1, 1)),
-        pc(R(608, 325, 724, 700)),
-    ]
-    G["H"] = lambda: [pc(R(0, 0, S, 700)), pc(R(526, 0, 630, 700)), pc(R(S, 321, 526, 421))]
+
+    def glyph_g_cap() -> list[Piece]:
+        outer_rx, _inner_rx, _outer_ry, _inner_ry = protected_curve_strokes(
+            362, 258
+        )
+        outer_right = 362 * W + outer_rx
+        aperture_x = 362 * W + outer_rx * cos(38 * pi / 180)
+        terminal_left = outer_right - 116 * weight_ratio
+        aperture_y = 350 + 362 * sin(38 * pi / 180)
+        connector_padding = max(6.0, 0.1 * S)
+        connector_left = min(aperture_x, terminal_left) - connector_padding
+        connector_right = max(aperture_x, terminal_left) + connector_padding
+        return [
+            pc(RS(362, 350, 362, 258, -38, -322, -345, -30, 1, 1)),
+            pc(rect(terminal_left, 325, outer_right, 700)),
+            pc(
+                hstem(
+                    connector_left,
+                    connector_right,
+                    aperture_y,
+                )
+            ),
+        ]
+
+    G["G"] = glyph_g_cap
+
+    def glyph_h_cap() -> list[Piece]:
+        left_center, right_center = 52 * W, 578 * W
+        return [
+            pc(vstem(52, 0, 700)),
+            pc(vstem(578, 0, 700)),
+            pc(hstem(left_center + S / 2, right_center - S / 2, 371)),
+        ]
+
+    G["H"] = glyph_h_cap
     G["E"] = lambda: [
-        pc(R(0, 0, S, 700)),
+        pc(R(0, 0, 104, 700)),
         pc(R(0, 0, 590, SH)),
         pc(R(0, 310, 425, 410)),
         pc(R(0, 600, 596, 700)),
     ]
-    G["L"] = lambda: [pc(R(0, 0, S, 700)), pc(R(0, 600, 615, 700))]
+    G["L"] = lambda: [pc(R(0, 0, 104, 700)), pc(R(0, 600, 615, 700))]
     G["T"] = lambda: [pc(R(0, 0, 700, S)), pc(R(298, 0, 402, 700))]
-    G["I"] = lambda: [pc(R(0, 0, S, 700))]
-    G["S"] = lambda: [
-        pc(R(198.5, 0, 690, S)),
-        pc(RS(198.5, 198.5, 198.5, 94.5, 90, 270, 270, 90)),
-        pc(R(198.5, 293, 501.5, 397)),
-        pc(RS(501.5, 496.5, 203.5, 99.5, -90, 90, 90, -90)),
-        pc(R(10, 596, 501.5, 700)),
-    ]
-    G["B"] = lambda: [
-        pc(R(0, 0, S, 700)),
-        pc(R(0, 0, 404, S)),
-        pc(R(0, 298, 419, 402)),
-        pc(R(0, 596, 419, 700)),
-        pc(RS(404, 201, 201, 97, -90, 90, 90, -90)),
-        pc(RS(419, 499, 201, 97, -90, 90, 90, -90)),
-    ]
-    G["P"] = lambda: [
-        pc(R(0, 0, S, 700)),
-        pc(R(0, 0, 393.5, S)),
-        pc(R(0, 319, 393.5, 423)),
-        pc(RS(393.5, 211.5, 211.5, 107.5, -90, 90, 90, -90)),
-    ]
+    G["I"] = lambda: [pc(R(0, 0, 104, 700))]
+    def glyph_s_cap() -> list[Piece]:
+        top_center = S / 2
+        middle_center = 345
+        bottom_center = 700 - S / 2
+        return [
+            pc(R(198.5, 0, 690, S)),
+            pc(
+                connected_half_bowl(
+                    198.5,
+                    top_center,
+                    middle_center,
+                    198.5,
+                    94.5,
+                    90,
+                    270,
+                    270,
+                    90,
+                )
+            ),
+            pc(R(198.5, 345 - S / 2, 501.5, 345 + S / 2)),
+            pc(
+                connected_half_bowl(
+                    501.5,
+                    middle_center,
+                    bottom_center,
+                    203.5,
+                    99.5,
+                    -90,
+                    90,
+                    90,
+                    -90,
+                )
+            ),
+            pc(R(10, 700 - S, 501.5, 700)),
+        ]
+
+    G["S"] = glyph_s_cap
+
+    def glyph_b_cap() -> list[Piece]:
+        top_center = S / 2
+        middle_center = 350
+        bottom_center = 700 - S / 2
+        return [
+            pc(R(0, 0, 104, 700)),
+            pc(R(0, 0, 404, S)),
+            pc(R(0, 350 - S / 2, 419, 350 + S / 2)),
+            pc(R(0, 700 - S, 419, 700)),
+            pc(
+                connected_half_bowl(
+                    404,
+                    top_center,
+                    middle_center,
+                    201,
+                    97,
+                    -90,
+                    90,
+                    90,
+                    -90,
+                )
+            ),
+            pc(
+                connected_half_bowl(
+                    419,
+                    middle_center,
+                    bottom_center,
+                    201,
+                    97,
+                    -90,
+                    90,
+                    90,
+                    -90,
+                )
+            ),
+        ]
+
+    G["B"] = glyph_b_cap
+
+    def glyph_p_cap() -> list[Piece]:
+        top_center = S / 2
+        lower_center = 371
+        return [
+            pc(R(0, 0, 104, 700)),
+            pc(R(0, 0, 393.5, S)),
+            pc(R(0, lower_center - S / 2, 393.5, lower_center + S / 2)),
+            pc(
+                connected_half_bowl(
+                    393.5,
+                    top_center,
+                    lower_center,
+                    211.5,
+                    107.5,
+                    -90,
+                    90,
+                    90,
+                    -90,
+                )
+            ),
+        ]
+
+    G["P"] = glyph_p_cap
 
     def glyph_r() -> list[Piece]:
         leg_top, u, px = (480, 380), (0.417, 0.909), (0.909, -0.417)
@@ -550,63 +1120,90 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         tr = (leg_top[0] + px[0] * 52, leg_top[1] + px[1] * 52)
         br = (tr[0] + u[0] * ((700 - tr[1]) / u[1]), 700)
         bl = (tl[0] + u[0] * ((700 - tl[1]) / u[1]), 700)
-        return G["P"]() + [pc(Q([tl, tr, br, bl]))]
+        body = G["P"]()
+        leg_contour = Q([tl, tr, br, bl])
+        top_midpoint = (
+            (leg_contour.pts[0][0] + leg_contour.pts[1][0]) / 2,
+            (leg_contour.pts[0][1] + leg_contour.pts[1][1]) / 2,
+        )
+        bottom_midpoint = (
+            (leg_contour.pts[2][0] + leg_contour.pts[3][0]) / 2,
+            (leg_contour.pts[2][1] + leg_contour.pts[3][1]) / 2,
+        )
+        leg_contour = attach_quad_cap(
+            body,
+            leg_contour,
+            (0, 1),
+            (
+                top_midpoint[0] - bottom_midpoint[0],
+                top_midpoint[1] - bottom_midpoint[1],
+            ),
+        )
+        return body + [pc(leg_contour)]
 
     G["R"] = glyph_r
 
     def glyph_m_cap() -> list[Piece]:
-        width, wh, mid, ya, jj, fw = 770, 112.6, 385, 567, S, 96
-        dxo, dyo = mid - S, ya - jj
-        xt = S + wh - dxo * jj / dyo
-        y_cr = jj + dyo * (mid - S - wh) / dxo
-        yf = ya - fw / 2 * dyo / dxo
+        center = 385 * W
+        left_inner = 52 * W + S / 2
+        right_inner = 718 * W - S / 2
+        top_inset = 49.48120950323974 * weight_ratio
+        inner_apex_y = 381.470462633452
+        outer_apex_y = inner_apex_y + (
+            487.9110320284698 - inner_apex_y
+        ) * weight_ratio
+        outer_cap_half = 48 * weight_ratio
         return [
-            pc(R(0, 0, S, 700)),
-            pc(R(width - S, 0, width, 700)),
+            pc(vstem(52, 0, 700)),
+            pc(vstem(718, 0, 700)),
             pc(
-                Q(
+                quad(
                     [
-                        (S, 0),
-                        (xt, 0),
-                        (mid, y_cr),
-                        (width - xt, 0),
-                        (width - S, 0),
-                        (width - S, jj),
-                        (mid + fw / 2, yf),
-                        (mid - fw / 2, yf),
-                        (S, jj),
+                        (left_inner, 0),
+                        (left_inner + top_inset, 0),
+                        (center, inner_apex_y),
+                        (right_inner - top_inset, 0),
+                        (right_inner, 0),
+                        (right_inner, S),
+                        (center + outer_cap_half, outer_apex_y),
+                        (center - outer_cap_half, outer_apex_y),
+                        (left_inner, S),
                     ]
                 )
             ),
         ]
 
     G["M"] = glyph_m_cap
-    G["N"] = lambda: [
-        pc(R(0, 0, S, 700)),
-        pc(R(521, 0, 625, 700)),
-        pc(Q([(0, 0), (129.7, 0), (625, 700), (495.3, 700)])),
-    ]
+    def glyph_n_cap() -> list[Piece]:
+        left = pc(R(0, 0, 104, 700))
+        right = pc(R(521, 0, 625, 700))
+        diagonal = Q([(0, 0), (129.7, 0), (625, 700), (495.3, 700)])
+        diagonal = attach_quad_cap([left], diagonal, (0, 1), (-1, 0))
+        diagonal = attach_quad_cap([right], diagonal, (2, 3), (1, 0))
+        return [left, right, pc(diagonal)]
+
+    G["N"] = glyph_n_cap
     G["A"] = lambda: [
         pc(Q([(302, 0), (406, 0), (104, 700), (0, 700)])),
         pc(Q([(302, 0), (406, 0), (708, 700), (604, 700)])),
         pc(R(120, 440, 590, 540)),
     ]
     G["D"] = lambda: [
-        pc(R(0, 0, S, 700)),
+        pc(R(0, 0, 104, 700)),
         pc(R(0, 0, 340, 104)),
         pc(R(0, 596, 340, 700)),
         pc(RS(340, 350, 350, 246, -90, 90, 90, -90)),
     ]
-    G["F"] = lambda: [pc(R(0, 0, S, 700)), pc(R(0, 0, 590, SH)), pc(R(0, 310, 425, 410))]
+    G["F"] = lambda: [pc(R(0, 0, 104, 700)), pc(R(0, 0, 590, SH)), pc(R(0, 310, 425, 410))]
     G["J"] = lambda: [
         pc(R(396, 0, 500, 550)),
         pc(RS(347, 547, 153, 49, 0, 180, 180, 0, 1, 1)),
     ]
-    G["K"] = lambda: [pc(R(0, 0, S, 700)), bar(50, 478, 590, 48, S), leg(240, 335, 620, 700, S)]
+    G["K"] = lambda: [pc(R(0, 0, 104, 700)), bar(50, 478, 590, 48, S), leg(240, 335, 620, 700, S)]
     G["Q"] = lambda: G["O"]() + [bar(440, 460, 760, 790, S)]
     G["U"] = lambda: [
-        pc(R(0, 0, S, 400)),
-        pc(R(526, 0, 630, 400)),
+        pc(vstem(52, 0, 400)),
+        pc(vstem(578, 0, 400)),
         pc(RS(315, 397, 315, 211, 180, 0, 0, 180)),
     ]
     G["V"] = lambda: [
@@ -631,57 +1228,154 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
     G["Z"] = lambda: [
         pc(R(0, 0, 620, SH)),
         pc(R(0, 600, 620, 700)),
-        pc(Q([(543.4, 20), (620, 20), (620, 100), (76.6, 680), (0, 680), (0, 600)])),
+        pc(
+            diagonal_strip_hex(
+                (581.7, 60),
+                (38.3, 640),
+                110.59591548657296,
+                (0, 620, 20, 680),
+                [
+                    (543.4, 20),
+                    (620, 20),
+                    (620, 100),
+                    (76.6, 680),
+                    (0, 680),
+                    (0, 600),
+                ],
+            )
+        ),
     ]
 
     # Digits.
-    G["0"] = lambda: [
-        pc(
-            ellipse(310 * W, 350, 310 * W, 362),
-            [
-                ellipse(
-                    310 * W,
-                    350,
-                    max(1.0, 310 * W - S),
-                    max(1.0, 362 - S),
-                )
-            ],
-        )
-    ]
+    G["0"] = lambda: [ellipse_ring_p(310, 350, 310, 206, 362, 258)]
 
     def glyph_one() -> list[Piece]:
         x0, u, pp = 150, (-0.743, 0.669), (0.669, 0.743)
         a = (x0, 0)
         b = (x0 + u[0] * 150, u[1] * 150)
-        c = (b[0] + pp[0] * S, b[1] + pp[1] * S)
-        d = (a[0] + pp[0] * S, a[1] + pp[1] * S)
-        return [pc(R(x0, 0, x0 + S, 700)), pc(Q([a, b, c, d]))]
+        # Q applies the active weight to this canonical 104-unit band.
+        # Feeding S here would scale the Thin flag twice.
+        c = (b[0] + pp[0] * 104, b[1] + pp[1] * 104)
+        d = (a[0] + pp[0] * 104, a[1] + pp[1] * 104)
+        stem = pc(R(x0, 0, x0 + 104, 700))
+        flag = Q([a, b, c, d])
+        far_midpoint = (
+            (flag.pts[1][0] + flag.pts[2][0]) / 2,
+            (flag.pts[1][1] + flag.pts[2][1]) / 2,
+        )
+        attachment_midpoint = (
+            (flag.pts[3][0] + flag.pts[0][0]) / 2,
+            (flag.pts[3][1] + flag.pts[0][1]) / 2,
+        )
+        flag = attach_quad_cap(
+            [stem],
+            flag,
+            (0, 3),
+            (
+                attachment_midpoint[0] - far_midpoint[0],
+                attachment_midpoint[1] - far_midpoint[1],
+            ),
+        )
+        return [stem, pc(flag)]
 
     G["1"] = glyph_one
-    G["2"] = lambda: [
-        pc(RS(322, 322, 322, 218, 180, 390, 390, 180, 1, 1)),
-        pc(Q([(511, 431), (519.6, 414.1), (613.8, 458.1), (601, 483), (140, 600), (140, 640), (0, 640), (0, 600)])),
-        pc(R(0, 600, 640, 700)),
-    ]
-    G["3"] = lambda: [
-        pc(R(80, 0, 320, SH)),
-        pc(RS(320, 180, 180, 76, -90, 90, 90, -90)),
-        pc(R(190, 256, 320, 360)),
-        pc(RS(320, 478, 222, 118, -90, 90, 90, -90)),
-        pc(R(70, 596, 320, 700)),
-    ]
+    def glyph_two() -> list[Piece]:
+        outer_rx, inner_rx, outer_ry, inner_ry = protected_curve_strokes(
+            322, 218
+        )
+        angle = 30 * pi / 180
+        inner_cap = (
+            322 * W + inner_rx * cos(angle),
+            322 + inner_ry * sin(angle),
+        )
+        outer_cap = (
+            322 * W + outer_rx * cos(angle),
+            322 + outer_ry * sin(angle),
+        )
+        return [
+            pc(RS(322, 322, 322, 218, 180, 390, 390, 180, 1, 1)),
+            pc(
+                quad(
+                    [
+                        inner_cap,
+                        outer_cap,
+                        (140 * W, 600),
+                        (140 * W, 640),
+                        (0, 640),
+                        (0, 600),
+                    ]
+                )
+            ),
+            pc(R(0, 600, 640, 700)),
+        ]
+
+    G["2"] = glyph_two
+    def glyph_three() -> list[Piece]:
+        top_center = S / 2
+        middle_center = 308
+        bottom_center = 700 - S / 2
+        return [
+            pc(R(80, 0, 320, SH)),
+            pc(
+                connected_half_bowl(
+                    320,
+                    top_center,
+                    middle_center,
+                    180,
+                    76,
+                    -90,
+                    90,
+                    90,
+                    -90,
+                )
+            ),
+            pc(R(190, middle_center - S / 2, 320, middle_center + S / 2)),
+            pc(
+                connected_half_bowl(
+                    320,
+                    middle_center,
+                    bottom_center,
+                    222,
+                    118,
+                    -90,
+                    90,
+                    90,
+                    -90,
+                )
+            ),
+            pc(R(70, 700 - S, 320, 700)),
+        ]
+
+    G["3"] = glyph_three
     G["4"] = lambda: [
         pc(R(430, 0, 534, 700)),
         pc(R(0, 480, 620, 580)),
-        pc(Q([(430, 0), (534, 0), (534, 60), (134, 480), (134, 520), (0, 520), (0, 452)])),
+        pc(vertically_clipped_band((482, 0), (67, 486), 0, 520)),
     ]
-    G["5"] = lambda: [
-        pc(R(90, 0, 650, SH)),
-        pc(R(90, 0, 194, 388)),
-        pc(R(90, 284, 470, 388)),
-        pc(RS(470, 492, 208, 104, -90, 90, 90, -90)),
-        pc(R(96, 596, 470, 700)),
-    ]
+    def glyph_five() -> list[Piece]:
+        middle_center = 336
+        bottom_center = 700 - S / 2
+        return [
+            pc(R(90, 0, 650, SH)),
+            pc(R(90, 0, 194, middle_center + S / 2)),
+            pc(R(90, middle_center - S / 2, 470, middle_center + S / 2)),
+            pc(
+                connected_half_bowl(
+                    470,
+                    middle_center,
+                    bottom_center,
+                    208,
+                    104,
+                    -90,
+                    90,
+                    90,
+                    -90,
+                )
+            ),
+            pc(R(96, 700 - S, 470, 700)),
+        ]
+
+    G["5"] = glyph_five
     G["6"] = lambda: [
         ring_p(322, 462, 250, 146),
         pc(R(72, 290, 176, 462)),
@@ -693,7 +1387,7 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
 
     # Lowercase.
     G["a"] = lambda: [ring_p(262, 450, 262, 158), pc(R(420, 195, 524, 700))]
-    G["b"] = lambda: [pc(R(0, 0, S, 700)), ring_p(262, 450, 262, 158)]
+    G["b"] = lambda: [pc(vstem(52, 0, 700)), ring_p(262, 450, 262, 158)]
     G["c"] = lambda: [pc(RS(262, 450, 262, 158, -35, -325, -333, -27, 1, 1))]
     G["d"] = lambda: [ring_p(262, 450, 262, 158), pc(R(420, 0, 524, 700))]
     G["e"] = lambda: [pc(RS(262, 450, 262, 158, 38, 365, 365, 38, 1, 1)), pc(R(8, 400, 516, 500))]
@@ -708,49 +1402,79 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         pc(RS(284, 660, 240, 136, 0, 150, 150, 0, 1, 1)),
     ]
     G["h"] = lambda: [
-        pc(R(0, 0, S, 700)),
+        pc(vstem(52, 0, 700)),
         pc(RS(262, 462, 262, 158, 180, 360, 360, 180)),
         pc(R(420, 462, 524, 700)),
     ]
-    G["i"] = lambda: [pc(R(0, 200, S, 700)), disc(52, 75, 55)]
-    G["ı"] = lambda: [pc(R(0, 200, S, 700))]
+    G["i"] = lambda: [pc(R(0, 200, 104, 700)), disc(52, 75, 55)]
+    G["ı"] = lambda: [pc(R(0, 200, 104, 700))]
     G["j"] = lambda: [
         pc(R(150, 200, 254, 760)),
         pc(RS(101, 747, 153, 49, 0, 150, 150, 0, 1, 1)),
         disc(202, 75, 55),
     ]
-    G["k"] = lambda: [pc(R(0, 0, S, 700)), bar(60, 485, 440, 205, S), leg(235, 345, 470, 700, S)]
-    G["l"] = lambda: [pc(R(0, 0, S, 700))]
+    G["k"] = lambda: [pc(R(0, 0, 104, 700)), bar(60, 485, 440, 205, S), leg(235, 345, 470, 700, S)]
+    G["l"] = lambda: [pc(R(0, 0, 104, 700))]
     G["m"] = lambda: [
-        pc(R(0, 200, S, 700)),
+        pc(vstem(52, 200, 700)),
         pc(RS(233, 433, 233, 129, 180, 360, 360, 180)),
         pc(R(362, 433, 466, 700)),
         pc(RS(595, 433, 233, 129, 180, 360, 360, 180)),
         pc(R(724, 433, 828, 700)),
     ]
     G["n"] = lambda: [
-        pc(R(0, 200, S, 700)),
+        pc(vstem(52, 200, 700)),
         pc(RS(262, 462, 262, 158, 180, 360, 360, 180)),
         pc(R(420, 462, 524, 700)),
     ]
     G["o"] = lambda: [ring_p(262, 450, 262, 158)]
-    G["p"] = lambda: [pc(R(0, 200, S, 900)), ring_p(262, 450, 262, 158)]
+    G["p"] = lambda: [pc(vstem(52, 200, 900)), ring_p(262, 450, 262, 158)]
     G["q"] = lambda: [ring_p(262, 450, 262, 158), pc(R(420, 200, 524, 900))]
-    G["r"] = lambda: [pc(R(0, 200, S, 700)), pc(RS(240, 440, 240, 136, 180, 310, 310, 180, 1, 1))]
-    G["s"] = lambda: [
-        pc(R(148, 204, 500, 308)),
-        pc(RS(148, 352, 148, 44, 90, 270, 270, 90)),
-        pc(R(148, 396, 352, 500)),
-        pc(RS(352, 554, 158, 54, -90, 90, 90, -90)),
-        pc(R(10, 608, 352, 712)),
-    ]
+    G["r"] = lambda: [pc(R(0, 200, 104, 700)), pc(RS(240, 440, 240, 136, 180, 310, 310, 180, 1, 1))]
+    def glyph_s_lower() -> list[Piece]:
+        top_center = 256
+        middle_center = 448
+        bottom_center = 660
+        return [
+            pc(R(148, top_center - S / 2, 500, top_center + S / 2)),
+            pc(
+                connected_half_bowl(
+                    148,
+                    top_center,
+                    middle_center,
+                    148,
+                    44,
+                    90,
+                    270,
+                    270,
+                    90,
+                )
+            ),
+            pc(R(148, middle_center - S / 2, 352, middle_center + S / 2)),
+            pc(
+                connected_half_bowl(
+                    352,
+                    middle_center,
+                    bottom_center,
+                    158,
+                    54,
+                    -90,
+                    90,
+                    90,
+                    -90,
+                )
+            ),
+            pc(R(10, bottom_center - S / 2, 352, bottom_center + S / 2)),
+        ]
+
+    G["s"] = glyph_s_lower
     G["t"] = lambda: [
         pc(R(130, 80, 234, 560)),
         pc(R(0, 200, 420, 300)),
         pc(RS(270, 560, 140, 36, 180, 0, 0, 180, 1, 1)),
     ]
     G["u"] = lambda: [
-        pc(R(0, 200, S, 440)),
+        pc(vstem(52, 200, 440)),
         pc(RS(262, 438, 262, 158, 180, 0, 0, 180)),
         pc(R(420, 200, 524, 700)),
     ]
@@ -775,11 +1499,26 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
     G["z"] = lambda: [
         pc(R(20, 200, 520, 296)),
         pc(R(20, 604, 520, 700)),
-        pc(Q([(452.4, 230), (520, 230), (520, 296), (87.6, 670), (20, 670), (20, 604)])),
+        pc(
+            diagonal_strip_hex(
+                (486.2, 263),
+                (53.8, 637),
+                94.1409813428312,
+                (20, 520, 230, 670),
+                [
+                    (452.4, 230),
+                    (520, 230),
+                    (520, 296),
+                    (87.6, 670),
+                    (20, 670),
+                    (20, 604),
+                ],
+            )
+        ),
     ]
 
     # ASCII punctuation.
-    G["!"] = lambda: [pc(R(0, 0, S, 470)), disc(52, 637, 63)]
+    G["!"] = lambda: [pc(R(0, 0, 104, 470)), disc(52, 637, 63)]
     G['"'] = lambda: [pc(R(0, 0, 90, 210)), pc(R(170, 0, 260, 210))]
     G["#"] = lambda: [pc(R(150, 60, 240, 640)), pc(R(380, 60, 470, 640)), pc(R(0, 200, 620, 280)), pc(R(0, 420, 620, 500))]
     G["$"] = lambda: G["S"]() + [pc(R(310, -70, 386, 770))]
@@ -812,7 +1551,7 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         pc(R(424, 254, 500, 526)),
         pc(R(424, 450, 604, 526)),
     ]
-    G["["] = lambda: [pc(R(0, -40, S, 780)), pc(R(0, -40, 300, 40)), pc(R(0, 700, 300, 780))]
+    G["["] = lambda: [pc(R(0, -40, 104, 780)), pc(R(0, -40, 300, 40)), pc(R(0, 700, 300, 780))]
     G["\\"] = lambda: [pc(Q([(0, 0), (104, 0), (460, 700), (356, 700)]))]
     G["]"] = lambda: mirror_x(G["["](), 300)
     G["^"] = lambda: [chev(230, 10, (60, 250), (400, 250), 92)]
@@ -825,7 +1564,7 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         pc(R(170, 370, 258, 780)),
         pc(R(170, 695, 300, 780)),
     ]
-    G["|"] = lambda: [pc(R(0, -40, S, 780))]
+    G["|"] = lambda: [pc(R(0, -40, 104, 780))]
     G["}"] = lambda: mirror_x(G["{"](), 300)
     G["~"] = lambda: [wave(220, 360, 220, 32, 45)]
 
@@ -846,7 +1585,7 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         bar(125, 465, 45, 545, 80),
     ]
     G["¥"] = lambda: G["Y"]() + [pc(R(70, 350, 570, 420)), pc(R(70, 490, 570, 560))]
-    G["¦"] = lambda: [pc(R(0, -40, S, 300)), pc(R(0, 420, S, 780))]
+    G["¦"] = lambda: [pc(R(0, -40, 104, 300)), pc(R(0, 420, 104, 780))]
     G["§"] = lambda: translate(scale(G["S"](), 0.85) + [ring_p(297, 297, 140, 72)], 20, 55)
     G["¨"] = lambda: [disc(10, 90, 55), disc(250, 90, 55)]
     G["©"] = lambda: [ring_p(350, 350, 350, 290), pc(RS(350, 350, 190, 118, -38, -322, -330, -30, 1, 1))]
@@ -868,7 +1607,7 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
     G["³"] = lambda: scale(G["3"](), 0.5)
     G["´"] = lambda: [bar(190, 25, 50, 170, 88)]
     G["µ"] = lambda: [
-        pc(R(0, 200, S, 900)),
+        pc(vstem(52, 200, 900)),
         pc(RS(262, 438, 262, 158, 180, 0, 0, 180)),
         pc(R(420, 200, 524, 700)),
     ]
@@ -909,14 +1648,14 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
     G["Ð"] = lambda: G["D"]() + [pc(R(-70, 304, 250, 400))]
     G["ð"] = lambda: [ring_p(240, 490, 222, 118), bar(300, 300, 480, 40, 96), bar(310, 110, 480, 230, 66)]
     G["Þ"] = lambda: [
-        pc(R(0, 0, S, 700)),
+        pc(R(0, 0, 104, 700)),
         pc(R(0, 150, 400, 254)),
         pc(R(0, 456, 400, 560)),
         pc(RS(400, 355, 205, 101, -90, 90, 90, -90)),
     ]
-    G["þ"] = lambda: [pc(R(0, 0, S, 900)), ring_p(262, 450, 262, 158)]
+    G["þ"] = lambda: [pc(vstem(52, 0, 900)), ring_p(262, 450, 262, 158)]
     G["ß"] = lambda: [
-        pc(R(0, 0, S, 700)),
+        pc(R(0, 0, 104, 700)),
         pc(RS(175, 175, 175, 71, 180, 360, 360, 180)),
         pc(R(246, 160, 350, 400)),
         pc(RS(298, 498, 202, 98, -90, 90, 90, -90, 1, 1)),
@@ -947,7 +1686,18 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         if kind == "acute":
             return [bar(cx + 100, 25, cx - 40, 170, 88)]
         if kind == "circ":
-            return [chev(cx, 20, (cx - 140, 170), (cx + 140, 170), 84)]
+            # Preserve the canonical ±140 default while keeping the terminal
+            # caps clear of the extrusion direction away from wdth=100.
+            half_span = 140 / max(1.0, W)
+            return [
+                chev(
+                    cx,
+                    20,
+                    (cx - half_span, 170),
+                    (cx + half_span, 170),
+                    84,
+                )
+            ]
         if kind == "dier":
             return [disc(cx - 120, 85, 55), disc(cx + 120, 85, 55)]
         if kind == "ring":
@@ -1498,7 +2248,7 @@ class LayerPiece:
 
 @dataclass(frozen=True, slots=True)
 class ReplayedLayers:
-    """Interpolation-compatible geometry for the five COLRv1 paint layers."""
+    """Interpolation-compatible geometry for the COLRv1 paint layers."""
 
     outline: GlyphOutline
     wall_dark: tuple[LayerPiece, ...]
@@ -1539,94 +2289,20 @@ def _walk_contour(
     return points[index % count]
 
 
-def _point_on_segment(
-    x: float, y: float, a: SamplePoint, b: SamplePoint, tolerance: float = 1e-7
-) -> bool:
-    cross = (x - a.x) * (b.y - a.y) - (y - a.y) * (b.x - a.x)
-    if abs(cross) > tolerance * max(1.0, _js_hypot(b.x - a.x, b.y - a.y)):
-        return False
-    return (
-        min(a.x, b.x) - tolerance <= x <= max(a.x, b.x) + tolerance
-        and min(a.y, b.y) - tolerance <= y <= max(a.y, b.y) + tolerance
-    )
-
-
-def _inside_or_boundary(x: float, y: float, polygon: Sequence[SamplePoint]) -> bool:
-    return point_in(x, y, polygon) or any(
-        _point_on_segment(x, y, polygon[index - 1], polygon[index])
-        for index in range(len(polygon))
-    )
-
-
-def _intersection_parameter(
-    start: SamplePoint,
-    end: SamplePoint,
-    a: SamplePoint,
-    b: SamplePoint,
-) -> float | None:
-    dx, dy = end.x - start.x, end.y - start.y
-    ex, ey = b.x - a.x, b.y - a.y
-    den = dx * ey - dy * ex
-    if abs(den) < 1e-12:
-        return None
-    qx, qy = a.x - start.x, a.y - start.y
-    t = (qx * ey - qy * ex) / den
-    u = (qx * dy - qy * dx) / den
-    if -1e-9 <= t <= 1 + 1e-9 and -1e-9 <= u <= 1 + 1e-9:
-        return min(1.0, max(0.0, t))
-    return None
-
-
-def _clip_segment(
-    start: SamplePoint,
-    end: SamplePoint,
-    polygons: Sequence[Sequence[SamplePoint]],
-) -> tuple[SamplePoint, SamplePoint]:
-    """Clip to a polygon union and retain the interval crossing the midpoint."""
-
-    parameters = [0.0, 1.0]
-    for polygon in polygons:
-        for index, point in enumerate(polygon):
-            t = _intersection_parameter(start, end, polygon[index - 1], point)
-            if t is not None:
-                parameters.append(t)
-    parameters = sorted(set(round(t, 12) for t in parameters))
-    inside_intervals: list[tuple[float, float]] = []
-    for lo, hi in zip(parameters, parameters[1:]):
-        mid = (lo + hi) / 2
-        x = start.x + (end.x - start.x) * mid
-        y = start.y + (end.y - start.y) * mid
-        if any(_inside_or_boundary(x, y, polygon) for polygon in polygons):
-            inside_intervals.append((lo, hi))
-    if not inside_intervals:
-        # A hatch centreline often lies exactly on the shared boundary of two
-        # wall polygons.  The requested 10%-90% segment is already face-safe.
-        return start, end
-    containing_mid = [interval for interval in inside_intervals if interval[0] <= 0.5 <= interval[1]]
-    lo, hi = max(
-        containing_mid or inside_intervals,
-        key=lambda interval: interval[1] - interval[0],
-    )
-    return (
-        SamplePoint(start.x + (end.x - start.x) * lo, start.y + (end.y - start.y) * lo),
-        SamplePoint(start.x + (end.x - start.x) * hi, start.y + (end.y - start.y) * hi),
-    )
-
-
 def _hatch_quad(
     center: SamplePoint,
     vector: tuple[float, float],
     thickness: float,
-    clip_polygons: Sequence[Sequence[SamplePoint]],
 ) -> LayerPiece:
+    """Build one nominal full-thickness four-point hatch mark."""
+
     vx, vy = vector
     depth = _js_hypot(vx, vy) or 1.0
     ux, uy = vx / depth, vy / depth
     half_length = depth * 0.4
+    px, py = -uy * thickness / 2, ux * thickness / 2
     start = SamplePoint(center.x - ux * half_length, center.y - uy * half_length)
     end = SamplePoint(center.x + ux * half_length, center.y + uy * half_length)
-    start, end = _clip_segment(start, end, clip_polygons)
-    px, py = -uy * thickness / 2, ux * thickness / 2
     return LayerPiece(
         (
             SamplePoint(start.x + px, start.y + py),
@@ -1668,36 +2344,51 @@ def replay_recipe(
     seed: float | None = None,
     keyline_offset: float = 7.5,
 ) -> ReplayedLayers:
-    """Replay a frozen recipe at a master with seven clipped hatch quads/group."""
+    """Replay one frozen recipe with seven topology-stable hatches per group."""
 
     p = coerce_params(params)
     p = replace(p, jit=recipe.jitter_amp, hatch_n=HATCH_N)
     outline = build_contours(recipe.name, p, seed=seed, topology=recipe.topology)
     vector = p.v
-    wall_pieces: list[LayerPiece] = []
     dark: list[LayerPiece] = []
     bronze: list[LayerPiece] = []
     for run in recipe.runs:
         points = outline.pieces[run.piece_index].contours[run.contour_index].points
         wall = _wall_piece(points, run, vector)
-        wall_pieces.append(wall)
         (bronze if run.color == "bronze" else dark).append(wall)
 
     hatches: list[LayerPiece] = []
     for group in recipe.hatch_groups:
         contour = outline.pieces[group.piece_index].contours[group.contour_index].points
-        before = wall_pieces[group.before_run].outer
-        after = wall_pieces[group.after_run].outer
+        before_run = recipe.runs[group.before_run]
+        after_run = recipe.runs[group.after_run]
+        before_length = _polyline_length(
+            _run_points(contour, before_run.start, before_run.end)
+        )
+        after_length = _polyline_length(
+            _run_points(contour, after_run.start, after_run.end)
+        )
         half = HATCH_N // 2
+        guard = p.hatch_t / 2
+        before_spacing = min(
+            p.hatch_sp,
+            max(0.0, (before_length - guard) / half),
+        )
+        after_spacing = min(
+            p.hatch_sp,
+            max(0.0, (after_length - guard) / half),
+        )
         for mark in range(-half, half + 1):
+            spacing = after_spacing if mark >= 0 else before_spacing
             boundary = _walk_contour(
                 contour,
                 group.anchor_edge,
-                abs(mark) * p.hatch_sp,
+                abs(mark) * spacing,
                 1 if mark >= 0 else -1,
             )
             center = boundary.translated(vector[0] * 0.5, vector[1] * 0.5)
-            hatches.append(_hatch_quad(center, vector, p.hatch_t, (before, after)))
+            hatch = _hatch_quad(center, vector, p.hatch_t)
+            hatches.append(hatch)
 
     face: list[LayerPiece] = []
     keyline: list[LayerPiece] = []

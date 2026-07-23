@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="percent.hand.ext" format="2">
+  <advance width="721.58"/>
+  <outline>
+    <component base="percent.hand"/>
+  </outline>
+</glyph>

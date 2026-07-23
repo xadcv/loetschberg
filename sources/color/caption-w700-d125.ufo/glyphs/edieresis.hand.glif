@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="edieresis.hand" format="2">
+  <advance width="701.840338"/>
+  <outline>
+    <component base="e.hand"/>
+    <component base="_mark.edieresis.e.dier.hand"/>
+  </outline>
+</glyph>

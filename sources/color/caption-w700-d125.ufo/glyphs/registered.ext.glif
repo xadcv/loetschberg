@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="registered.ext" format="2">
+  <advance width="866.887574"/>
+  <outline>
+    <component base="registered"/>
+  </outline>
+</glyph>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="uni00AD.ext.wallBronze" format="2">
+  <advance width="696.0"/>
+  <outline>
+    <contour>
+      <point x="598.0" y="418.8" type="line"/>
+      <point x="598.0" y="387.28000000000003" type="line"/>
+      <point x="598.0" y="355.76" type="line"/>
+      <point x="598.0" y="324.24" type="line"/>
+      <point x="598.0" y="292.72" type="line"/>
+      <point x="598.0" y="261.2" type="line"/>
+      <point x="658.0" y="191.2" type="line"/>
+      <point x="658.0" y="222.72000000000003" type="line"/>
+      <point x="658.0" y="254.24" type="line"/>
+      <point x="658.0" y="285.76" type="line"/>
+      <point x="658.0" y="317.28000000000003" type="line"/>
+      <point x="658.0" y="348.8" type="line"/>
+    </contour>
+  </outline>
+</glyph>

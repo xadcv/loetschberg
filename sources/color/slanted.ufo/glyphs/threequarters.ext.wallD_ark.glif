@@ -194,13 +194,5 @@
       <point x="632.6773604726089" y="-17.200000000000045" type="line"/>
       <point x="655.4106938059423" y="-17.200000000000045" type="line"/>
     </contour>
-    <contour>
-      <point x="717.627420994367" y="308.0" type="line"/>
-      <point x="714.8216743803226" y="294.8" type="line"/>
-      <point x="712.0159277662783" y="281.6" type="line"/>
-      <point x="757.1369684493768" y="211.60000000000002" type="line"/>
-      <point x="759.942715063421" y="224.8" type="line"/>
-      <point x="762.7484616774653" y="238.0" type="line"/>
-    </contour>
   </outline>
 </glyph>

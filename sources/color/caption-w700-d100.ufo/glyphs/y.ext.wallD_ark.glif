@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="y.ext.wallDark" format="2">
+  <advance width="613.698462"/>
+  <outline>
+    <contour>
+      <point x="255.33846153846153" y="-200.0" type="line"/>
+      <point x="227.99076923076922" y="-200.0" type="line"/>
+      <point x="200.64307692307693" y="-200.0" type="line"/>
+      <point x="173.2953846153846" y="-200.0" type="line"/>
+      <point x="145.9476923076923" y="-200.0" type="line"/>
+      <point x="118.6" y="-200.0" type="line"/>
+      <point x="164.6" y="-254.0" type="line"/>
+      <point x="191.9476923076923" y="-254.0" type="line"/>
+      <point x="219.2953846153846" y="-254.0" type="line"/>
+      <point x="246.6430769230769" y="-254.0" type="line"/>
+      <point x="273.9907692307692" y="-254.0" type="line"/>
+      <point x="301.3384615384615" y="-254.0" type="line"/>
+    </contour>
+  </outline>
+</glyph>

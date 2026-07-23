@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="asterisk.hand.ext" format="2">
+  <advance width="336.030945"/>
+  <outline>
+    <component base="asterisk.hand"/>
+  </outline>
+</glyph>

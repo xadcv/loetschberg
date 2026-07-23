@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="ampersand.hand.ext" format="2">
-  <advance width="900.0"/>
+  <advance width="845.83447"/>
   <outline>
     <component base="ampersand.hand"/>
   </outline>

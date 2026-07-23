@@ -53,32 +53,6 @@ fontbakery version: 1.1.0
 </details>
 
 <details>
-    <summary>✅ <b>PASS</b> Is the CFF2 subr/gsubr call depth > 10? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff2-call-depth">opentype/cff2_call_depth</a></summary>
-    <div>
-
-
->
-> Per "The CFF2 CharString Format", the "Subr nesting, stack limit" is 10.
->
-
-
-
-
-> Original proposal: https://github.com/fonttools/fontbakery/pull/2425
-
-
-
-
-
-* ✅ **PASS** <p>All looks good!</p>
- [code: ok]
-
-
-
-</div>
-</details>
-
-<details>
     <summary>✅ <b>PASS</b> Check code page character ranges <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-code-pages">opentype/code_pages</a></summary>
     <div>
 
@@ -1233,25 +1207,25 @@ fontbakery version: 1.1.0
 </details>
 
 <details>
-    <summary>⏩ <b>SKIP</b> Does the font's CFF table top dict strings fit into the ASCII range? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-ascii-strings">opentype/cff_ascii_strings</a></summary>
+    <summary>✅ <b>PASS</b> Is the CFF2 subr/gsubr call depth > 10? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff2-call-depth">opentype/cff2_call_depth</a></summary>
     <div>
 
 
 >
-> All CFF Table top dict string chars should fit into the ASCII range.
+> Per "The CFF2 CharString Format", the "Subr nesting, stack limit" is 10.
 >
 
 
 
 
-> Original proposal: https://github.com/fonttools/fontbakery/issues/4619
+> Original proposal: https://github.com/fonttools/fontbakery/pull/2425
 
 
 
 
 
-* ⏩ **SKIP** <p>Unfulfilled Conditions: is_cff</p>
- [code: unfulfilled-conditions]
+* ✅ **PASS** <p>All looks good!</p>
+ [code: ok]
 
 
 
@@ -1272,37 +1246,6 @@ fontbakery version: 1.1.0
 
 
 > Original proposal: https://github.com/fonttools/fontbakery/pull/2425
-
-
-
-
-
-* ⏩ **SKIP** <p>Unfulfilled Conditions: is_cff</p>
- [code: unfulfilled-conditions]
-
-
-
-</div>
-</details>
-
-<details>
-    <summary>⏩ <b>SKIP</b> Does the font use deprecated CFF operators or operations? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-deprecated-operators">opentype/cff_deprecated_operators</a></summary>
-    <div>
-
-
->
-> The 'dotsection' operator and the use of 'endchar' to build accented characters
-> from the Adobe Standard Encoding Character Set ("seac") are deprecated in CFF.
-> Adobe recommends repairing any fonts that use these, especially endchar-as-seac,
-> because a rendering issue was discovered in Microsoft Word with a font that
-> makes use of this operation. The check treats that usage as a FAIL.
-> There are no known ill effects of using dotsection, so that check is a WARN.
->
-
-
-
-
-> Original proposal: https://github.com/fonttools/fontbakery/pull/3033
 
 
 
@@ -1490,6 +1433,63 @@ fontbakery version: 1.1.0
 * ⏩ **SKIP** <p>Add the <code>vendor_id</code> key to a <code>fontbakery.yaml</code> file on your font project directory to enable this check.
 You'll also need to use the <code>--configuration</code> flag when invoking fontbakery.</p>
 
+
+
+
+</div>
+</details>
+
+<details>
+    <summary>⏩ <b>SKIP</b> Does the font's CFF table top dict strings fit into the ASCII range? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-ascii-strings">opentype/cff_ascii_strings</a></summary>
+    <div>
+
+
+>
+> All CFF Table top dict string chars should fit into the ASCII range.
+>
+
+
+
+
+> Original proposal: https://github.com/fonttools/fontbakery/issues/4619
+
+
+
+
+
+* ⏩ **SKIP** <p>Unfulfilled Conditions: is_cff</p>
+ [code: unfulfilled-conditions]
+
+
+
+</div>
+</details>
+
+<details>
+    <summary>⏩ <b>SKIP</b> Does the font use deprecated CFF operators or operations? <a href="https://fontbakery.readthedocs.io/en/stable/fontbakery/checks/opentype.html#opentype-cff-deprecated-operators">opentype/cff_deprecated_operators</a></summary>
+    <div>
+
+
+>
+> The 'dotsection' operator and the use of 'endchar' to build accented characters
+> from the Adobe Standard Encoding Character Set ("seac") are deprecated in CFF.
+> Adobe recommends repairing any fonts that use these, especially endchar-as-seac,
+> because a rendering issue was discovered in Microsoft Word with a font that
+> makes use of this operation. The check treats that usage as a FAIL.
+> There are no known ill effects of using dotsection, so that check is a WARN.
+>
+
+
+
+
+> Original proposal: https://github.com/fonttools/fontbakery/pull/3033
+
+
+
+
+
+* ⏩ **SKIP** <p>Unfulfilled Conditions: is_cff</p>
+ [code: unfulfilled-conditions]
 
 
 

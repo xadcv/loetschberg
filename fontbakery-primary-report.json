@@ -8,38 +8,6 @@
         {
             "checks": [
                 {
-                    "description": "Check hhea.caretSlopeRise and hhea.caretSlopeRun",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/caret_slope>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.caret_slope",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/3670"
-                    ],
-                    "rationale": "\n        Checks whether hhea.caretSlopeRise and hhea.caretSlopeRun\n        match with post.italicAngle.\n\n        For Upright fonts, you can set hhea.caretSlopeRise to 1\n        and hhea.caretSlopeRun to 0.\n\n        For Italic fonts, you can set hhea.caretSlopeRise to head.unitsPerEm\n        and calculate hhea.caretSlopeRun like this:\n        round(math.tan(\n          math.radians(-1 * font[\"post\"].italicAngle)) * font[\"head\"].unitsPerEm)\n\n        This check allows for a 0.1\u00b0 rounding difference between the Italic angle\n        as calculated by the caret slope and post.italicAngle\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
                     "description": "Is the CFF2 subr/gsubr call depth > 10?",
                     "documentation": null,
                     "experimental": false,
@@ -68,70 +36,6 @@
                         "https://github.com/fonttools/fontbakery/pull/2425"
                     ],
                     "rationale": "\n        Per \"The CFF2 CharString Format\", the \"Subr nesting, stack limit\" is 10.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_ascii_strings",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4619"
-                    ],
-                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Is the CFF subr/gsubr call depth > 10?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_call_depth>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_call_depth",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2425"
-                    ],
-                    "rationale": "\n        Per \"The Type 2 Charstring Format, Technical Note #5177\",\n        the \"Subr nesting, stack limit\" is 10.\n    ",
                     "result": "SKIP",
                     "severity": null
                 },
@@ -520,6 +424,38 @@
                     "severity": null
                 },
                 {
+                    "description": "Check hhea.caretSlopeRise and hhea.caretSlopeRun",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/caret_slope>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.caret_slope",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/3670"
+                    ],
+                    "rationale": "\n        Checks whether hhea.caretSlopeRise and hhea.caretSlopeRun\n        match with post.italicAngle.\n\n        For Upright fonts, you can set hhea.caretSlopeRise to 1\n        and hhea.caretSlopeRun to 0.\n\n        For Italic fonts, you can set hhea.caretSlopeRise to head.unitsPerEm\n        and calculate hhea.caretSlopeRun like this:\n        round(math.tan(\n          math.radians(-1 * font[\"post\"].italicAngle)) * font[\"head\"].unitsPerEm)\n\n        This check allows for a 0.1\u00b0 rounding difference between the Italic angle\n        as calculated by the caret slope and post.italicAngle\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
                     "description": "Axes and named instances fall within correct ranges?",
                     "documentation": null,
                     "experimental": false,
@@ -649,6 +585,38 @@
                     "severity": null
                 },
                 {
+                    "description": "Is the CFF subr/gsubr call depth > 10?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff_call_depth>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.cff_call_depth",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/2425"
+                    ],
+                    "rationale": "\n        Per \"The Type 2 Charstring Format, Technical Note #5177\",\n        the \"Subr nesting, stack limit\" is 10.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
                     "description": "Check glyphs do not have duplicate components which have the same x,y coordinates.",
                     "documentation": null,
                     "experimental": false,
@@ -709,38 +677,6 @@
                         "https://github.com/fonttools/fontbakery/issues/4829"
                     ],
                     "rationale": "\n        This check validates the structural integrity of the glyf table,\n        by checking that all glyphs referenced in the loca table are\n        actually present in the glyf table and that there is no unused\n        data at the end of the glyf table. A failure here indicates a\n        problem with the font compiler.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Checking post.italicAngle value.",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/italic_angle>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": null,
-                                "message": "Value of post.italicAngle is 0.0 with style=\"Regular\"."
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.italic_angle",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4829"
-                    ],
-                    "rationale": "\n        The 'post' table italicAngle property should be a reasonable amount, likely\n        not more than 30\u00b0. Note that in the OpenType specification, the value is\n        negative for a rightward lean.\n\n        https://docs.microsoft.com/en-us/typography/opentype/spec/post\n    ",
                     "result": "PASS",
                     "severity": null
                 },
@@ -1135,38 +1071,6 @@
                     ],
                     "rationale": "\n        The PostScript name entries in the font's 'name' table should match\n        the FontName string in the 'CFF ' table.\n\n        The 'CFF ' table has a lot of information that is duplicated in other tables.\n        This information should be consistent across tables, because there's\n        no guarantee which table an app will get the data from.\n    ",
                     "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Check for points out of bounds.",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/points_out_of_bounds>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.points_out_of_bounds",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/735"
-                    ],
-                    "rationale": "\n        The glyf table specifies a bounding box for each glyph. This check\n        ensures that all points in all glyph paths are within the bounding\n        box. Glyphs with out-of-bounds points can cause rendering issues in\n        some software, and should be corrected.\n    ",
-                    "result": "PASS",
                     "severity": null
                 },
                 {
@@ -1672,6 +1576,102 @@
                         "https://github.com/fonttools/fontbakery/issues/4829"
                     ],
                     "rationale": "\n        The OS/2.xAvgCharWidth field is used to calculate the width of a string of\n        characters. It is the average width of all non-zero width glyphs in the font.\n\n        This check ensures that the value is correct. A failure here may indicate\n        a bug in the font compiler, rather than something that the designer can\n        do anything about.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Check for points out of bounds.",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/points_out_of_bounds>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.points_out_of_bounds",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/735"
+                    ],
+                    "rationale": "\n        The glyf table specifies a bounding box for each glyph. This check\n        ensures that all points in all glyph paths are within the bounding\n        box. Glyphs with out-of-bounds points can cause rendering issues in\n        some software, and should be corrected.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.cff_ascii_strings",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4619"
+                    ],
+                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
+                    "description": "Checking post.italicAngle value.",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-VF[wght,wdth,opsz,slnt].ttf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/italic_angle>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": null,
+                                "message": "Value of post.italicAngle is 0.0 with style=\"Regular\"."
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.italic_angle",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4829"
+                    ],
+                    "rationale": "\n        The 'post' table italicAngle property should be a reasonable amount, likely\n        not more than 30\u00b0. Note that in the OpenType specification, the value is\n        negative for a rightward lean.\n\n        https://docs.microsoft.com/en-us/typography/opentype/spec/post\n    ",
                     "result": "PASS",
                     "severity": null
                 }
