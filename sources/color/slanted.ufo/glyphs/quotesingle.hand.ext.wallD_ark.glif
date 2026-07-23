@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="quotesingle.hand.ext.wallDark" format="2">
+  <advance width="286.0"/>
+  <outline>
+    <contour>
+      <point x="290.67445754764265" y="488.51890623695294" type="line"/>
+      <point x="268.44049846084704" y="487.9483260467688" type="line"/>
+      <point x="246.16358917440695" y="487.4174452084459" type="line"/>
+      <point x="223.8359884150015" y="486.98616254374366" type="line"/>
+      <point x="201.4519458434857" y="486.7031392993972" type="line"/>
+      <point x="246.57298652658415" y="416.7031392993972" type="line"/>
+      <point x="268.95702909809995" y="416.98616254374366" type="line"/>
+      <point x="291.2846298575054" y="417.4174452084459" type="line"/>
+      <point x="313.5615391439454" y="417.9483260467688" type="line"/>
+      <point x="335.7954982307411" y="418.51890623695294" type="line"/>
+    </contour>
+  </outline>
+</glyph>

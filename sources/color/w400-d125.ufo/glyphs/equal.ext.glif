@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="equal.ext" format="2">
+  <advance width="746.0"/>
+  <outline>
+    <component base="equal"/>
+  </outline>
+</glyph>

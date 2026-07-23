@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="quotesingle.ext.wallBronze" format="2">
+  <advance width="230.615385"/>
+  <outline>
+    <contour>
+      <point x="132.6153846153846" y="700.0" type="line"/>
+      <point x="132.6153846153846" y="676.6666666666666" type="line"/>
+      <point x="132.6153846153846" y="653.3333333333334" type="line"/>
+      <point x="132.6153846153846" y="630.0" type="line"/>
+      <point x="132.6153846153846" y="606.6666666666666" type="line"/>
+      <point x="132.6153846153846" y="583.3333333333334" type="line"/>
+      <point x="132.6153846153846" y="560.0" type="line"/>
+      <point x="132.6153846153846" y="536.6666666666666" type="line"/>
+      <point x="132.6153846153846" y="513.3333333333334" type="line"/>
+      <point x="132.6153846153846" y="490.0" type="line"/>
+      <point x="192.6153846153846" y="420.0" type="line"/>
+      <point x="192.6153846153846" y="443.33333333333337" type="line"/>
+      <point x="192.6153846153846" y="466.66666666666663" type="line"/>
+      <point x="192.6153846153846" y="490.0" type="line"/>
+      <point x="192.6153846153846" y="513.3333333333333" type="line"/>
+      <point x="192.6153846153846" y="536.6666666666667" type="line"/>
+      <point x="192.6153846153846" y="560.0" type="line"/>
+      <point x="192.6153846153846" y="583.3333333333334" type="line"/>
+      <point x="192.6153846153846" y="606.6666666666666" type="line"/>
+      <point x="192.6153846153846" y="630.0" type="line"/>
+    </contour>
+  </outline>
+</glyph>

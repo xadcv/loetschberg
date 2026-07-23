@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Ocircumflex.hand" format="2">
+  <advance width="1101.0"/>
+  <outline>
+    <component base="O.hand"/>
+    <component base="_mark.Ocircumflex.O.circ.hand"/>
+  </outline>
+</glyph>

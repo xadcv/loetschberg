@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="six.hand.ext" format="2">
+  <advance width="744.0"/>
+  <outline>
+    <component base="six.hand"/>
+  </outline>
+</glyph>

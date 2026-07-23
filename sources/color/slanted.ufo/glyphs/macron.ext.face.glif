@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="macron.ext.face" format="2">
+  <advance width="556.0"/>
+  <outline>
+    <contour>
+      <point x="238.2873307022146" y="660.0" type="line"/>
+      <point x="262.2873307022146" y="660.0" type="line"/>
+      <point x="286.2873307022146" y="660.0" type="line"/>
+      <point x="310.2873307022146" y="660.0" type="line"/>
+      <point x="334.2873307022146" y="660.0" type="line"/>
+      <point x="358.2873307022146" y="660.0" type="line"/>
+      <point x="382.2873307022146" y="660.0" type="line"/>
+      <point x="406.2873307022146" y="660.0" type="line"/>
+      <point x="430.2873307022146" y="660.0" type="line"/>
+      <point x="454.2873307022146" y="660.0" type="line"/>
+      <point x="478.2873307022146" y="660.0" type="line"/>
+      <point x="502.2873307022146" y="660.0" type="line"/>
+      <point x="526.2873307022146" y="660.0" type="line"/>
+      <point x="550.2873307022146" y="660.0" type="line"/>
+      <point x="574.2873307022146" y="660.0" type="line"/>
+      <point x="598.2873307022146" y="660.0" type="line"/>
+      <point x="593.6110863454742" y="638.0" type="line"/>
+      <point x="588.9348419887336" y="616.0" type="line"/>
+      <point x="584.2585976319931" y="594.0" type="line"/>
+      <point x="579.5823532752527" y="572.0" type="line"/>
+      <point x="555.5823532752527" y="572.0" type="line"/>
+      <point x="531.5823532752527" y="572.0" type="line"/>
+      <point x="507.5823532752527" y="572.0" type="line"/>
+      <point x="483.5823532752527" y="572.0" type="line"/>
+      <point x="459.5823532752527" y="572.0" type="line"/>
+      <point x="435.5823532752527" y="572.0" type="line"/>
+      <point x="411.5823532752527" y="572.0" type="line"/>
+      <point x="387.5823532752527" y="572.0" type="line"/>
+      <point x="363.5823532752527" y="572.0" type="line"/>
+      <point x="339.5823532752527" y="572.0" type="line"/>
+      <point x="315.5823532752527" y="572.0" type="line"/>
+      <point x="291.5823532752527" y="572.0" type="line"/>
+      <point x="267.5823532752527" y="572.0" type="line"/>
+      <point x="243.58235327525267" y="572.0" type="line"/>
+      <point x="219.58235327525267" y="572.0" type="line"/>
+      <point x="224.25859763199315" y="594.0" type="line"/>
+      <point x="228.93484198873364" y="616.0" type="line"/>
+      <point x="233.61108634547412" y="638.0" type="line"/>
+    </contour>
+  </outline>
+</glyph>

@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="equal.ext.wallBronze" format="2">
+  <advance width="580.0"/>
+  <outline>
+    <contour>
+      <point x="510.0" y="453.25" type="line"/>
+      <point x="510.0" y="434.125" type="line"/>
+      <point x="510.0" y="415.0" type="line"/>
+      <point x="510.0" y="395.875" type="line"/>
+      <point x="510.0" y="376.75" type="line"/>
+      <point x="556.0" y="322.75" type="line"/>
+      <point x="556.0" y="341.875" type="line"/>
+      <point x="556.0" y="361.0" type="line"/>
+      <point x="556.0" y="380.125" type="line"/>
+      <point x="556.0" y="399.25" type="line"/>
+    </contour>
+    <contour>
+      <point x="510.0" y="263.25" type="line"/>
+      <point x="510.0" y="244.125" type="line"/>
+      <point x="510.0" y="225.0" type="line"/>
+      <point x="510.0" y="205.875" type="line"/>
+      <point x="510.0" y="186.75" type="line"/>
+      <point x="556.0" y="132.75" type="line"/>
+      <point x="556.0" y="151.875" type="line"/>
+      <point x="556.0" y="171.0" type="line"/>
+      <point x="556.0" y="190.125" type="line"/>
+      <point x="556.0" y="209.25" type="line"/>
+    </contour>
+  </outline>
+</glyph>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="egrave.ext" format="2">
+  <advance width="850.827361"/>
+  <outline>
+    <component base="egrave"/>
+  </outline>
+</glyph>

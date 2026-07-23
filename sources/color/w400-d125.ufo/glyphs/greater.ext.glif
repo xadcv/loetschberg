@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="greater.ext" format="2">
+  <advance width="811.155421"/>
+  <outline>
+    <component base="greater"/>
+  </outline>
+</glyph>

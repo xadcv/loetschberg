@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="uacute.ext.wallBronze" format="2">
+  <advance width="886.0"/>
+  <outline>
+    <contour>
+      <point x="348.0" y="500.0" type="line"/>
+      <point x="348.0" y="476.0" type="line"/>
+      <point x="348.0" y="452.0" type="line"/>
+      <point x="348.0" y="428.0" type="line"/>
+      <point x="348.0" y="404.0" type="line"/>
+      <point x="348.0" y="380.0" type="line"/>
+      <point x="348.0" y="356.0" type="line"/>
+      <point x="348.0" y="332.0" type="line"/>
+      <point x="348.0" y="308.0" type="line"/>
+      <point x="348.0" y="284.0" type="line"/>
+      <point x="348.0" y="260.0" type="line"/>
+      <point x="408.0" y="190.0" type="line"/>
+      <point x="408.0" y="214.0" type="line"/>
+      <point x="408.0" y="238.0" type="line"/>
+      <point x="408.0" y="262.0" type="line"/>
+      <point x="408.0" y="286.0" type="line"/>
+      <point x="408.0" y="310.0" type="line"/>
+      <point x="408.0" y="334.0" type="line"/>
+      <point x="408.0" y="358.0" type="line"/>
+      <point x="408.0" y="382.0" type="line"/>
+      <point x="408.0" y="406.0" type="line"/>
+      <point x="408.0" y="430.0" type="line"/>
+    </contour>
+    <contour>
+      <point x="298.0" y="262.0" type="line"/>
+      <point x="298.3105835918724" y="257.6750986278642" type="line"/>
+      <point x="299.2408212354498" y="253.3712677404759" type="line"/>
+      <point x="300.78618090643977" y="249.10947516929895" type="line"/>
+      <point x="302.93913376786435" y="244.91048393934602" type="line"/>
+      <point x="305.68919084979666" y="240.7947511138085" type="line"/>
+      <point x="309.0229541505684" y="236.78232812930037" type="line"/>
+      <point x="312.9241819104868" y="232.89276310727473" type="line"/>
+      <point x="317.3738677400557" y="229.1450056175413" type="line"/>
+      <point x="322.35033321719425" y="225.55731435786663" type="line"/>
+      <point x="327.8293335023303" y="222.14716819943453" type="line"/>
+      <point x="387.8293335023303" y="152.14716819943453" type="line"/>
+      <point x="382.35033321719425" y="155.55731435786663" type="line"/>
+      <point x="377.3738677400557" y="159.1450056175413" type="line"/>
+      <point x="372.9241819104868" y="162.89276310727473" type="line"/>
+      <point x="369.0229541505684" y="166.78232812930037" type="line"/>
+      <point x="365.68919084979666" y="170.7947511138085" type="line"/>
+      <point x="362.93913376786435" y="174.91048393934602" type="line"/>
+      <point x="360.78618090643977" y="179.109475169299" type="line"/>
+      <point x="359.2408212354498" y="183.3712677404759" type="line"/>
+      <point x="358.3105835918724" y="187.67509862786414" type="line"/>
+      <point x="358.0" y="192.0" type="line"/>
+    </contour>
+    <contour>
+      <point x="788.0" y="500.0" type="line"/>
+      <point x="788.0" y="476.1904761904762" type="line"/>
+      <point x="788.0" y="452.3809523809524" type="line"/>
+      <point x="788.0" y="428.57142857142856" type="line"/>
+      <point x="788.0" y="404.76190476190476" type="line"/>
+      <point x="788.0" y="380.95238095238096" type="line"/>
+      <point x="788.0" y="357.1428571428571" type="line"/>
+      <point x="788.0" y="333.33333333333337" type="line"/>
+      <point x="788.0" y="309.5238095238095" type="line"/>
+      <point x="788.0" y="285.7142857142857" type="line"/>
+      <point x="788.0" y="261.9047619047619" type="line"/>
+      <point x="788.0" y="238.09523809523807" type="line"/>
+      <point x="788.0" y="214.28571428571428" type="line"/>
+      <point x="788.0" y="190.47619047619048" type="line"/>
+      <point x="788.0" y="166.66666666666674" type="line"/>
+      <point x="788.0" y="142.8571428571429" type="line"/>
+      <point x="788.0" y="119.04761904761904" type="line"/>
+      <point x="788.0" y="95.23809523809518" type="line"/>
+      <point x="788.0" y="71.42857142857144" type="line"/>
+      <point x="788.0" y="47.61904761904759" type="line"/>
+      <point x="788.0" y="23.809523809523853" type="line"/>
+      <point x="788.0" y="0.0" type="line"/>
+      <point x="848.0" y="-70.0" type="line"/>
+      <point x="848.0" y="-46.19047619047615" type="line"/>
+      <point x="848.0" y="-22.380952380952408" type="line"/>
+      <point x="848.0" y="1.4285714285714448" type="line"/>
+      <point x="848.0" y="25.238095238095184" type="line"/>
+      <point x="848.0" y="49.04761904761904" type="line"/>
+      <point x="848.0" y="72.85714285714289" type="line"/>
+      <point x="848.0" y="96.66666666666674" type="line"/>
+      <point x="848.0" y="120.47619047619048" type="line"/>
+      <point x="848.0" y="144.28571428571422" type="line"/>
+      <point x="848.0" y="168.09523809523807" type="line"/>
+      <point x="848.0" y="191.90476190476193" type="line"/>
+      <point x="848.0" y="215.71428571428572" type="line"/>
+      <point x="848.0" y="239.52380952380952" type="line"/>
+      <point x="848.0" y="263.33333333333337" type="line"/>
+      <point x="848.0" y="287.1428571428571" type="line"/>
+      <point x="848.0" y="310.95238095238096" type="line"/>
+      <point x="848.0" y="334.76190476190476" type="line"/>
+      <point x="848.0" y="358.57142857142856" type="line"/>
+      <point x="848.0" y="382.3809523809524" type="line"/>
+      <point x="848.0" y="406.1904761904762" type="line"/>
+      <point x="848.0" y="430.0" type="line"/>
+    </contour>
+    <contour>
+      <point x="621.986127017335" y="609.8443294618371" type="line"/>
+      <point x="602.5416825728905" y="593.7332183507259" type="line"/>
+      <point x="583.0972381284461" y="577.6221072396148" type="line"/>
+      <point x="563.6527936840016" y="561.5109961285037" type="line"/>
+      <point x="544.2083492395573" y="545.3998850173925" type="line"/>
+      <point x="524.7639047951128" y="529.2887739062814" type="line"/>
+      <point x="505.31946035066835" y="513.1776627951704" type="line"/>
+      <point x="485.8750159062239" y="497.0665516840593" type="line"/>
+      <point x="466.4305714617795" y="480.9554405729482" type="line"/>
+      <point x="446.98612701733504" y="464.84432946183705" type="line"/>
+      <point x="506.98612701733504" y="394.84432946183705" type="line"/>
+      <point x="526.4305714617794" y="410.9554405729482" type="line"/>
+      <point x="545.8750159062239" y="427.0665516840593" type="line"/>
+      <point x="565.3194603506684" y="443.17766279517036" type="line"/>
+      <point x="584.7639047951128" y="459.2887739062815" type="line"/>
+      <point x="604.2083492395573" y="475.3998850173926" type="line"/>
+      <point x="623.6527936840016" y="491.51099612850373" type="line"/>
+      <point x="643.0972381284461" y="507.6221072396148" type="line"/>
+      <point x="662.5416825728905" y="523.7332183507259" type="line"/>
+      <point x="681.986127017335" y="539.8443294618371" type="line"/>
+    </contour>
+  </outline>
+</glyph>

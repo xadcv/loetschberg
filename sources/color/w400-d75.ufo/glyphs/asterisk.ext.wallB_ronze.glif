@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="asterisk.ext.wallBronze" format="2">
+  <advance width="428.804208"/>
+  <outline>
+    <contour>
+      <point x="330.8042080990622" y="483.25612060707067" type="line"/>
+      <point x="317.97815607429663" y="466.62806030353534" type="line"/>
+      <point x="305.1521040495311" y="450.0" type="line"/>
+      <point x="292.32605202476554" y="433.37193969646466" type="line"/>
+      <point x="279.5" y="416.74387939292933" type="line"/>
+      <point x="339.5" y="346.74387939292933" type="line"/>
+      <point x="352.32605202476554" y="363.37193969646466" type="line"/>
+      <point x="365.1521040495311" y="380.0" type="line"/>
+      <point x="377.97815607429663" y="396.62806030353534" type="line"/>
+      <point x="390.8042080990622" y="413.25612060707067" type="line"/>
+    </contour>
+    <contour>
+      <point x="279.5" y="623.2561206070707" type="line"/>
+      <point x="292.32605202476554" y="606.6280603035353" type="line"/>
+      <point x="305.1521040495311" y="590.0" type="line"/>
+      <point x="317.97815607429663" y="573.3719396964647" type="line"/>
+      <point x="330.8042080990622" y="556.7438793929293" type="line"/>
+      <point x="390.8042080990622" y="486.74387939292933" type="line"/>
+      <point x="377.97815607429663" y="503.37193969646466" type="line"/>
+      <point x="365.1521040495311" y="520.0" type="line"/>
+      <point x="352.32605202476554" y="536.6280603035353" type="line"/>
+      <point x="339.5" y="553.2561206070707" type="line"/>
+    </contour>
+  </outline>
+</glyph>

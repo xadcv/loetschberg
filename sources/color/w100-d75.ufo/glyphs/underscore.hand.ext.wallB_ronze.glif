@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="underscore.hand.ext.wallBronze" format="2">
+  <advance width="616.0"/>
+  <outline>
+    <contour>
+      <point x="517.7169232535798" y="-59.052824338860205" type="line"/>
+      <point x="517.6244750812583" y="-67.08074516316992" type="line"/>
+      <point x="517.5034091457368" y="-75.1161977261263" type="line"/>
+      <point x="517.356017388378" y="-83.15952490738368" type="line"/>
+      <point x="517.1850901338408" y="-91.21102775617635" type="line"/>
+      <point x="577.1850901338408" y="-161.21102775617635" type="line"/>
+      <point x="577.356017388378" y="-153.15952490738368" type="line"/>
+      <point x="577.5034091457368" y="-145.1161977261263" type="line"/>
+      <point x="577.6244750812583" y="-137.08074516316992" type="line"/>
+      <point x="577.7169232535798" y="-129.0528243388602" type="line"/>
+    </contour>
+  </outline>
+</glyph>

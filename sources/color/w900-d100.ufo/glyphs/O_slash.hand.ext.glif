@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Oslash.hand.ext" format="2">
+  <advance width="961.588795"/>
+  <outline>
+    <component base="Oslash.hand"/>
+  </outline>
+</glyph>

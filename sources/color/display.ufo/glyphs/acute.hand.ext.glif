@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="acute.hand.ext" format="2">
+  <advance width="399.307329"/>
+  <outline>
+    <component base="acute.hand"/>
+  </outline>
+</glyph>

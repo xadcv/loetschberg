@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="atilde.hand.ext" format="2">
+  <advance width="768.0"/>
+  <outline>
+    <component base="atilde.hand"/>
+  </outline>
+</glyph>

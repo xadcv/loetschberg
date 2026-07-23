@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="K.hand.ext" format="2">
+  <advance width="727.32758"/>
+  <outline>
+    <component base="K.hand"/>
+  </outline>
+</glyph>

@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>ascender</key>
+    <integer>960</integer>
+    <key>capHeight</key>
+    <integer>700</integer>
+    <key>descender</key>
+    <integer>-300</integer>
+    <key>familyName</key>
+    <string>Lötschberg</string>
+    <key>italicAngle</key>
+    <integer>0</integer>
+    <key>openTypeHheaAscender</key>
+    <integer>960</integer>
+    <key>openTypeHheaDescender</key>
+    <integer>-300</integer>
+    <key>openTypeHheaLineGap</key>
+    <integer>0</integer>
+    <key>openTypeNameDescription</key>
+    <string>Lötschberg parametric variable colour railway sans</string>
+    <key>openTypeNameDesigner</key>
+    <string>ADCV</string>
+    <key>openTypeNameManufacturer</key>
+    <string>ADCV</string>
+    <key>openTypeNameUniqueID</key>
+    <string>1.000;ADCV;Loetschberg-w100-d100</string>
+    <key>openTypeNameVersion</key>
+    <string>Version 1.000</string>
+    <key>openTypeOS2TypoAscender</key>
+    <integer>960</integer>
+    <key>openTypeOS2TypoDescender</key>
+    <integer>-300</integer>
+    <key>openTypeOS2TypoLineGap</key>
+    <integer>0</integer>
+    <key>openTypeOS2VendorID</key>
+    <string>ADCV</string>
+    <key>openTypeOS2WeightClass</key>
+    <integer>100</integer>
+    <key>openTypeOS2WidthClass</key>
+    <integer>5</integer>
+    <key>openTypeOS2WinAscent</key>
+    <integer>960</integer>
+    <key>openTypeOS2WinDescent</key>
+    <integer>300</integer>
+    <key>postscriptFontName</key>
+    <string>Loetschberg-w100d100</string>
+    <key>postscriptFullName</key>
+    <string>Lötschberg Master w100-d100</string>
+    <key>postscriptUnderlinePosition</key>
+    <integer>-100</integer>
+    <key>postscriptUnderlineThickness</key>
+    <integer>50</integer>
+    <key>postscriptWeightName</key>
+    <string>Regular</string>
+    <key>styleMapFamilyName</key>
+    <string>Lötschberg</string>
+    <key>styleMapStyleName</key>
+    <string>regular</string>
+    <key>styleName</key>
+    <string>Master w100-d100</string>
+    <key>unitsPerEm</key>
+    <integer>1000</integer>
+    <key>versionMajor</key>
+    <integer>1</integer>
+    <key>versionMinor</key>
+    <integer>0</integer>
+    <key>xHeight</key>
+    <integer>500</integer>
+    <key>year</key>
+    <integer>2026</integer>
+  </dict>
+</plist>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="dotlessi.hand.ext.wallDark" format="2">
+  <advance width="236.0"/>
+  <outline>
+    <contour>
+      <point x="140.6412467838242" y="-2.6306363292754895" type="line"/>
+      <point x="132.79063723271526" y="-2.4881794244507773" type="line"/>
+      <point x="124.94005987143501" y="-2.329286997775739" type="line"/>
+      <point x="117.08835831761189" y="-2.156244355850049" type="line"/>
+      <point x="109.23438488900166" y="-1.971540323975546" type="line"/>
+      <point x="101.37700948541074" y="-1.7778314500570787" type="line"/>
+      <point x="161.37700948541072" y="-71.77783145005708" type="line"/>
+      <point x="169.23438488900166" y="-71.97154032397555" type="line"/>
+      <point x="177.0883583176119" y="-72.15624435585005" type="line"/>
+      <point x="184.940059871435" y="-72.32928699777574" type="line"/>
+      <point x="192.79063723271526" y="-72.48817942445078" type="line"/>
+      <point x="200.6412467838242" y="-72.63063632927549" type="line"/>
+    </contour>
+  </outline>
+</glyph>

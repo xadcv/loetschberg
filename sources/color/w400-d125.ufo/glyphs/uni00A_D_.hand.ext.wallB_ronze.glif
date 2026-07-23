@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="uni00AD.hand.ext.wallBronze" format="2">
+  <advance width="696.0"/>
+  <outline>
+    <contour>
+      <point x="598.2905259100295" y="390.415012663807" type="line"/>
+      <point x="598.0959084021929" y="370.1500557463565" type="line"/>
+      <point x="598.0929472831215" y="349.9166375270877" type="line"/>
+      <point x="598.2819815733187" y="329.72230035891954" type="line"/>
+      <point x="598.6413686104466" y="309.5733237838348" type="line"/>
+      <point x="599.1299619322144" y="289.4745216244625" type="line"/>
+      <point x="659.1299619322144" y="219.4745216244625" type="line"/>
+      <point x="658.6413686104466" y="239.57332378383478" type="line"/>
+      <point x="658.2819815733187" y="259.72230035891954" type="line"/>
+      <point x="658.0929472831215" y="279.9166375270877" type="line"/>
+      <point x="658.0959084021929" y="300.1500557463565" type="line"/>
+      <point x="658.2905259100295" y="320.415012663807" type="line"/>
+    </contour>
+  </outline>
+</glyph>

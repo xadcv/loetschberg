@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="braceleft.ext" format="2">
+  <advance width="561.51153"/>
+  <outline>
+    <component base="braceleft"/>
+  </outline>
+</glyph>

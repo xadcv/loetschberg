@@ -1,0 +1,26 @@
+[project]
+name = "loetschberg-font"
+version = "1.0.0"
+description = "Reproducible build for the Lötschberg variable colour typeface"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "cffsubr>=0.4.0",
+  "fontbakery>=1.0.1",
+  "fontmake>=3.11.1",
+  "fonttools[lxml,ufo,woff]>=4.59.0",
+  "opentype-sanitizer>=9.2.0",
+  "ufoLib2>=0.18.1",
+  "uharfbuzz>=0.55.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.4.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

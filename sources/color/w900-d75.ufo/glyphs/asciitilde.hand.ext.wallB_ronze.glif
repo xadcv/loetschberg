@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="asciitilde.hand.ext.wallBronze" format="2">
+  <advance width="616.053675"/>
+  <outline>
+    <contour>
+      <point x="426.1895773841227" y="415.1495252371658" type="line"/>
+      <point x="449.50358524313754" y="377.7534305059868" type="line"/>
+      <point x="472.7704498766753" y="340.27243500873794" type="line"/>
+      <point x="495.6532737898973" y="302.76606842869654" type="line"/>
+      <point x="517.9940162306846" y="265.2961342775752" type="line"/>
+      <point x="577.9940162306846" y="195.29613427757522" type="line"/>
+      <point x="555.6532737898973" y="232.76606842869654" type="line"/>
+      <point x="532.7704498766752" y="270.27243500873794" type="line"/>
+      <point x="509.50358524313754" y="307.7534305059868" type="line"/>
+      <point x="486.1895773841227" y="345.1495252371658" type="line"/>
+    </contour>
+  </outline>
+</glyph>

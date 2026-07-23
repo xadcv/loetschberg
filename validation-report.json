@@ -1,0 +1,74 @@
+{
+  "status": "passed",
+  "errors": [],
+  "topologyCompatible": true,
+  "primaryTables": [
+    "COLR",
+    "CPAL",
+    "GDEF",
+    "GPOS",
+    "GSUB",
+    "GlyphOrder",
+    "HVAR",
+    "MVAR",
+    "OS/2",
+    "STAT",
+    "cmap",
+    "fvar",
+    "glyf",
+    "gvar",
+    "head",
+    "hhea",
+    "hmtx",
+    "loca",
+    "maxp",
+    "name",
+    "post"
+  ],
+  "sidecarTables": [
+    "CFF2",
+    "GDEF",
+    "GPOS",
+    "GSUB",
+    "GlyphOrder",
+    "HVAR",
+    "MVAR",
+    "OS/2",
+    "STAT",
+    "cmap",
+    "fvar",
+    "head",
+    "hhea",
+    "hmtx",
+    "maxp",
+    "name",
+    "post"
+  ],
+  "axes": {
+    "wght": [
+      100.0,
+      400.0,
+      900.0
+    ],
+    "wdth": [
+      75.0,
+      100.0,
+      125.0
+    ],
+    "opsz": [
+      8.0,
+      12.0,
+      144.0
+    ],
+    "slnt": [
+      -12.0,
+      0.0,
+      0.0
+    ]
+  },
+  "cmapCount": 192,
+  "primaryBytes": 4957848,
+  "sidecarBytes": 875952,
+  "woffBytes": 2164392,
+  "woff2Bytes": 1353544
+}

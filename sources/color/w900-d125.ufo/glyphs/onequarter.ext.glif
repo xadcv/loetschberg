@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="onequarter.ext" format="2">
+  <advance width="928.2975"/>
+  <outline>
+    <component base="onequarter"/>
+  </outline>
+</glyph>
