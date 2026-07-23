@@ -31,7 +31,7 @@ Run these commands from the repository root. `build.py` creates the compatible m
 | `Loetschberg-VF[wght,wdth].ttf` | Primary variable colour font with `ss01`, `ss02`, COLRv1, and CPAL |
 | `Loetschberg-Text-VF[wght,wdth].otf` | Mono CFF2 text sidecar with base outlines and `ss01` |
 | `Loetschberg-Regular-VF[wght,wdth].ttf` | Palette-free Regular family for Figma, with `ss01` |
-| `Loetschberg-Extruded-VF[wght,wdth].ttf` | Palette-free extruded family for Figma, with `ss01` |
+| `Loetschberg-Extruded-VF[wght,wdth].ttf` | Palette-free extrusion-only registration layer for Figma, with `ss01` |
 | `Loetschberg-VF.woff2` / `.woff` | Web aliases of the primary colour font |
 | `Loetschberg-1.0.2.zip` | Versioned release package |
 | `index.html` | Interactive web specimen |
@@ -47,9 +47,11 @@ The Python port, 12 UFO masters per designspace, tests, and reports are retained
 Install only this pair for Figma:
 
 - **Lötschberg** — flat construction, with Handdrawn through `ss01`.
-- **Lötschberg Extruded** — monochrome extrusion with hatch knockouts, with Handdrawn through `ss01`.
+- **Lötschberg Extruded** — extrusion-only depth layer with hatch knockouts, with Handdrawn through `ss01`.
 
-Both are true two-axis variable `glyf` fonts. The Extruded family is monochrome because Figma does not render the production COLRv1 palette construction. Do not co-install the primary `Loetschberg-VF[wght,wdth].ttf`: it intentionally shares the **Lötschberg** family name with the Regular compatibility font.
+Both are true two-axis variable `glyf` fonts with identical advances and registration. In Figma, duplicate the text layer without moving it: use **Lötschberg Extruded** on the lower layer for the depth colour and **Lötschberg** on the upper layer for the face colour. The depth glyph deliberately omits the face and keyline, so the background remains visible through counters and hatch knockouts and no reversed hatch can cut through the foreground face.
+
+Do not co-install the primary `Loetschberg-VF[wght,wdth].ttf`: it intentionally shares the **Lötschberg** family name with the Regular compatibility font.
 
 ## Designspace
 

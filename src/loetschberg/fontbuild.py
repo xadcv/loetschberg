@@ -576,7 +576,7 @@ def _build_master_fonts(
         f"Lötschberg Extruded {spec.style_name}"
     )
     extruded.info.openTypeNameDescription = (
-        "Lötschberg monochrome extruded glyf variable font"
+        "Lötschberg extrusion-only registration layer for monochrome workflows"
     )
     color.features.text = _feature_text(text_only=False, kern=spec.kern)
     text.features.text = _feature_text(text_only=True, kern=spec.kern)
@@ -681,6 +681,11 @@ def _build_master_fonts(
         _new_glyph(color, ext_name(name, True), width, components=[hand_name(name)])
         signatures[ext_name(name)] = signatures[ext_name(name, True)] = (0, ())
 
+        # The monochrome Figma export is a depth-only registration layer.
+        # Users duplicate a text object, put this family behind the Regular
+        # family, and colour the two objects independently. Keeping the face
+        # and keyline out of this glyph is essential: reversed hatch contours
+        # must only knock through wall ink, never through the foreground face.
         mono_extruded: dict[bool, list[list[tuple[float, float]]]] = {}
         for is_hand, recipe, params, layer_shift in (
             (False, regular_recipes[char], regular_params, shift),
@@ -708,7 +713,7 @@ def _build_master_fonts(
                     mono_extruded.setdefault(is_hand, []).extend(
                         [list(reversed(contour)) for contour in font_contours]
                     )
-                else:
+                elif role in {"wallDark", "wallBronze"}:
                     mono_extruded.setdefault(is_hand, []).extend(font_contours)
 
         _new_glyph(
@@ -994,7 +999,7 @@ def compile_fonts() -> None:
         postscript_prefix="LoetschbergExtruded",
         unique_id="LoetschbergExtrudedVF",
         description=(
-            "Lötschberg monochrome extruded glyf variable compatibility font"
+            "Lötschberg extrusion-only registration layer for monochrome workflows"
         ),
     )
     _write_web_fonts()

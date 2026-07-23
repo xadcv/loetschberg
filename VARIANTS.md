@@ -68,9 +68,11 @@ All colours are fixed CPAL entries.
 | File | Install family | Default construction | OpenType variant |
 |---|---|---|---|
 | `Loetschberg-Regular-VF[wght,wdth].ttf` | **Lötschberg** | Regular flat outline | `ss01` → Handdrawn flat |
-| `Loetschberg-Extruded-VF[wght,wdth].ttf` | **Lötschberg Extruded** | Monochrome extrusion with hatch knockouts | `ss01` → Handdrawn extruded |
+| `Loetschberg-Extruded-VF[wght,wdth].ttf` | **Lötschberg Extruded** | Extrusion-only depth layer with hatch knockouts | `ss01` → Handdrawn depth |
 
-Both exports retain only `wght` and `wdth`; neither contains COLR/CPAL or `ss02`. Install only these two compatibility TTFs for Figma. The Regular export shares its family name with the primary COLRv1 font, so those two builds must not be co-installed.
+Both exports retain only `wght` and `wdth`; neither contains COLR/CPAL or `ss02`. Their advances and axis locations match exactly. To reproduce separate face and extrusion colours in Figma, duplicate a text object in place, apply **Lötschberg Extruded** to the lower object and **Lötschberg** to the upper object, then choose each object’s colour independently. The depth layer omits face and keyline outlines; its reversed hatches only knock through wall ink.
+
+Install only these two compatibility TTFs for Figma. The Regular export shares its family name with the primary COLRv1 font, so those two builds must not be co-installed.
 
 ## Interpolation invariant
 

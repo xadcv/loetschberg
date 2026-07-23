@@ -19,7 +19,7 @@
     <key>openTypeHheaLineGap</key>
     <integer>0</integer>
     <key>openTypeNameDescription</key>
-    <string>Lötschberg monochrome extruded glyf variable font</string>
+    <string>Lötschberg extrusion-only registration layer for monochrome workflows</string>
     <key>openTypeNameDesigner</key>
     <string>ADCV</string>
     <key>openTypeNameManufacturer</key>

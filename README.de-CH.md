@@ -27,7 +27,7 @@ uv run pytest
 | `Loetschberg-VF[wght,wdth].ttf` | Primäri variabli Farbschrift mit `ss01`, `ss02`, COLRv1 und CPAL |
 | `Loetschberg-Text-VF[wght,wdth].otf` | Monochromi CFF2-Textfamilie mit `ss01` |
 | `Loetschberg-Regular-VF[wght,wdth].ttf` | Flachi Figma-Familie mit `ss01` |
-| `Loetschberg-Extruded-VF[wght,wdth].ttf` | Monochromi extrudierti Figma-Familie mit `ss01` |
+| `Loetschberg-Extruded-VF[wght,wdth].ttf` | Reini Tüüfe-Ebeni für Figma mit `ss01` |
 | `Loetschberg-VF.woff2` / `.woff` | Web-Aliasse vo de Primärschrift |
 | `Loetschberg-1.0.2.zip` | Versionierts Release-Paket |
 | `index.html` | Interaktivs Web-Specimen |
@@ -38,9 +38,11 @@ uv run pytest
 Installier für Figma nume das Paar:
 
 - **Lötschberg** — flachi Konstruktion, Handdrawn über `ss01`.
-- **Lötschberg Extruded** — monochromi Extrusion mit Schraffur, Handdrawn über `ss01`.
+- **Lötschberg Extruded** — reini Extrusions-Ebeni mit Schraffur, Handdrawn über `ss01`.
 
-Beidi sind echti variable `glyf`-Schrifte mit `wght` und `wdth`. D primäri `Loetschberg-VF[wght,wdth].ttf` sött nöd gliichziitig installiert sii, will si de Familiename **Lötschberg** mit de Regular-Kompatibilitätsschrift teilt.
+Beidi sind echti variable `glyf`-Schrifte mit `wght`, `wdth` und identische Vorbreitene. Duplizier i Figma d Textebeni ohni si z verschiebe: **Lötschberg Extruded** chunnt unde für d Tüüfefarb, **Lötschberg** obe für d Vordersite. D Tüüfe-Ebeni enthaltet kei Vordersite und kei Keyline; Hintergrund, Innenrüüm und Schraffur bliibed drum suuber offe.
+
+D primäri `Loetschberg-VF[wght,wdth].ttf` sött nöd gliichziitig installiert sii, will si de Familiename **Lötschberg** mit de Regular-Kompatibilitätsschrift teilt.
 
 ## Designspace
 

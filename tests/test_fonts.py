@@ -707,6 +707,35 @@ def test_extruded_compat_has_structurally_distinct_expanded_outlines(
     assert extruded.yMin < regular.yMin
 
 
+def test_extruded_compat_is_depth_only_registration_layer(
+    primary_font: TTFont,
+    extruded_compat_font: TTFont,
+) -> None:
+    """The Figma depth layer must omit face/keyline contours.
+
+    Hatch contours are reversed knockouts. If the foreground face were copied
+    into the same monochrome glyph, those global holes would cut white glitches
+    through it at heavy locations.
+    """
+
+    name = _cmap_name(extruded_compat_font, ord("O"))
+    extruded = extruded_compat_font["glyf"][name]
+    extruded.expand(extruded_compat_font["glyf"])
+
+    expected_contours = 0
+    for role in ("wallDark", "wallBronze", "hatch"):
+        layer = primary_font["glyf"][f"{name}.ext.{role}"]
+        layer.expand(primary_font["glyf"])
+        expected_contours += layer.numberOfContours
+
+    assert extruded.numberOfContours == expected_contours
+    for role in ("face", "keyline"):
+        assert _recording(extruded_compat_font, name) != _recording(
+            primary_font,
+            f"{name}.ext.{role}",
+        )
+
+
 def test_h_left_stem_is_invariant_across_width(primary_font: TTFont) -> None:
     narrow = _static_primary(wdth=75.0)
     wide = _static_primary(wdth=125.0)
