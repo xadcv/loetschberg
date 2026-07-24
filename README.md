@@ -1,108 +1,143 @@
-# Lötschberg
+# LÖTSCHBERG
 
-**Language:** English · [Schwiizerdütsch](README.de-CH.md)
+## English
 
-Lötschberg is a two-axis variable typeface generated from parametric geometry. Weight and width remain continuous; Handdrawn is an interpolation-compatible `ss01` stylistic set rather than a third axis. Optical size and slant were deliberately removed in 1.0.3 so the same variable family loads reliably in Figma and conventional desktop applications.
+Lötschberg is a geometric display face drawn from Swiss locomotive lettering. Its construction is direct and mechanical, but not rigid. Round counters, open joins, and measured spacing keep the family readable as it moves from narrow and light to wide and black.
 
-The primary font is a `glyf` variable COLRv1 font for live colour text. A mono CFF2 OTF is provided for text workflows, and one overlap-unioned Regular `glyf` TTF provides the local/Figma-compatible family. Extrusion remains in the COLRv1 TTF and its WOFF/WOFF2 aliases. In the primary colour font, `ss02` selects the extruded construction. `ss01` and `ss02` are independent and converge in either order.
+> LÖTSCHBERG<br>
+> BERN 151<br>
+> GÖPPENSTEIN · KANDERSTEG · BRIG
 
-## Source governance
+[Open the interactive specimen](index.html)
 
-Outline geometry comes exclusively from the original grid generator, `project/Loetschberg Character Grid.dc.html`. The specimen generator and reconstruction brief contribute parameters and design intent only. Their outlines are not font sources. The deterministic Python port is [src/loetschberg/generator.py](src/loetschberg/generator.py), locked to canonical script SHA-256 `b42ad1dfdf204d650da26e35624b3283466350efb0bf780ad0fb3777ee02f47a`.
+### Two continuous axes
 
-The port was extracted from `class Component extends DCLogic` in the well-formed `script[type="text/x-dc"][data-dc-script]` element. Its `data-props` JSON was HTML-entity decoded. `support.js` was a preview runtime and was never run by the font build.
+| Axis | Range | Default |
+|---|---:|---:|
+| Weight `wght` | 100–900 | 400 |
+| Width `wdth` | 75–125 | 100 |
 
-## Reproducible build
+Twelve exact masters anchor Thin, Regular, Bold, and Black at Condensed, Normal, and Expanded widths. Every position between them remains live.
 
-The project uses [uv](https://docs.astral.sh/uv/) for dependency and command isolation:
+### Four forms
 
-```sh
-uv sync
-uv run python build.py
-uv run pytest
+| Handdrawn `ss01` | Extruded `ss02` | Result |
+|---:|---:|---|
+| Off | Off | Regular |
+| On | Off | Handdrawn |
+| Off | On | Extruded colour |
+| On | On | Handdrawn with depth |
+
+Handdrawn loosens the outline without changing the designspace. Extruded adds a COLRv1 face, two wall colours, clipped hatching, and a keyline.
+
+### Character specimen
+
+```text
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+0123456789
+
+ÄÖÜ ÀÁÂÃÅ Æ Ç ÈÉÊË ÌÍÎÏ Ñ ÒÓÔÕØ ÙÚÛ Ý Þ ß
+äöü àáâãå æ ç èéêë ìíîï ñ òóôõø ùúû ýÿ þ
+
+.,:;!? ¡¿ " ' () [] {} / \ + − × ÷ = % & @
 ```
 
-Run these commands from the repository root. `build.py` creates the compatible masters and designspaces, compiles all variable fonts, adds GSUB/COLRv1/CPAL/STAT data, produces the web fonts, and runs topology assertions.
+### Colour
 
-## Root deliverables
-
-| File | Purpose |
+| Role | Value |
 |---|---|
-| `Loetschberg-VF[wght,wdth].ttf` | Primary variable colour font with `ss01`, `ss02`, COLRv1, and CPAL |
-| `Loetschberg-Text-VF[wght,wdth].otf` | Mono CFF2 text sidecar with base outlines and `ss01` |
-| `Loetschberg-Regular-VF[wght,wdth].ttf` | Overlap-unioned Regular family for local use and Figma, with `ss01` |
-| `Loetschberg-VF.woff2` / `.woff` | Web aliases of the primary colour font |
-| `Loetschberg-1.0.3.zip` | Versioned release package |
-| `index.html` | Interactive web specimen |
-| `VARIANTS.md` | Feature, colour, and compatibility contract |
-| `fontbakery-*-report.{json,md}` | Offline checks for each install family |
-| `interpolatable-report.json` | Source interpolation diagnostic |
-| `validation-report.json` | Machine-readable release gate |
+| Ochre face | `#E2A250` |
+| Bronze wall | `#B07A41` |
+| Charcoal wall and hatch | `#3A332A` |
+| Face keyline | `#2A2016` |
+| Suggested coach background | `#783F35` |
 
-The Python port, 12 UFO masters per designspace, tests, and reports are retained engineering artifacts. They are not alternate outline authorities.
+### Choose a file
 
-## Figma compatibility
+| File | Use |
+|---|---|
+| `Loetschberg-Regular-VF[wght,wdth].ttf` | Local use and Figma |
+| `Loetschberg-VF.woff2` | Complete colour webfont |
+| `Loetschberg-VF.woff` | WOFF web fallback |
+| `Loetschberg-VF[wght,wdth].ttf` | Desktop software with variable COLRv1 support |
+| `Loetschberg-Text-VF[wght,wdth].otf` | Monochrome CFF2 text work |
+| `Loetschberg-1.0.3.zip` | Complete release |
 
-Install only `Loetschberg-Regular-VF[wght,wdth].ttf` for Figma. It is a true two-axis variable `glyf` font with Handdrawn through `ss01`. Its face geometry and advances come from the same masters as the WOFF build at every weight and width; only the representation differs. The local TTF unions overlapping construction pieces before variable compilation so font brokers do not have to interpret overlap flags.
+For Figma, install only the Regular TTF. It uses the same visible face geometry and spacing as the webfont across both axes, with overlapping construction pieces joined for reliable local rendering. Extruded remains in the colour TTF and webfonts.
 
-Extruded is web/COLRv1-only. Use the primary TTF in a colour-font-capable desktop application or WOFF/WOFF2 in the browser.
+### License
 
-Do not co-install the primary `Loetschberg-VF[wght,wdth].ttf`: it intentionally shares the **Lötschberg** family name with the Regular compatibility font.
+Lötschberg is released under the [SIL Open Font License 1.1](LICENSE). You may use it in personal and commercial work, modify it, and redistribute it under the license terms.
 
-## Designspace
+---
 
-| Axis | Tag | Minimum | Default | Maximum | Behaviour |
-|---|---:|---:|---:|---:|---|
-| Weight | `wght` | 100 | 400 | 900 | Continuous Thin→Regular→Black stroke and counter system |
-| Width | `wdth` | 75 | 100 | 125 | Continuous Condensed→Normal→Expanded skeleton and spacing |
+## Schwiizerdütsch
 
-The source plane contains exact Thin, Regular, Bold, and Black masters at Condensed, Normal, and Expanded widths. Named instances cover all 12 combinations.
+Lötschberg isch e geometrischi Displayschrift nach Schwiizer Lokomotiv-Beschriftige. D Konstruktion isch direkt und mechanisch, aber nöd starr. Rundi Innenrüüm, offeni Verbindige und abgstimmti Abständ halted d Familie läsbar, vom schmale Thin bis zum breite Black.
 
-The 1.0.3 geometry coordinates the two axes instead of scaling independent pieces. Above Regular, added ink is eased across the external skeleton and the internal counter rather than consuming the counter alone. The width extremes apply matching black skeleton compensation, and curve strokes bias outward as weight rises. Round forms retain explicit counter floors; joined bowls share stroke centres; diagonal bands are clipped from centre lines; and load-bearing joins use attachment-constrained caps. This keeps apertures, joins, stroke rhythm, and apparent spacing coherent from Thin Condensed through Black Expanded.
+> LÖTSCHBERG<br>
+> BÄRN 151<br>
+> GÖPPENSTEIN · KANDERSTEG · BRIG
 
-Wall planes are checked after the complete glyph shift and y-flip using OpenType rounding. If a valid floating plane would collapse onto one integer line, only its rear edge receives the smallest at-most-two-unit lattice correction that preserves winding and area.
+[S interaktive Schriftmuster ufmache](index.html?lang=gsw-CH)
 
-## Features and colour
+### Zwei stufelosi Achse
 
-`ss01` is named **Handdrawn** and substitutes point-compatible `jit=3.4` outlines. `ss02` is named **Extruded** and substitutes COLRv1 base glyphs. Enabling both selects the handdrawn extrusion regardless of feature order.
+| Achse | Bereich | Standard |
+|---|---:|---:|
+| Gwicht `wght` | 100–900 | 400 |
+| Breiti `wdth` | 75–125 | 100 |
 
-The CPAL palette is:
+Zwölf exakti Masters verankered Thin, Regular, Bold und Black i de Breite Condensed, Normal und Expanded. Jede Punkt dazwüsche bliibt live.
 
-| Index | Role | Colour |
-|---:|---|---|
-| 0 | Ochre face | `#E2A250` |
-| 1 | Bronze wall | `#B07A41` |
-| 2 | Charcoal wall/hatch | `#3A332A` |
-| 3 | Keyline | `#2A2016` |
+### Vier Forme
 
-The five logical COLRv1 paints are ordered dark wall, bronze wall, hatch, keyline, then face. Hatch quads are clipped at render time to the live wall union with `PaintComposite(SRC_IN)`. This preserves seven compatible four-point marks per group across the entire designspace.
+| Handdrawn `ss01` | Extruded `ss02` | Resultat |
+|---:|---:|---|
+| Us | Us | Regular |
+| Ii | Us | Handdrawn |
+| Us | Ii | Extrudierti Farbschrift |
+| Ii | Ii | Handzeichnet mit Tüüfi |
 
-## Coordinates and metrics
+Handdrawn lockeret de Umriss, ohni de Designspace z ändere. Extruded ergänzt e COLRv1-Vordersite, zwei Wandfarbe, abgschnittni Schraffure und e Keyline.
 
-Source coordinates are y-down. The font transform is `font_x = src_x` and `font_y = 700 - src_y`, at 1000 units per em.
+### Zeichemuster
 
-| Metric | Value |
-|---|---:|
-| Units per em | 1000 |
-| Cap height | 700 |
-| x-height | 500 |
-| Ascender / `winAscent` | 960 |
-| Descender | -300 |
-| `winDescent` | 300 |
-| Line gap | 0 |
+```text
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+0123456789
 
-Advances vary by weight and width and are captured in HVAR. All desktop binaries use installable embedding (`fsType=0`) and carry variation PostScript prefix name ID 25. Release 1.0.3 carries internal font version `1.003`.
+ÄÖÜ ÀÁÂÃÅ Æ Ç ÈÉÊË ÌÍÎÏ Ñ ÒÓÔÕØ ÙÚÛ Ý Þ ß
+äöü àáâãå æ ç èéêë ìíîï ñ òóôõø ùúû ýÿ þ
 
-## Validation contract
+.,:;!? ¡¿ " ' () [] {} / \ + − × ÷ = % & @
+```
 
-The build fails if any glyph changes contour count, point count, point order, or start point between masters. This applies to base, `.hand`, wall, hatch, keyline, face, `.ext`, and `.hand.ext` outlines. Source gates also require non-collapsing integer-quantized walls and seven correctly centred hatch marks per frozen group.
+### Farbe
 
-Before release:
+| Rolle | Wert |
+|---|---|
+| Ocker-Vordersite | `#E2A250` |
+| Bronze-Wand | `#B07A41` |
+| Anthrazit-Wand und Schraffur | `#3A332A` |
+| Keyline vo de Vordersite | `#2A2016` |
+| Empfohlene Wagenbruun-Hintergrund | `#783F35` |
 
-1. Run `uv run pytest`.
-2. Run FontBakery and `ots-sanitize` on all three desktop fonts.
-3. Verify `hb-shape` for `ss01`, `ss02`, and their two application orders.
-4. Freeze and render weight/width extrema and all named instances.
-5. Confirm the WOFF2 and WOFF aliases load in `index.html` and remain variable across both axes.
+### D richtig Datei
 
-Firefox, macOS, Illustrator, InDesign, and Figma remain external visual checks when those runtimes are unavailable in the build environment.
+| Datei | Für was |
+|---|---|
+| `Loetschberg-Regular-VF[wght,wdth].ttf` | Lokali Apps und Figma |
+| `Loetschberg-VF.woff2` | Kompletti Farb-Webschrift |
+| `Loetschberg-VF.woff` | WOFF-Fallback fürs Web |
+| `Loetschberg-VF[wght,wdth].ttf` | Desktop-Software mit variabler COLRv1-Unterstützig |
+| `Loetschberg-Text-VF[wght,wdth].otf` | Monochromi CFF2-Textarbeit |
+| `Loetschberg-1.0.3.zip` | Kompletts Release |
+
+Für Figma installiersch nume d Regular-TTF. Si nutzt über beidi Achse die gliich sichtbari Forme und Abständ wie d Webschrift. Überlappendi Konstruktionsteili sind für zuverlässigs lokals Rendering vereint. Extruded bliibt i de Farb-TTF und de Webschrifte.
+
+### Lizenz
+
+Lötschberg isch under de [SIL Open Font License 1.1](LICENSE) veröffentlicht. Du derfsch si privat und kommerziell bruuche, verändere und nach de Lizenzbedingige wiiterverteile.
