@@ -380,13 +380,25 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
 
         base_stroke = ro - ri
         desired_stroke = base_stroke * weight_ratio
+        skeleton_rx = (ro + ri) * W / 2
+        counter_floor_x = max(16.0, ri * W * 0.35)
+        counter_floor_y = max(18.0, ri * 0.35)
+
+        # Light cuts retain the Regular outer silhouette and open the counter.
+        # Previously only the side stroke became lighter while the top and
+        # bottom stayed at Regular weight, distorting O, C, and their accents.
+        if desired_stroke <= base_stroke:
+            outer_rx = skeleton_rx + base_stroke / 2
+            inner_rx = max(counter_floor_x, outer_rx - desired_stroke)
+            outer_ry = ro
+            inner_ry = max(counter_floor_y, ro - desired_stroke)
+            return outer_rx, inner_rx, outer_ry, inner_ry
+
         heavy_progress = min(
             1.0,
             max(0.0, (desired_stroke - base_stroke) / max(base_stroke * 0.7, 1)),
         )
 
-        skeleton_rx = (ro + ri) * W / 2
-        counter_floor_x = max(16.0, ri * W * 0.35)
         stroke_x = min(
             desired_stroke,
             max(1.0, 2 * (skeleton_rx - counter_floor_x)),
@@ -399,7 +411,6 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         # curve weight both outside and inside instead of consuming the full
         # counter. This is the round-glyph counterpart to the weight-aware
         # skeleton expansion used by straight and diagonal construction.
-        counter_floor_y = max(18.0, ri * 0.35)
         added_stroke_y = max(0.0, desired_stroke - base_stroke)
         outer_ry = ro + added_stroke_y * 0.35
         inner_ry = max(
@@ -719,6 +730,7 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         contour: Contour,
         moving_indices: Sequence[int],
         direction: tuple[float, float],
+        overlap: float | None = None,
     ) -> Contour:
         """Extend one quad cap only enough to overlap its parent stroke."""
 
@@ -761,11 +773,36 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
 
         # A positive overlap survives integer rounding and ordinary gvar
         # interpolation between the explicit width/weight source planes.
-        return extended(upper + max(2.0, 0.08 * S))
+        return extended(
+            upper
+            + (
+                max(2.0, 0.08 * S)
+                if overlap is None
+                else overlap
+            )
+        )
 
     def disc(cx: float, cy: float, radius: float) -> Piece:
         weighted_radius = max(8.0, radius + (S - 104.0) * 0.25)
         return pc(ellipse(cx * W, cy, weighted_radius, weighted_radius))
+
+    def accent_disc(cx: float, cy: float, radius: float) -> Piece:
+        """Keep light dieresis dots in step with the active stroke."""
+
+        weighted_radius = (
+            radius * weight_ratio
+            if weight_ratio <= 1.0
+            else radius + (S - 104.0) * 0.25
+        )
+        weighted_radius = max(8.0, weighted_radius)
+        return pc(
+            ellipse(
+                cx * W,
+                cy,
+                weighted_radius,
+                weighted_radius,
+            )
+        )
 
     def ring_p(cx: float, cy: float, ro: float, ri: float) -> Piece:
         outer_rx, inner_rx, outer_ry, inner_ry = protected_curve_strokes(ro, ri)
@@ -977,7 +1014,10 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
 
     # Uppercase -- assignment order mirrors the canonical source.
     G["O"] = lambda: [ring_p(362, 350, 362, 258)]
-    G["Ö"] = lambda: G["O"]() + [disc(225.5, -115, 63), disc(498.5, -115, 63)]
+    G["Ö"] = lambda: G["O"]() + [
+        accent_disc(225.5, -115, 63),
+        accent_disc(498.5, -115, 63),
+    ]
     G["C"] = lambda: [pc(RS(362, 350, 362, 258, -38, -322, -330, -30, 1, 1))]
 
     def glyph_g_cap() -> list[Piece]:
@@ -1285,6 +1325,7 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
                 attachment_midpoint[0] - far_midpoint[0],
                 attachment_midpoint[1] - far_midpoint[1],
             ),
+            overlap=max(6.0, 0.16 * S),
         )
         return [stem, pc(flag)]
 
@@ -1365,10 +1406,18 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
     def glyph_five() -> list[Piece]:
         middle_center = 336
         bottom_center = 700 - S / 2
+        bowl_overlap = max(5.0, 0.12 * S)
         return [
             pc(R(90, 0, 650, SH)),
             pc(R(90, 0, 194, middle_center + S / 2)),
-            pc(R(90, middle_center - S / 2, 470, middle_center + S / 2)),
+            pc(
+                R(
+                    90,
+                    middle_center - S / 2,
+                    470 + bowl_overlap / W,
+                    middle_center + S / 2,
+                )
+            ),
             pc(
                 connected_half_bowl(
                     470,
@@ -1382,7 +1431,7 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
                     -90,
                 )
             ),
-            pc(R(96, 700 - S, 470, 700)),
+            pc(R(96, 700 - S, 470 + bowl_overlap / W, 700)),
         ]
 
     G["5"] = glyph_five
@@ -1681,7 +1730,10 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         if kind == "circ":
             return [chev(cx, -260, (cx - 155, -85), (cx + 155, -85), 90)]
         if kind == "dier":
-            return [disc(cx - 136, -115, 63), disc(cx + 136, -115, 63)]
+            return [
+                accent_disc(cx - 136, -115, 63),
+                accent_disc(cx + 136, -115, 63),
+            ]
         if kind == "ring":
             return [ring_p(cx, -150, 96, 42)]
         if kind == "tilde":
@@ -1709,7 +1761,10 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
                 )
             ]
         if kind == "dier":
-            return [disc(cx - 120, 85, 55), disc(cx + 120, 85, 55)]
+            return [
+                accent_disc(cx - 120, 85, 55),
+                accent_disc(cx + 120, 85, 55),
+            ]
         if kind == "ring":
             return [ring_p(cx, 70, 88, 36)]
         if kind == "tilde":

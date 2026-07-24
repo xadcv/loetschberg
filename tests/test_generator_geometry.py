@@ -195,6 +195,46 @@ def _polygon_area(points: tuple[Point, ...]) -> float:
     ) / 2
 
 
+@pytest.mark.parametrize("width", WIDTHS)
+def test_thin_round_strokes_are_balanced(width: float) -> None:
+    params = MasterSpec("thin-round-probe", wght=100, wdth=width).params()
+    topology = gen.freeze_topology(params, ("O", "Ö"))
+    o_outline = gen.build_contours("O", params, topology=topology["O"])
+    odieresis_outline = gen.build_contours(
+        "Ö",
+        params,
+        topology=topology["Ö"],
+    )
+
+    outer = _bbox(_points(o_outline.pieces[0].contours[0]))
+    inner = _bbox(_points(o_outline.pieces[0].contours[1]))
+    horizontal_stroke = inner[0] - outer[0]
+    vertical_stroke = inner[1] - outer[1]
+    assert horizontal_stroke == pytest.approx(params.s, abs=0.75)
+    assert vertical_stroke == pytest.approx(params.s, abs=0.75)
+
+    dot = _bbox(_points(odieresis_outline.pieces[1].contours[0]))
+    dot_diameter = dot[2] - dot[0]
+    assert 1.15 <= dot_diameter / params.s <= 1.3
+
+
+@pytest.mark.parametrize("width", WIDTHS)
+def test_thin_digit_joins_have_positive_overlap(width: float) -> None:
+    params = MasterSpec("thin-digit-probe", wght=100, wdth=width).params()
+    topology = gen.freeze_topology(params, ("1", "5"))
+    one = gen.build_contours("1", params, topology=topology["1"])
+    five = gen.build_contours("5", params, topology=topology["5"])
+
+    one_stem = _bbox(_points(one.pieces[0].contours[0]))
+    one_flag = _bbox(_points(one.pieces[1].contours[0]))
+    assert one_flag[2] - one_stem[0] >= 8
+
+    bowl = _bbox(_points(five.pieces[3].contours[0]))
+    for bar_index in (2, 4):
+        bar = _bbox(_points(five.pieces[bar_index].contours[0]))
+        assert bar[2] - bowl[0] >= 4.5
+
+
 def _ordered_wall_polygons(
     recipe: gen.FrozenRecipe,
     layers: gen.ReplayedLayers,

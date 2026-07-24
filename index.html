@@ -484,6 +484,7 @@
     .download-card h3 { margin: 0 0 10px; font-size: 1.35rem; }
     .download-card p { margin: 0; color: var(--muted); }
     .download-card .button { align-self: flex-start; margin-top: auto; }
+    .download-card--repository { background: var(--paper-dark); }
 
     .production {
       display: grid;
@@ -793,6 +794,12 @@
           <p data-i18n="downloads.packageCopy">All five font files with a bilingual README and variant notes.</p>
           <a class="button" href="./Loetschberg-1.0.3.zip" download data-i18n="downloads.getPackage">Download ZIP</a>
         </article>
+        <article class="download-card download-card--repository">
+          <p class="download-card__format" data-i18n="downloads.repoFormat">GitHub · Source</p>
+          <h3 data-i18n="downloads.repoTitle">Source repository</h3>
+          <p data-i18n="downloads.repoCopy">Generator, tests, font sources, and release files.</p>
+          <a class="button" href="https://github.com/xadcv/loetschberg" target="_blank" rel="noreferrer" data-i18n="downloads.openRepo">Open GitHub</a>
+        </article>
       </div>
     </section>
 
@@ -904,6 +911,10 @@
           "downloads.packageCopy": "All fünf Schriftdateie mit eme zweisprachige README und Variantennotize.",
           "downloads.download": "Abelade",
           "downloads.getPackage": "ZIP abelade",
+          "downloads.repoFormat": "GitHub · Quellcode",
+          "downloads.repoTitle": "Quellcode",
+          "downloads.repoCopy": "Generator, Tests, Schriftquelle und Release-Dateie.",
+          "downloads.openRepo": "Uf GitHub",
           "production.title": "Was dinne steckt",
           "production.intro": "Ei Quällsystem produziert d Farbschrift, d Textversion, d lokali Regular-TTF und beidi Web-Container.",
           "production.axesTitle": "Zwei stufelosi Achse",

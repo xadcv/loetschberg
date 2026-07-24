@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Ccedilla.hand.ext" format="2">
-  <advance width="785.842522"/>
+  <advance width="843.039372"/>
   <outline>
     <component base="Ccedilla.hand"/>
   </outline>
