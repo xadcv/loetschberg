@@ -1,6 +1,11 @@
-# FontBakery report — Figma Regular family
+# FontBakery report: local Regular TTF
 
-- Font: `Loetschberg-Regular-VF[wght,wdth].ttf`
-- Profile: FontBakery 1.1.0 `check-opentype`
-- Result: **46 PASS · 7 SKIP · 0 FAIL · 0 WARN**
-- Machine-readable detail: `fontbakery-regular-report.json`
+File: `Loetschberg-Regular-VF[wght,wdth].ttf`
+
+FontBakery 1.1.0 `check-opentype --skip-network` result:
+
+- PASS: 46
+- SKIP: 7
+- Not finished: 0
+
+The complete machine-readable results are in `fontbakery-regular-report.json`.

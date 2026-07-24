@@ -62,25 +62,6 @@
     "name",
     "post"
   ],
-  "extrudedCompatTables": [
-    "GPOS",
-    "GSUB",
-    "GlyphOrder",
-    "HVAR",
-    "OS/2",
-    "STAT",
-    "cmap",
-    "fvar",
-    "glyf",
-    "gvar",
-    "head",
-    "hhea",
-    "hmtx",
-    "loca",
-    "maxp",
-    "name",
-    "post"
-  ],
   "axes": {
     "wght": [
       100.0,
@@ -97,7 +78,6 @@
   "primaryBytes": 7713464,
   "sidecarBytes": 1076864,
   "regularCompatBytes": 1202720,
-  "extrudedCompatBytes": 1722172,
   "woffBytes": 3115524,
-  "woff2Bytes": 1933812
+  "woff2Bytes": 1932944
 }

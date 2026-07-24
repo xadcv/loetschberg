@@ -2,9 +2,9 @@
 
 **Language:** English · [Schwiizerdütsch](README.de-CH.md)
 
-Lötschberg is a two-axis variable typeface generated from parametric geometry. Weight and width remain continuous; Handdrawn is an interpolation-compatible `ss01` stylistic set rather than a third axis. Optical size and slant were deliberately removed in 1.0.2 so the same variable family loads reliably in Figma and conventional desktop applications.
+Lötschberg is a two-axis variable typeface generated from parametric geometry. Weight and width remain continuous; Handdrawn is an interpolation-compatible `ss01` stylistic set rather than a third axis. Optical size and slant were deliberately removed in 1.0.3 so the same variable family loads reliably in Figma and conventional desktop applications.
 
-The primary font is a `glyf` variable COLRv1 font for live colour text. A mono CFF2 OTF is provided for text workflows, and separate palette-free Regular and Extruded `glyf` TTFs provide Figma-compatible families. In the primary colour font, `ss02` selects the extruded construction. `ss01` and `ss02` are independent and converge in either order.
+The primary font is a `glyf` variable COLRv1 font for live colour text. A mono CFF2 OTF is provided for text workflows, and one overlap-unioned Regular `glyf` TTF provides the local/Figma-compatible family. Extrusion remains in the COLRv1 TTF and its WOFF/WOFF2 aliases. In the primary colour font, `ss02` selects the extruded construction. `ss01` and `ss02` are independent and converge in either order.
 
 ## Source governance
 
@@ -30,10 +30,9 @@ Run these commands from the repository root. `build.py` creates the compatible m
 |---|---|
 | `Loetschberg-VF[wght,wdth].ttf` | Primary variable colour font with `ss01`, `ss02`, COLRv1, and CPAL |
 | `Loetschberg-Text-VF[wght,wdth].otf` | Mono CFF2 text sidecar with base outlines and `ss01` |
-| `Loetschberg-Regular-VF[wght,wdth].ttf` | Palette-free Regular family for Figma, with `ss01` |
-| `Loetschberg-Extruded-VF[wght,wdth].ttf` | Palette-free extrusion-only registration layer for Figma, with `ss01` |
+| `Loetschberg-Regular-VF[wght,wdth].ttf` | Overlap-unioned Regular family for local use and Figma, with `ss01` |
 | `Loetschberg-VF.woff2` / `.woff` | Web aliases of the primary colour font |
-| `Loetschberg-1.0.2.zip` | Versioned release package |
+| `Loetschberg-1.0.3.zip` | Versioned release package |
 | `index.html` | Interactive web specimen |
 | `VARIANTS.md` | Feature, colour, and compatibility contract |
 | `fontbakery-*-report.{json,md}` | Offline checks for each install family |
@@ -44,12 +43,9 @@ The Python port, 12 UFO masters per designspace, tests, and reports are retained
 
 ## Figma compatibility
 
-Install only this pair for Figma:
+Install only `Loetschberg-Regular-VF[wght,wdth].ttf` for Figma. It is a true two-axis variable `glyf` font with Handdrawn through `ss01`. Its face geometry and advances come from the same masters as the WOFF build at every weight and width; only the representation differs. The local TTF unions overlapping construction pieces before variable compilation so font brokers do not have to interpret overlap flags.
 
-- **Lötschberg** — flat construction, with Handdrawn through `ss01`.
-- **Lötschberg Extruded** — extrusion-only depth layer with hatch knockouts, with Handdrawn through `ss01`.
-
-Both are true two-axis variable `glyf` fonts with identical advances and registration. In Figma, duplicate the text layer without moving it: use **Lötschberg Extruded** on the lower layer for the depth colour and **Lötschberg** on the upper layer for the face colour. The depth glyph deliberately omits the face and keyline, so the background remains visible through counters and hatch knockouts and no reversed hatch can cut through the foreground face.
+Extruded is web/COLRv1-only. Use the primary TTF in a colour-font-capable desktop application or WOFF/WOFF2 in the browser.
 
 Do not co-install the primary `Loetschberg-VF[wght,wdth].ttf`: it intentionally shares the **Lötschberg** family name with the Regular compatibility font.
 
@@ -62,7 +58,7 @@ Do not co-install the primary `Loetschberg-VF[wght,wdth].ttf`: it intentionally 
 
 The source plane contains exact Thin, Regular, Bold, and Black masters at Condensed, Normal, and Expanded widths. Named instances cover all 12 combinations.
 
-The 1.0.2 geometry coordinates the two axes instead of scaling independent pieces. Above Regular, added ink is eased across the external skeleton and the internal counter rather than consuming the counter alone. The width extremes apply matching black skeleton compensation, and curve strokes bias outward as weight rises. Round forms retain explicit counter floors; joined bowls share stroke centres; diagonal bands are clipped from centre lines; and load-bearing joins use attachment-constrained caps. This keeps apertures, joins, stroke rhythm, and apparent spacing coherent from Thin Condensed through Black Expanded.
+The 1.0.3 geometry coordinates the two axes instead of scaling independent pieces. Above Regular, added ink is eased across the external skeleton and the internal counter rather than consuming the counter alone. The width extremes apply matching black skeleton compensation, and curve strokes bias outward as weight rises. Round forms retain explicit counter floors; joined bowls share stroke centres; diagonal bands are clipped from centre lines; and load-bearing joins use attachment-constrained caps. This keeps apertures, joins, stroke rhythm, and apparent spacing coherent from Thin Condensed through Black Expanded.
 
 Wall planes are checked after the complete glyph shift and y-flip using OpenType rounding. If a valid floating plane would collapse onto one integer line, only its rear edge receives the smallest at-most-two-unit lattice correction that preserves winding and area.
 
@@ -95,7 +91,7 @@ Source coordinates are y-down. The font transform is `font_x = src_x` and `font_
 | `winDescent` | 300 |
 | Line gap | 0 |
 
-Advances vary by weight and width and are captured in HVAR. All desktop binaries use installable embedding (`fsType=0`) and carry variation PostScript prefix name ID 25. Release 1.0.2 carries internal font version `1.002`.
+Advances vary by weight and width and are captured in HVAR. All desktop binaries use installable embedding (`fsType=0`) and carry variation PostScript prefix name ID 25. Release 1.0.3 carries internal font version `1.003`.
 
 ## Validation contract
 
@@ -104,7 +100,7 @@ The build fails if any glyph changes contour count, point count, point order, or
 Before release:
 
 1. Run `uv run pytest`.
-2. Run FontBakery and `ots-sanitize` on all four desktop fonts.
+2. Run FontBakery and `ots-sanitize` on all three desktop fonts.
 3. Verify `hb-shape` for `ss01`, `ss02`, and their two application orders.
 4. Freeze and render weight/width extrema and all named instances.
 5. Confirm the WOFF2 and WOFF aliases load in `index.html` and remain variable across both axes.

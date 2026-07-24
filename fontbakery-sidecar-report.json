@@ -40,335 +40,6 @@
                     "severity": null
                 },
                 {
-                    "description": "Is the CFF2 subr/gsubr call depth > 10?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff2_call_depth>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.cff2_call_depth",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2425"
-                    ],
-                    "rationale": "\n        Per \"The CFF2 CharString Format\", the \"Subr nesting, stack limit\" is 10.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_ascii_strings",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4619"
-                    ],
-                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Is the CFF subr/gsubr call depth > 10?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_call_depth>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_call_depth",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2425"
-                    ],
-                    "rationale": "\n        Per \"The Type 2 Charstring Format, Technical Note #5177\",\n        the \"Subr nesting, stack limit\" is 10.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Does the font use deprecated CFF operators or operations?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/cff_deprecated_operators>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_cff"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.cff_deprecated_operators",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/3033"
-                    ],
-                    "rationale": "\n        The 'dotsection' operator and the use of 'endchar' to build accented characters\n        from the Adobe Standard Encoding Character Set (\"seac\") are deprecated in CFF.\n        Adobe recommends repairing any fonts that use these, especially endchar-as-seac,\n        because a rendering issue was discovered in Microsoft Word with a font that\n        makes use of this operation. The check treats that usage as a FAIL.\n        There are no known ill effects of using dotsection, so that check is a WARN.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Check code page character ranges",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/code_pages>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.code_pages",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/2474"
-                    ],
-                    "rationale": "\n        At least some programs (such as Word and Sublime Text) under Windows 7\n        do not recognize fonts unless code page bits are properly set on the\n        ulCodePageRange1 (and/or ulCodePageRange2) fields of the OS/2 table.\n\n        More specifically, the fonts are selectable in the font menu, but whichever\n        Windows API these applications use considers them unsuitable for any\n        character set, so anything set in these fonts is rendered with Arial as a\n        fallback font.\n\n        This check currently does not identify which code pages should be set.\n        Auto-detecting coverage is not trivial since the OpenType specification\n        leaves the interpretation of whether a given code page is \"functional\"\n        or not open to the font developer to decide.\n\n        So here we simply detect as a FAIL when a given font has no code page\n        declared at all.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "The font should not need a DSIG table anymore.",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/dsig>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.dsig",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/3398",
-                        "https://github.com/fonttools/fontbakery/issues/4829"
-                    ],
-                    "rationale": "\n        Microsoft Office 2013 and below products expect fonts to have a digital\n        signature declared in a DSIG table in order to implement OpenType features.\n        The EOL date for Microsoft Office 2013 products was 4/11/2023.\n\n        This issue does not impact Microsoft Office 2016 and above products. It is now considered better to completely remove the table.\n\n        But if you still want your font to support OpenType features on Office 2013,\n        then you may find it handy to add a fake signature on a placeholder DSIG table\n        by running one of the helper scripts provided at\n        https://github.com/googlefonts/gftools\n\n        Reference: https://github.com/fonttools/fontbakery/issues/1845\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Check that OS/2.fsSelection bold & italic settings are unique for each NameID1",
-                    "documentation": null,
-                    "experimental": false,
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/family/bold_italic_unique_for_nameid1>",
-                        []
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.family.bold_italic_unique_for_nameid1",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2388"
-                    ],
-                    "rationale": "\n        Per the OpenType spec: name ID 1 'is used in combination with Font Subfamily\n        name (name ID 2), and should be shared among at most four fonts that differ\n        only in weight or style.\n\n        This four-way distinction should also be reflected in the OS/2.fsSelection\n        field, using bits 0 and 5.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Verify that family names in the name table are consistent across all fonts in the family. Checks Typographic Family name (nameID 16) if present, otherwise uses Font Family name (nameID 1)",
-                    "documentation": null,
-                    "experimental": false,
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/family/consistent_family_name>",
-                        []
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.family.consistent_family_name",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4112"
-                    ],
-                    "rationale": "\n        Per the OpenType spec:\n\n            * \"...many existing applications that use this pair of names assume that a\n              Font Family name is shared by at most four fonts that form a font\n              style-linking group\"\n\n            * \"For extended typographic families that includes fonts other than the\n              four basic styles(regular, italic, bold, bold italic), it is strongly\n              recommended that name IDs 16 and 17 be used in fonts to create an\n              extended, typographic grouping.\"\n\n            * \"If name ID 16 is absent, then name ID 1 is considered to be the\n              typographic family name.\"\n\n        https://learn.microsoft.com/en-us/typography/opentype/spec/name\n\n        Fonts within a font family all must have consistent names\n        in the Typographic Family name (nameID 16)\n        or Font Family name (nameID 1), depending on which it uses.\n\n        Inconsistent font/typographic family names across fonts in a family\n        can result in unexpected behaviors, such as broken style linking.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Make sure all font files have the same version value.",
-                    "documentation": null,
-                    "experimental": false,
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/family/equal_font_versions>",
-                        []
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.family.equal_font_versions",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4829"
-                    ],
-                    "rationale": "\n        Within a family released at the same time, all members of the family\n        should have the same version number in the head table.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Verify that each group of fonts with the same nameID 1 has maximum of 4 fonts.",
-                    "documentation": null,
-                    "experimental": false,
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/family/max_4_fonts_per_family_name>",
-                        []
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.family.max_4_fonts_per_family_name",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2372"
-                    ],
-                    "rationale": "\n        Per the OpenType spec:\n\n        'The Font Family name [...] should be shared among at most four fonts that\n        differ only in weight or style [...]'\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Font follows the family naming recommendations?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/family_naming_recommendations>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.family_naming_recommendations",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4829"
-                    ],
-                    "rationale": "\n        This check ensures that the length of various family name and style\n        name strings in the name table are within the maximum length\n        recommended by the OpenType specification.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
                     "description": "Fonts have consistent PANOSE family type?",
                     "documentation": null,
                     "experimental": false,
@@ -421,13 +92,45 @@
                     "severity": null
                 },
                 {
-                    "description": "Checking font version fields (head and name table).",
+                    "description": "Is the CFF subr/gsubr call depth > 10?",
                     "documentation": null,
                     "experimental": false,
                     "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/font_version>",
+                        "<FontBakeryCheck:opentype/cff_call_depth>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.cff_call_depth",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/2425"
+                    ],
+                    "rationale": "\n        Per \"The Type 2 Charstring Format, Technical Note #5177\",\n        the \"Subr nesting, stack limit\" is 10.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
+                    "description": "The font should not need a DSIG table anymore.",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/dsig>",
                         [
                             [
                                 "font",
@@ -444,111 +147,12 @@
                             "status": "PASS"
                         }
                     ],
-                    "module": "opentype.font_version",
+                    "module": "opentype.dsig",
                     "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/3398",
                         "https://github.com/fonttools/fontbakery/issues/4829"
                     ],
-                    "rationale": "\n            The OpenType specification provides for two fields which contain\n            the version number of the font: fontRevision in the head table,\n            and nameID 5 in the name table. If these fields do not match,\n            different applications will report different version numbers for\n            the font.\n        ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Checking OS/2 fsSelection value.",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/fsselection>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.fsselection",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4829",
-                        "https://github.com/fonttools/fontbakery/pull/2382"
-                    ],
-                    "rationale": "\n        The OS/2.fsSelection field is a bit field used to specify the stylistic\n        qualities of the font - in particular, it specifies to some operating\n        systems whether the font is italic (bit 0), bold (bit 5) or regular\n        (bit 6).\n\n        This check verifies that the fsSelection field is set correctly for the\n        font style. For a family of static fonts created in GlyphsApp, this is\n        set by using the style linking checkboxes in the exports settings.\n\n        Additionally, the bold and italic bits in OS/2.fsSelection must match the\n        bold and italic bits in head.macStyle per the OpenType spec.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Axes and named instances fall within correct ranges?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/fvar/axis_ranges_correct>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.fvar.axis_ranges_correct",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/2264",
-                        "https://github.com/fonttools/fontbakery/pull/2520",
-                        "https://github.com/fonttools/fontbakery/issues/2572"
-                    ],
-                    "rationale": "\n        According to the OpenType spec's registered design-variation tags, instances in\n        a variable font should have certain prescribed values.\n        If a variable font has a 'wght' (Weight) axis, the valid coordinate range is 1-1000.\n        If a variable font has a 'wdth' (Width) axis, the valid numeric range is strictly greater than zero.\n        If a variable font has a 'slnt' (Slant) axis, then the coordinate of its 'Regular' instance is required to be 0.\n        If a variable font has a 'ital' (Slant) axis, then the coordinate of its 'Regular' instance is required to be 0.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Axes and named instances fall within correct ranges?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/fvar/regular_coords_correct>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.fvar.regular_coords_correct",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/1707",
-                        "https://github.com/fonttools/fontbakery/issues/2572"
-                    ],
-                    "rationale": "\n        According to the Open-Type spec's registered design-variation tags,instances in a variable font should have certain prescribed values.\n        If a variable font has a 'wght' (Weight) axis, the valid coordinate range is 1-1000.\n        If a variable font has a 'wdth' (Width) axis, the valid numeric range is strictly greater than zero.\n        If a variable font has a 'slnt' (Slant) axis, then the coordinate of its 'Regular' instance is required to be 0.\n        If a variable font has a 'ital' (Slant) axis, then the coordinate of its 'Regular' instance is required to be 0.\n    ",
+                    "rationale": "\n        Microsoft Office 2013 and below products expect fonts to have a digital\n        signature declared in a DSIG table in order to implement OpenType features.\n        The EOL date for Microsoft Office 2013 products was 4/11/2023.\n\n        This issue does not impact Microsoft Office 2016 and above products. It is now considered better to completely remove the table.\n\n        But if you still want your font to support OpenType features on Office 2013,\n        then you may find it handy to add a fake signature on a placeholder DSIG table\n        by running one of the helper scripts provided at\n        https://github.com/googlefonts/gftools\n\n        Reference: https://github.com/fonttools/fontbakery/issues/1845\n    ",
                     "result": "PASS",
                     "severity": null
                 },
@@ -585,6 +189,58 @@
                     "severity": null
                 },
                 {
+                    "description": "Make sure all font files have the same version value.",
+                    "documentation": null,
+                    "experimental": false,
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/family/equal_font_versions>",
+                        []
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.family.equal_font_versions",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4829"
+                    ],
+                    "rationale": "\n        Within a family released at the same time, all members of the family\n        should have the same version number in the head table.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Verify that family names in the name table are consistent across all fonts in the family. Checks Typographic Family name (nameID 16) if present, otherwise uses Font Family name (nameID 1)",
+                    "documentation": null,
+                    "experimental": false,
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/family/consistent_family_name>",
+                        []
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.family.consistent_family_name",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4112"
+                    ],
+                    "rationale": "\n        Per the OpenType spec:\n\n            * \"...many existing applications that use this pair of names assume that a\n              Font Family name is shared by at most four fonts that form a font\n              style-linking group\"\n\n            * \"For extended typographic families that includes fonts other than the\n              four basic styles(regular, italic, bold, bold italic), it is strongly\n              recommended that name IDs 16 and 17 be used in fonts to create an\n              extended, typographic grouping.\"\n\n            * \"If name ID 16 is absent, then name ID 1 is considered to be the\n              typographic family name.\"\n\n        https://learn.microsoft.com/en-us/typography/opentype/spec/name\n\n        Fonts within a font family all must have consistent names\n        in the Typographic Family name (nameID 16)\n        or Font Family name (nameID 1), depending on which it uses.\n\n        Inconsistent font/typographic family names across fonts in a family\n        can result in unexpected behaviors, such as broken style linking.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
                     "description": "Check GDEF mark glyph class doesn't have characters that are not marks.",
                     "documentation": null,
                     "experimental": false,
@@ -617,13 +273,13 @@
                     "severity": null
                 },
                 {
-                    "description": "Check glyphs in mark glyph class are non-spacing.",
+                    "description": "Checking OS/2 fsSelection value.",
                     "documentation": null,
                     "experimental": false,
                     "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/gdef_spacing_marks>",
+                        "<FontBakeryCheck:opentype/fsselection>",
                         [
                             [
                                 "font",
@@ -640,141 +296,12 @@
                             "status": "PASS"
                         }
                     ],
-                    "module": "opentype.gdef_spacing_marks",
+                    "module": "opentype.fsselection",
                     "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/2877"
+                        "https://github.com/fonttools/fontbakery/issues/4829",
+                        "https://github.com/fonttools/fontbakery/pull/2382"
                     ],
-                    "rationale": "\n        Glyphs in the GDEF mark glyph class should be non-spacing.\n\n        Spacing glyphs in the GDEF mark glyph class may have incorrect anchor\n        positioning that was only intended for building composite glyphs during design.\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Check glyphs do not have duplicate components which have the same x,y coordinates.",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/glyf_non_transformed_duplicate_components>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_ttf"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.glyf_non_transformed_duplicate_components",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2709"
-                    ],
-                    "rationale": "\n        There have been cases in which fonts had faulty double quote marks, with each\n        of them containing two single quote marks as components with the same\n        x, y coordinates which makes them visually look like single quote marks.\n\n        This check ensures that glyphs do not contain duplicate components\n        which have the same x,y coordinates.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Is there any unused data at the end of the glyf table?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/glyf_unused_data>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "unfulfilled-conditions",
-                                "message": "Unfulfilled Conditions: is_ttf"
-                            },
-                            "status": "SKIP"
-                        }
-                    ],
-                    "module": "opentype.glyf_unused_data",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4829"
-                    ],
-                    "rationale": "\n        This check validates the structural integrity of the glyf table,\n        by checking that all glyphs referenced in the loca table are\n        actually present in the glyf table and that there is no unused\n        data at the end of the glyf table. A failure here indicates a\n        problem with the font compiler.\n    ",
-                    "result": "SKIP",
-                    "severity": null
-                },
-                {
-                    "description": "Checking post.italicAngle value.",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/italic_angle>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": null,
-                                "message": "Value of post.italicAngle is 0.0 with style=\"Regular\"."
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.italic_angle",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/4829"
-                    ],
-                    "rationale": "\n        The 'post' table italicAngle property should be a reasonable amount, likely\n        not more than 30\u00b0. Note that in the OpenType specification, the value is\n        negative for a rightward lean.\n\n        https://docs.microsoft.com/en-us/typography/opentype/spec/post\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Is there a usable \"kern\" table declared in the font?",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/kern_table>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": null,
-                                "message": "Font does not declare an optional \"kern\" table."
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.kern_table",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/1675",
-                        "https://github.com/fonttools/fontbakery/issues/3148",
-                        "https://github.com/fonttools/fontbakery/issues/4829"
-                    ],
-                    "rationale": "\n        Even though all fonts should have their kerning implemented in the GPOS table,\n        there may be kerning info at the kern table as well.\n\n        Some applications such as MS PowerPoint require kerning info on the kern table.\n        More specifically, they require a format 0 kern subtable from a kern table\n        version 0 with only glyphs defined in the cmap table, which is the only one\n        that Windows understands (and which is also the simplest and more limited\n        of all the kern subtables).\n\n        Google Fonts ingests fonts made for download and use on desktops, and does\n        all web font optimizations in the serving pipeline (using libre libraries\n        that anyone can replicate.)\n\n        Ideally, TTFs intended for desktop users (and thus the ones intended for\n        Google Fonts) should have both KERN and GPOS tables.\n\n        Given all of the above, we currently treat kerning on a v0 kern table\n        as a good-to-have (but optional) feature.\n    ",
+                    "rationale": "\n        The OS/2.fsSelection field is a bit field used to specify the stylistic\n        qualities of the font - in particular, it specifies to some operating\n        systems whether the font is italic (bit 0), bold (bit 5) or regular\n        (bit 6).\n\n        This check verifies that the fsSelection field is set correctly for the\n        font style. For a family of static fonts created in GlyphsApp, this is\n        set by using the style linking checkboxes in the exports settings.\n\n        Additionally, the bold and italic bits in OS/2.fsSelection must match the\n        bold and italic bits in head.macStyle per the OpenType spec.\n    ",
                     "result": "PASS",
                     "severity": null
                 },
@@ -1010,13 +537,13 @@
                     "severity": null
                 },
                 {
-                    "description": "Check name table for empty records.",
+                    "description": "Check glyphs in mark glyph class are non-spacing.",
                     "documentation": null,
                     "experimental": false,
                     "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/name/empty_records>",
+                        "<FontBakeryCheck:opentype/gdef_spacing_marks>",
                         [
                             [
                                 "font",
@@ -1033,22 +560,22 @@
                             "status": "PASS"
                         }
                     ],
-                    "module": "opentype.name.empty_records",
+                    "module": "opentype.gdef_spacing_marks",
                     "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2369"
+                        "https://github.com/fonttools/fontbakery/issues/2877"
                     ],
-                    "rationale": "\n        Check the name table for empty records,\n        as this can cause problems in Adobe apps.\n    ",
+                    "rationale": "\n        Glyphs in the GDEF mark glyph class should be non-spacing.\n\n        Spacing glyphs in the GDEF mark glyph class may have incorrect anchor\n        positioning that was only intended for building composite glyphs during design.\n    ",
                     "result": "PASS",
                     "severity": null
                 },
                 {
-                    "description": "Does full font name begin with the font family name?",
+                    "description": "Check glyphs do not have duplicate components which have the same x,y coordinates.",
                     "documentation": null,
                     "experimental": false,
                     "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/name/match_familyname_fullfont>",
+                        "<FontBakeryCheck:opentype/glyf_non_transformed_duplicate_components>",
                         [
                             [
                                 "font",
@@ -1059,50 +586,50 @@
                     "logs": [
                         {
                             "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_ttf"
                             },
-                            "status": "PASS"
+                            "status": "SKIP"
                         }
                     ],
-                    "module": "opentype.name.match_familyname_fullfont",
+                    "module": "opentype.glyf_non_transformed_duplicate_components",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/2709"
+                    ],
+                    "rationale": "\n        There have been cases in which fonts had faulty double quote marks, with each\n        of them containing two single quote marks as components with the same\n        x, y coordinates which makes them visually look like single quote marks.\n\n        This check ensures that glyphs do not contain duplicate components\n        which have the same x,y coordinates.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
+                    "description": "Is there any unused data at the end of the glyf table?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/glyf_unused_data>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_ttf"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.glyf_unused_data",
                     "proposal": [
                         "https://github.com/fonttools/fontbakery/issues/4829"
                     ],
-                    "rationale": "\n        The FULL_FONT_NAME entry in the \u2018name\u2019 table should start with the same string\n        as the Family Name (FONT_FAMILY_NAME, TYPOGRAPHIC_FAMILY_NAME or\n        WWS_FAMILY_NAME).\n\n        If the Family Name is not included as the first part of the Full Font Name, and\n        the user embeds the font in a document using a Microsoft Office app, the app\n        will fail to render the font when it opens the document again.\n\n        NOTE: Up until version 1.5, the OpenType spec included the following exception\n        in the definition of Full Font Name:\n\n            \"An exception to the [above] definition of Full font name is for Microsoft\n            platform strings for CFF OpenType fonts: in this case, the Full font name\n            string must be identical to the PostScript FontName in the CFF Name INDEX.\"\n\n        https://docs.microsoft.com/en-us/typography/opentype/otspec150/name#name-ids\n    ",
-                    "result": "PASS",
-                    "severity": null
-                },
-                {
-                    "description": "Name table ID 6 (PostScript name) must be consistent across platforms.",
-                    "documentation": null,
-                    "experimental": false,
-                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
-                    "key": [
-                        "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/name/postscript_name_consistency>",
-                        [
-                            [
-                                "font",
-                                0
-                            ]
-                        ]
-                    ],
-                    "logs": [
-                        {
-                            "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
-                            },
-                            "status": "PASS"
-                        }
-                    ],
-                    "module": "opentype.name.postscript_name_consistency",
-                    "proposal": [
-                        "https://github.com/fonttools/fontbakery/pull/2394"
-                    ],
-                    "rationale": "\n        The PostScript name entries in the font's 'name' table should be\n        consistent across platforms.\n\n        This is the TTF/CFF2 equivalent of the CFF 'name/postscript_vs_cff' check.\n    ",
-                    "result": "PASS",
+                    "rationale": "\n        This check validates the structural integrity of the glyf table,\n        by checking that all glyphs referenced in the loca table are\n        actually present in the glyf table and that there is no unused\n        data at the end of the glyf table. A failure here indicates a\n        problem with the font compiler.\n    ",
+                    "result": "SKIP",
                     "severity": null
                 },
                 {
@@ -1170,13 +697,13 @@
                     "severity": null
                 },
                 {
-                    "description": "PostScript name follows OpenType specification requirements?",
+                    "description": "Is there a usable \"kern\" table declared in the font?",
                     "documentation": null,
                     "experimental": false,
                     "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/postscript_name>",
+                        "<FontBakeryCheck:opentype/kern_table>",
                         [
                             [
                                 "font",
@@ -1187,17 +714,19 @@
                     "logs": [
                         {
                             "message": {
-                                "code": "ok",
-                                "message": "All looks good!"
+                                "code": null,
+                                "message": "Font does not declare an optional \"kern\" table."
                             },
                             "status": "PASS"
                         }
                     ],
-                    "module": "opentype.postscript_name",
+                    "module": "opentype.kern_table",
                     "proposal": [
-                        "https://github.com/miguelsousa/openbakery/issues/62"
+                        "https://github.com/fonttools/fontbakery/issues/1675",
+                        "https://github.com/fonttools/fontbakery/issues/3148",
+                        "https://github.com/fonttools/fontbakery/issues/4829"
                     ],
-                    "rationale": "\n        The PostScript name is used by some applications to identify the font.\n        It should only consist of characters from the set A-Z, a-z, 0-9, and hyphen.\n\n    ",
+                    "rationale": "\n        Even though all fonts should have their kerning implemented in the GPOS table,\n        there may be kerning info at the kern table as well.\n\n        Some applications such as MS PowerPoint require kerning info on the kern table.\n        More specifically, they require a format 0 kern subtable from a kern table\n        version 0 with only glyphs defined in the cmap table, which is the only one\n        that Windows understands (and which is also the simplest and more limited\n        of all the kern subtables).\n\n        Google Fonts ingests fonts made for download and use on desktops, and does\n        all web font optimizations in the serving pipeline (using libre libraries\n        that anyone can replicate.)\n\n        Ideally, TTFs intended for desktop users (and thus the ones intended for\n        Google Fonts) should have both KERN and GPOS tables.\n\n        Given all of the above, we currently treat kerning on a v0 kern table\n        as a good-to-have (but optional) feature.\n    ",
                     "result": "PASS",
                     "severity": null
                 },
@@ -1269,31 +798,29 @@
                     "severity": null
                 },
                 {
-                    "description": "Ensure VFs have 'ital' STAT axis.",
+                    "description": "Verify that each group of fonts with the same nameID 1 has maximum of 4 fonts.",
                     "documentation": null,
                     "experimental": false,
                     "key": [
                         "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/STAT/ital_axis>",
+                        "<FontBakeryCheck:opentype/family/max_4_fonts_per_family_name>",
                         []
                     ],
                     "logs": [
                         {
                             "message": {
-                                "code": null,
-                                "message": "Font {font.file} doesn't have an ital axis"
+                                "code": "ok",
+                                "message": "All looks good!"
                             },
-                            "status": "SKIP"
+                            "status": "PASS"
                         }
                     ],
-                    "module": "opentype.STAT.ital_axis",
+                    "module": "opentype.family.max_4_fonts_per_family_name",
                     "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/2934",
-                        "https://github.com/fonttools/fontbakery/issues/3668",
-                        "https://github.com/fonttools/fontbakery/issues/3669"
+                        "https://github.com/fonttools/fontbakery/pull/2372"
                     ],
-                    "rationale": "\n        Check that related Upright and Italic VFs have an\n        'ital' axis in the STAT table.\n\n        Since the STAT table can be used to create new instances, it is\n        important to ensure that such an 'ital' axis be the last one\n        declared in the STAT table so that the eventual naming of new\n        instances follows the subfamily traditional scheme (RIBBI / WWS)\n        where \"Italic\" is always last.\n\n        The 'ital' axis should also be strictly boolean, only accepting\n        values of 0 (for Uprights) or 1 (for Italics). This usually works\n        as a mechanism for selecting between two linked variable font files.\n\n        Also, the axis value name for uprights must be set as elidable.\n    ",
-                    "result": "SKIP",
+                    "rationale": "\n        Per the OpenType spec:\n\n        'The Font Family name [...] should be shared among at most four fonts that\n        differ only in weight or style [...]'\n    ",
+                    "result": "PASS",
                     "severity": null
                 },
                 {
@@ -1515,13 +1042,13 @@
                     "severity": null
                 },
                 {
-                    "description": "Validates subfamilyNameID and postScriptNameID for the default instance record",
+                    "description": "Checking font version fields (head and name table).",
                     "documentation": null,
                     "experimental": false,
                     "filename": "Loetschberg-Text-VF[wght,wdth].otf",
                     "key": [
                         "<Section: OpenType Specification Checks>",
-                        "<FontBakeryCheck:opentype/varfont/valid_default_instance_nameids>",
+                        "<FontBakeryCheck:opentype/font_version>",
                         [
                             [
                                 "font",
@@ -1538,11 +1065,11 @@
                             "status": "PASS"
                         }
                     ],
-                    "module": "opentype.varfont.valid_default_instance_nameids",
+                    "module": "opentype.font_version",
                     "proposal": [
-                        "https://github.com/fonttools/fontbakery/issues/3708"
+                        "https://github.com/fonttools/fontbakery/issues/4829"
                     ],
-                    "rationale": "\n        According to the 'fvar' documentation in OpenType spec v1.9.1\n        https://docs.microsoft.com/en-us/typography/opentype/spec/fvar\n\n        The default instance of a font is that instance for which the coordinate\n        value of each axis is the defaultValue specified in the corresponding\n        variation axis record. An instance record is not required for the default\n        instance, though an instance record can be provided. When enumerating named\n        instances, the default instance should be enumerated even if there is no\n        corresponding instance record. If an instance record is included for the\n        default instance (that is, an instance record has coordinates set to default\n        values), then the nameID value should be set to either 2 or 17 or to a\n        name ID with the same value as name ID 2 or 17. Also, if a postScriptNameID is\n        included in instance records, and the postScriptNameID value should be set\n        to 6 or to a name ID with the same value as name ID 6.\n    ",
+                    "rationale": "\n            The OpenType specification provides for two fields which contain\n            the version number of the font: fontRevision in the head table,\n            and nameID 5 in the name table. If these fields do not match,\n            different applications will report different version numbers for\n            the font.\n        ",
                     "result": "PASS",
                     "severity": null
                 },
@@ -1672,6 +1199,479 @@
                         "https://github.com/fonttools/fontbakery/issues/4829"
                     ],
                     "rationale": "\n        The OS/2.xAvgCharWidth field is used to calculate the width of a string of\n        characters. It is the average width of all non-zero width glyphs in the font.\n\n        This check ensures that the value is correct. A failure here may indicate\n        a bug in the font compiler, rather than something that the designer can\n        do anything about.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Check name table for empty records.",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/name/empty_records>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.name.empty_records",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/2369"
+                    ],
+                    "rationale": "\n        Check the name table for empty records,\n        as this can cause problems in Adobe apps.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Validates subfamilyNameID and postScriptNameID for the default instance record",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/varfont/valid_default_instance_nameids>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.varfont.valid_default_instance_nameids",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/3708"
+                    ],
+                    "rationale": "\n        According to the 'fvar' documentation in OpenType spec v1.9.1\n        https://docs.microsoft.com/en-us/typography/opentype/spec/fvar\n\n        The default instance of a font is that instance for which the coordinate\n        value of each axis is the defaultValue specified in the corresponding\n        variation axis record. An instance record is not required for the default\n        instance, though an instance record can be provided. When enumerating named\n        instances, the default instance should be enumerated even if there is no\n        corresponding instance record. If an instance record is included for the\n        default instance (that is, an instance record has coordinates set to default\n        values), then the nameID value should be set to either 2 or 17 or to a\n        name ID with the same value as name ID 2 or 17. Also, if a postScriptNameID is\n        included in instance records, and the postScriptNameID value should be set\n        to 6 or to a name ID with the same value as name ID 6.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Check that OS/2.fsSelection bold & italic settings are unique for each NameID1",
+                    "documentation": null,
+                    "experimental": false,
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/family/bold_italic_unique_for_nameid1>",
+                        []
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.family.bold_italic_unique_for_nameid1",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/2388"
+                    ],
+                    "rationale": "\n        Per the OpenType spec: name ID 1 'is used in combination with Font Subfamily\n        name (name ID 2), and should be shared among at most four fonts that differ\n        only in weight or style.\n\n        This four-way distinction should also be reflected in the OS/2.fsSelection\n        field, using bits 0 and 5.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Axes and named instances fall within correct ranges?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/fvar/regular_coords_correct>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.fvar.regular_coords_correct",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/1707",
+                        "https://github.com/fonttools/fontbakery/issues/2572"
+                    ],
+                    "rationale": "\n        According to the Open-Type spec's registered design-variation tags,instances in a variable font should have certain prescribed values.\n        If a variable font has a 'wght' (Weight) axis, the valid coordinate range is 1-1000.\n        If a variable font has a 'wdth' (Width) axis, the valid numeric range is strictly greater than zero.\n        If a variable font has a 'slnt' (Slant) axis, then the coordinate of its 'Regular' instance is required to be 0.\n        If a variable font has a 'ital' (Slant) axis, then the coordinate of its 'Regular' instance is required to be 0.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Axes and named instances fall within correct ranges?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/fvar/axis_ranges_correct>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.fvar.axis_ranges_correct",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/2264",
+                        "https://github.com/fonttools/fontbakery/pull/2520",
+                        "https://github.com/fonttools/fontbakery/issues/2572"
+                    ],
+                    "rationale": "\n        According to the OpenType spec's registered design-variation tags, instances in\n        a variable font should have certain prescribed values.\n        If a variable font has a 'wght' (Weight) axis, the valid coordinate range is 1-1000.\n        If a variable font has a 'wdth' (Width) axis, the valid numeric range is strictly greater than zero.\n        If a variable font has a 'slnt' (Slant) axis, then the coordinate of its 'Regular' instance is required to be 0.\n        If a variable font has a 'ital' (Slant) axis, then the coordinate of its 'Regular' instance is required to be 0.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Does full font name begin with the font family name?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/name/match_familyname_fullfont>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.name.match_familyname_fullfont",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4829"
+                    ],
+                    "rationale": "\n        The FULL_FONT_NAME entry in the \u2018name\u2019 table should start with the same string\n        as the Family Name (FONT_FAMILY_NAME, TYPOGRAPHIC_FAMILY_NAME or\n        WWS_FAMILY_NAME).\n\n        If the Family Name is not included as the first part of the Full Font Name, and\n        the user embeds the font in a document using a Microsoft Office app, the app\n        will fail to render the font when it opens the document again.\n\n        NOTE: Up until version 1.5, the OpenType spec included the following exception\n        in the definition of Full Font Name:\n\n            \"An exception to the [above] definition of Full font name is for Microsoft\n            platform strings for CFF OpenType fonts: in this case, the Full font name\n            string must be identical to the PostScript FontName in the CFF Name INDEX.\"\n\n        https://docs.microsoft.com/en-us/typography/opentype/otspec150/name#name-ids\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Check code page character ranges",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/code_pages>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.code_pages",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/2474"
+                    ],
+                    "rationale": "\n        At least some programs (such as Word and Sublime Text) under Windows 7\n        do not recognize fonts unless code page bits are properly set on the\n        ulCodePageRange1 (and/or ulCodePageRange2) fields of the OS/2 table.\n\n        More specifically, the fonts are selectable in the font menu, but whichever\n        Windows API these applications use considers them unsuitable for any\n        character set, so anything set in these fonts is rendered with Arial as a\n        fallback font.\n\n        This check currently does not identify which code pages should be set.\n        Auto-detecting coverage is not trivial since the OpenType specification\n        leaves the interpretation of whether a given code page is \"functional\"\n        or not open to the font developer to decide.\n\n        So here we simply detect as a FAIL when a given font has no code page\n        declared at all.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Name table ID 6 (PostScript name) must be consistent across platforms.",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/name/postscript_name_consistency>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.name.postscript_name_consistency",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/2394"
+                    ],
+                    "rationale": "\n        The PostScript name entries in the font's 'name' table should be\n        consistent across platforms.\n\n        This is the TTF/CFF2 equivalent of the CFF 'name/postscript_vs_cff' check.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Checking post.italicAngle value.",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/italic_angle>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": null,
+                                "message": "Value of post.italicAngle is 0.0 with style=\"Regular\"."
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.italic_angle",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4829"
+                    ],
+                    "rationale": "\n        The 'post' table italicAngle property should be a reasonable amount, likely\n        not more than 30\u00b0. Note that in the OpenType specification, the value is\n        negative for a rightward lean.\n\n        https://docs.microsoft.com/en-us/typography/opentype/spec/post\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "PostScript name follows OpenType specification requirements?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/postscript_name>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.postscript_name",
+                    "proposal": [
+                        "https://github.com/miguelsousa/openbakery/issues/62"
+                    ],
+                    "rationale": "\n        The PostScript name is used by some applications to identify the font.\n        It should only consist of characters from the set A-Z, a-z, 0-9, and hyphen.\n\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Ensure VFs have 'ital' STAT axis.",
+                    "documentation": null,
+                    "experimental": false,
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/STAT/ital_axis>",
+                        []
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": null,
+                                "message": "Font {font.file} doesn't have an ital axis"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.STAT.ital_axis",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/2934",
+                        "https://github.com/fonttools/fontbakery/issues/3668",
+                        "https://github.com/fonttools/fontbakery/issues/3669"
+                    ],
+                    "rationale": "\n        Check that related Upright and Italic VFs have an\n        'ital' axis in the STAT table.\n\n        Since the STAT table can be used to create new instances, it is\n        important to ensure that such an 'ital' axis be the last one\n        declared in the STAT table so that the eventual naming of new\n        instances follows the subfamily traditional scheme (RIBBI / WWS)\n        where \"Italic\" is always last.\n\n        The 'ital' axis should also be strictly boolean, only accepting\n        values of 0 (for Uprights) or 1 (for Italics). This usually works\n        as a mechanism for selecting between two linked variable font files.\n\n        Also, the axis value name for uprights must be set as elidable.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
+                    "description": "Font follows the family naming recommendations?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/family_naming_recommendations>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.family_naming_recommendations",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4829"
+                    ],
+                    "rationale": "\n        This check ensures that the length of various family name and style\n        name strings in the name table are within the maximum length\n        recommended by the OpenType specification.\n    ",
+                    "result": "PASS",
+                    "severity": null
+                },
+                {
+                    "description": "Does the font use deprecated CFF operators or operations?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff_deprecated_operators>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.cff_deprecated_operators",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/3033"
+                    ],
+                    "rationale": "\n        The 'dotsection' operator and the use of 'endchar' to build accented characters\n        from the Adobe Standard Encoding Character Set (\"seac\") are deprecated in CFF.\n        Adobe recommends repairing any fonts that use these, especially endchar-as-seac,\n        because a rendering issue was discovered in Microsoft Word with a font that\n        makes use of this operation. The check treats that usage as a FAIL.\n        There are no known ill effects of using dotsection, so that check is a WARN.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
+                    "description": "Does the font's CFF table top dict strings fit into the ASCII range?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff_ascii_strings>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "unfulfilled-conditions",
+                                "message": "Unfulfilled Conditions: is_cff"
+                            },
+                            "status": "SKIP"
+                        }
+                    ],
+                    "module": "opentype.cff_ascii_strings",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/issues/4619"
+                    ],
+                    "rationale": "\n        All CFF Table top dict string chars should fit into the ASCII range.\n    ",
+                    "result": "SKIP",
+                    "severity": null
+                },
+                {
+                    "description": "Is the CFF2 subr/gsubr call depth > 10?",
+                    "documentation": null,
+                    "experimental": false,
+                    "filename": "Loetschberg-Text-VF[wght,wdth].otf",
+                    "key": [
+                        "<Section: OpenType Specification Checks>",
+                        "<FontBakeryCheck:opentype/cff2_call_depth>",
+                        [
+                            [
+                                "font",
+                                0
+                            ]
+                        ]
+                    ],
+                    "logs": [
+                        {
+                            "message": {
+                                "code": "ok",
+                                "message": "All looks good!"
+                            },
+                            "status": "PASS"
+                        }
+                    ],
+                    "module": "opentype.cff2_call_depth",
+                    "proposal": [
+                        "https://github.com/fonttools/fontbakery/pull/2425"
+                    ],
+                    "rationale": "\n        Per \"The CFF2 CharString Format\", the \"Subr nesting, stack limit\" is 10.\n    ",
                     "result": "PASS",
                     "severity": null
                 }

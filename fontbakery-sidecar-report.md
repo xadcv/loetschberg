@@ -1,6 +1,11 @@
-# FontBakery report — text sidecar
+# FontBakery report: CFF2 text sidecar
 
-- Font: `Loetschberg-Text-VF[wght,wdth].otf`
-- Profile: FontBakery 1.1.0 `check-opentype`
-- Result: **43 PASS · 10 SKIP · 0 FAIL · 0 WARN**
-- Machine-readable detail: `fontbakery-sidecar-report.json`
+File: `Loetschberg-Text-VF[wght,wdth].otf`
+
+FontBakery 1.1.0 `check-opentype --skip-network` result:
+
+- PASS: 43
+- SKIP: 10
+- Not finished: 0
+
+The complete machine-readable results are in `fontbakery-sidecar-report.json`.

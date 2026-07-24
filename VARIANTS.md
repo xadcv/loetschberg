@@ -1,6 +1,6 @@
 # Lötschberg variants
 
-The primary Lötschberg colour font has two orthogonal OpenType toggles over one two-axis designspace. The toggles are substitutions, not boolean variation axes. Separate Regular and Extruded families are supplied as palette-free compatibility exports for applications that cannot render COLRv1.
+The primary Lötschberg colour font has two orthogonal OpenType toggles over one two-axis designspace. The toggles are substitutions, not boolean variation axes. A palette-free, overlap-unioned Regular family is supplied for local applications that cannot render COLRv1 reliably.
 
 ## Feature states
 
@@ -39,7 +39,7 @@ feature ss02 {
 | `wght` | Weight | 100 | 400 | 900 | Coordinated stroke, counter, skeleton, and advance progression |
 | `wdth` | Width | 75 | 100 | 125 | Skeleton/layout width with weight-aware compensation at the black end |
 
-Twelve exact sources cover four weights at three widths. Optical size and slant are intentionally absent from version 1.0.2. Handdrawn remains a stylistic set, so it does not consume an axis and works at every weight/width location.
+Twelve exact sources cover four weights at three widths. Optical size and slant are intentionally absent from version 1.0.3. Handdrawn remains a stylistic set, so it does not consume an axis and works at every weight/width location.
 
 ## Colour construction
 
@@ -67,12 +67,11 @@ All colours are fixed CPAL entries.
 
 | File | Install family | Default construction | OpenType variant |
 |---|---|---|---|
-| `Loetschberg-Regular-VF[wght,wdth].ttf` | **Lötschberg** | Regular flat outline | `ss01` → Handdrawn flat |
-| `Loetschberg-Extruded-VF[wght,wdth].ttf` | **Lötschberg Extruded** | Extrusion-only depth layer with hatch knockouts | `ss01` → Handdrawn depth |
+| `Loetschberg-Regular-VF[wght,wdth].ttf` | **Lötschberg** | Overlap-unioned Regular flat outline | `ss01` → Handdrawn flat |
 
-Both exports retain only `wght` and `wdth`; neither contains COLR/CPAL or `ss02`. Their advances and axis locations match exactly. To reproduce separate face and extrusion colours in Figma, duplicate a text object in place, apply **Lötschberg Extruded** to the lower object and **Lötschberg** to the upper object, then choose each object’s colour independently. The depth layer omits face and keyline outlines; its reversed hatches only knock through wall ink.
+The export retains only `wght` and `wdth`; it contains no COLR/CPAL or `ss02`. Its geometry, advances, and axis locations derive from the same face masters as the primary and web fonts. Overlapping source pieces are boolean-unioned at each master before variable compilation, avoiding renderer-dependent overlap handling while preserving the visible silhouettes.
 
-Install only these two compatibility TTFs for Figma. The Regular export shares its family name with the primary COLRv1 font, so those two builds must not be co-installed.
+Install only this compatibility TTF for Figma. Extrusion remains available in the primary COLRv1 TTF and its WOFF/WOFF2 aliases. The Regular export shares its family name with the primary COLRv1 font, so those two builds must not be co-installed.
 
 ## Interpolation invariant
 
@@ -82,4 +81,4 @@ Every master in every glyph family and colour layer has the same contour count, 
 
 STAT describes the two registered axes and their named values. OpenType stylistic sets are GSUB features, so STAT cannot encode `ss01` and `ss02` as independent axes or guarantee a font picker exposes them.
 
-The primary font supplies the names **Handdrawn** and **Extruded** through GSUB feature names. The compatibility families fix Regular or Extruded at the family level and expose only **Handdrawn** through `ss01`.
+The primary font supplies the names **Handdrawn** and **Extruded** through GSUB feature names. The compatibility family fixes the flat construction and exposes only **Handdrawn** through `ss01`.
