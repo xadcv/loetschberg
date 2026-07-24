@@ -134,10 +134,11 @@
     .hero {
       width: var(--page);
       margin-inline: auto;
-      padding: clamp(52px, 8vh, 88px) 0 44px;
+      padding: clamp(28px, 5vh, 52px) 0 clamp(48px, 7vh, 76px);
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-      gap: clamp(32px, 6vw, 88px);
+      grid-template-columns: minmax(0, 1fr);
+      gap: clamp(42px, 7vh, 72px);
+      align-content: start;
       align-items: end;
     }
     .hero-copy { min-width: 0; }
@@ -152,11 +153,10 @@
     .hero-word {
       margin: 0;
       max-width: 100%;
-      overflow: hidden;
       color: var(--gold);
-      font-size: clamp(4.2rem, 8.7vw, 8.3rem);
+      font-size: clamp(4.8rem, 12vw, 10rem);
       font-weight: 400;
-      line-height: 0.82;
+      line-height: 0.92;
       white-space: nowrap;
       caret-color: var(--paper);
     }
@@ -170,23 +170,28 @@
     }
 
     .control-panel {
-      align-self: center;
-      padding: 24px;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns:
+        minmax(150px, 0.7fr)
+        minmax(180px, 1fr)
+        minmax(180px, 1fr)
+        minmax(250px, 1.15fr)
+        minmax(150px, 0.7fr);
+      gap: clamp(16px, 2.2vw, 30px);
+      align-items: center;
+      padding: 18px 20px;
       border: 1px solid rgb(244 237 223 / 0.3);
       border-radius: var(--radius);
       background: rgb(42 32 22 / 0.14);
       backdrop-filter: blur(12px);
     }
     .control-panel__head {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: baseline;
-      margin-bottom: 24px;
+      display: grid;
+      gap: 5px;
     }
     .control-panel h2 { margin: 0; font-size: 1rem; }
     .axis-summary { margin: 0; color: #e7c28c; font-size: 0.8rem; }
-    .axis-control + .axis-control { margin-top: 22px; }
     .axis-control__label {
       display: flex;
       justify-content: space-between;
@@ -204,7 +209,6 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
-      margin-top: 24px;
     }
     .feature-toggle, .reset-button {
       min-height: 44px;
@@ -222,7 +226,7 @@
     }
     .reset-button {
       width: 100%;
-      margin-top: 9px;
+      margin: 0;
       border-color: transparent;
       color: rgb(244 237 223 / 0.72);
       font-size: 0.82rem;
@@ -322,7 +326,11 @@
       font-size: 0.88rem;
     }
 
-    .matrix { display: grid; gap: 36px; }
+    .matrix {
+      display: grid;
+      gap: 36px;
+      container-type: inline-size;
+    }
     .matrix-row {
       display: grid;
       grid-template-columns: 80px repeat(3, minmax(0, 1fr));
@@ -332,10 +340,11 @@
     .matrix-label { color: var(--coach); font-weight: 800; }
     .matrix-sample {
       min-width: 0;
-      overflow: hidden;
+      padding-top: 0.14em;
+      margin-top: -0.14em;
       font-family: "Loetschberg", Impact, sans-serif;
-      font-size: clamp(2rem, 4.7vw, 5rem);
-      line-height: 0.85;
+      font-size: clamp(2rem, 5.2cqi, 5rem);
+      line-height: 1;
       white-space: nowrap;
     }
 
@@ -493,18 +502,20 @@
     .footer-inner {
       width: min(100%, 1320px);
       margin-inline: auto;
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(210px, 28ch);
       gap: 30px;
       align-items: end;
     }
     .footer-word {
+      min-width: 0;
       max-width: 100%;
       margin: 0;
-      overflow: hidden;
+      padding-top: 0.12em;
+      margin-top: -0.12em;
       color: var(--gold);
       font-size: clamp(3rem, 9vw, 8rem);
-      line-height: 0.8;
+      line-height: 1;
       white-space: nowrap;
     }
     .footer-note {
@@ -518,8 +529,12 @@
       :root { --page: min(100% - 28px, 720px); }
       .nav { display: none; }
       .language label { display: none; }
-      .hero { grid-template-columns: 1fr; align-items: start; }
-      .control-panel { max-width: none; }
+      .hero { align-items: start; }
+      .control-panel {
+        grid-template-columns: minmax(140px, 0.7fr) 1fr 1fr;
+      }
+      .feature-controls { grid-column: 2 / 3; }
+      .reset-button { grid-column: 3 / 4; }
       .section-head { grid-template-columns: 1fr; gap: 22px; }
       .variant-list, .colour-stage { grid-template-columns: 1fr; }
       .matrix-row { grid-template-columns: 54px 1fr; gap: 12px 18px; }
@@ -535,6 +550,14 @@
       .hero { padding-top: 42px; gap: 34px; }
       .hero-word { font-size: clamp(3.25rem, 18vw, 5.4rem); }
       .hero-intro { margin-top: 24px; }
+      .control-panel {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 20px;
+      }
+      .control-panel__head,
+      .feature-controls,
+      .reset-button { grid-column: auto; }
       .section { padding: 76px 0; }
       .section-head { margin-bottom: 34px; }
       .variant-list, .download-grid, .production { grid-template-columns: 1fr; }
@@ -649,13 +672,13 @@
       </div>
     </section>
 
-    <section class="section" aria-labelledby="matrix-title">
+    <section class="section" id="matrix" aria-labelledby="matrix-title">
       <div class="section-head">
         <div>
           <span class="section-number">03</span>
           <h2 id="matrix-title" data-i18n="matrix.title">The whole field</h2>
         </div>
-        <p class="section-intro" data-i18n="matrix.intro">Twelve named positions anchor the designspace. The transitions between them are continuous.</p>
+        <p class="section-intro" data-i18n="matrix.intro">Twelve master positions define the designspace. Everything between them is continuous.</p>
       </div>
       <div class="matrix" role="table" aria-label="Weight and width specimen" data-i18n-aria="matrix.aria">
         <div class="matrix-row" role="row">
@@ -784,7 +807,7 @@
       <div class="production">
         <article>
           <h3 data-i18n="production.axesTitle">Two continuous axes</h3>
-          <p data-i18n="production.axesCopy">Weight runs from 100 to 900. Width runs from 75 to 125. Twelve exact masters hold the corners and named positions.</p>
+          <p data-i18n="production.axesCopy">Weight runs from 100 to 900. Width runs from 75 to 125. Twelve masters define the grid.</p>
         </article>
         <article>
           <h3 data-i18n="production.formsTitle">Two independent alternates</h3>
@@ -798,7 +821,7 @@
     </section>
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer" id="footer">
     <div class="footer-inner">
       <p class="footer-word typeface axis-target feature-ext">LÖTSCHBERG</p>
       <p class="footer-note" data-i18n="footer.note">Drawn from railway lettering. Built for continuous change.</p>
@@ -844,7 +867,7 @@
           "play.placeholder": "Da schriibe",
           "play.hint": "Das isch Live-Text, kei Illustration.",
           "matrix.title": "S ganze Fäld",
-          "matrix.intro": "Zwölf benännti Positione verankered de Designspace. D Übergäng dazwüsche sind stufelos.",
+          "matrix.intro": "Zwölf Master-Positione definiered de Designspace. Alles dazwüsche lauft stufelos.",
           "matrix.aria": "Schriftmuster nach Gwicht und Breiti",
           "alphabet.title": "Meh als nume s Nameschild",
           "alphabet.intro": "D Lokomotiv-Beschriftig het de Ton gsetzt. D fertigi Familie deckt Basic Latin, Latin-1, Zahle, Satzzeiche, Symbol und westeuropäischi Akzänt ab.",
@@ -884,7 +907,7 @@
           "production.title": "Was dinne steckt",
           "production.intro": "Ei Quällsystem produziert d Farbschrift, d Textversion, d lokali Regular-TTF und beidi Web-Container.",
           "production.axesTitle": "Zwei stufelosi Achse",
-          "production.axesCopy": "S Gwicht lauft vo 100 bis 900. D Breiti lauft vo 75 bis 125. Zwölf exakti Masters halted d Egge und die benännte Positione.",
+          "production.axesCopy": "S Gwicht lauft vo 100 bis 900. D Breiti lauft vo 75 bis 125. Zwölf Masters definiered s Raster.",
           "production.formsTitle": "Zwei unabhängigi Variante",
           "production.formsCopy": "ss01 wählt Handdrawn. ss02 wählt Extruded i de Farbschrift. Jede Schalter funktioniert au elei.",
           "production.localTitle": "E separate lokale Umriss",
@@ -916,6 +939,59 @@
       const hand = document.getElementById("toggle-hand");
       const extruded = document.getElementById("toggle-ext");
       const language = document.getElementById("language-select");
+
+      function measureTextAt(element, size) {
+        element.style.fontSize = `${size}px`;
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getBoundingClientRect().width;
+      }
+
+      function fitSpecimenText() {
+        const heroWord = document.querySelector(".hero-word");
+        const heroWidth = heroWord.getBoundingClientRect().width;
+        const naturalHeroWidth = measureTextAt(heroWord, 100);
+        const heroSize = Math.max(
+          28,
+          Math.min(160, (100 * (heroWidth - 4)) / naturalHeroWidth)
+        );
+        heroWord.style.fontSize = `${heroSize}px`;
+
+        const samples = [...document.querySelectorAll(".matrix-sample")];
+        const probeSize = 100;
+
+        samples.forEach((sample) => {
+          sample.style.fontSize = `${probeSize}px`;
+        });
+        const matrixWidth = Math.min(
+          ...samples.map((sample) => sample.getBoundingClientRect().width)
+        );
+        const widestSample = Math.max(
+          ...samples.map((sample) => measureTextAt(sample, probeSize))
+        );
+        const matrixSize = Math.max(
+          26,
+          Math.min(96, (probeSize * (matrixWidth - 4)) / widestSample)
+        );
+        samples.forEach((sample) => {
+          sample.style.fontSize = `${matrixSize}px`;
+        });
+
+        const footerWord = document.querySelector(".footer-word");
+        const footerWidth = footerWord.getBoundingClientRect().width;
+        const naturalFooterWidth = measureTextAt(footerWord, probeSize);
+        const footerSize = Math.max(
+          40,
+          Math.min(128, (probeSize * (footerWidth - 4)) / naturalFooterWidth)
+        );
+        footerWord.style.fontSize = `${footerSize}px`;
+      }
+
+      let fitFrame;
+      function requestTextFit() {
+        cancelAnimationFrame(fitFrame);
+        fitFrame = requestAnimationFrame(fitSpecimenText);
+      }
 
       function updateAxes() {
         root.style.setProperty("--wght", weight.value);
@@ -996,6 +1072,8 @@
         updateFeatures();
       });
       language.addEventListener("change", () => setLanguage(language.value));
+      window.addEventListener("resize", requestTextFit);
+      document.querySelector(".hero-word").addEventListener("input", requestTextFit);
       document.getElementById("tab-basic").addEventListener("click", () => activateTab("basic"));
       document.getElementById("tab-latin").addEventListener("click", () => activateTab("latin"));
       document.querySelectorAll("[data-single-line]").forEach((element) => {
@@ -1014,6 +1092,8 @@
           : "en"
       );
       updateFeatures();
+      document.fonts.ready.then(requestTextFit);
+      requestTextFit();
     })();
   </script>
 </body>
