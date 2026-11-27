@@ -1,16 +1,26 @@
 """Canonical Lötschberg parametric glyph generator.
 
-This is a direct Python port of ``Loetschberg Character Grid.dc.html``.  All
+The default cut reproduces ``Loetschberg Character Grid.dc.html``.  All
 coordinates remain in the source's y-down coordinate system; font-coordinate
 conversion belongs to the build layer.  The specimen generator is deliberately
 not consulted here.
+
+Away from the default cut, three rules keep every glyph in one piece:
+
+* builders place each stroke from the edges of the stroke it joins
+  (``glyph_defs``);
+* outlines are sampled between their junctions, so a wall starts and stops
+  where two pieces meet at every source (``freeze_topology``);
+* a wall that faces away from the extrusion, or is buried, at a source is
+  kept flat there instead of being wound against its neighbours
+  (``freeze_recipe``, ``replay_recipe``).
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, replace
-from math import ceil, cos, inf, pi, sin, sqrt
+from math import asin, atan2, ceil, cos, inf, pi, sin, sqrt
 from typing import Literal, TypeAlias
 
 
@@ -19,7 +29,11 @@ GRID_SOURCE_SHA256 = "b42ad1dfdf204d650da26e35624b3283466350efb0bf780ad0fb3777ee
 # SHA-256 of the complete containing HTML file, useful for source-governance CI.
 GRID_HTML_SHA256 = "c0c10bb4c72138d3ebc13e2ba509899f57036c49afc1baecc6a0cf84fdf9c985"
 HATCH_N = 7
-SUBDIVISION_MAX_LENGTH = 24.0
+SUBDIVISION_MAX_LENGTH = 28.0
+# Sample spacing allowed at sources other than the structure master, and for
+# curve chords anywhere. Counts are shared by all sources, so sizing every
+# edge for the widest cut at 24 units would add a third more points.
+RELAXED_MAX_LENGTH = 38.0
 
 COLORS = {
     "ground": "#7C453B",
@@ -65,103 +79,6 @@ class Piece:
 
     outer: Contour
     holes: list[Contour]
-
-
-def _raw_contours_touch(
-    first: Sequence[RawPoint],
-    second: Sequence[RawPoint],
-    *,
-    epsilon: float = 1e-7,
-) -> bool:
-    """Return whether two closed raw contours intersect or contain a vertex."""
-
-    first_xy = tuple((point[0], point[1]) for point in first)
-    second_xy = tuple((point[0], point[1]) for point in second)
-
-    def cross(
-        a: tuple[float, float],
-        b: tuple[float, float],
-        c: tuple[float, float],
-    ) -> float:
-        return (b[0] - a[0]) * (c[1] - a[1]) - (
-            b[1] - a[1]
-        ) * (c[0] - a[0])
-
-    def on_segment(
-        a: tuple[float, float],
-        b: tuple[float, float],
-        point: tuple[float, float],
-    ) -> bool:
-        return (
-            abs(cross(a, b, point)) <= epsilon
-            and min(a[0], b[0]) - epsilon
-            <= point[0]
-            <= max(a[0], b[0]) + epsilon
-            and min(a[1], b[1]) - epsilon
-            <= point[1]
-            <= max(a[1], b[1]) + epsilon
-        )
-
-    def segments_intersect(
-        a: tuple[float, float],
-        b: tuple[float, float],
-        c: tuple[float, float],
-        d: tuple[float, float],
-    ) -> bool:
-        ab_c, ab_d = cross(a, b, c), cross(a, b, d)
-        cd_a, cd_b = cross(c, d, a), cross(c, d, b)
-        if (
-            ((ab_c > epsilon and ab_d < -epsilon) or
-             (ab_c < -epsilon and ab_d > epsilon))
-            and ((cd_a > epsilon and cd_b < -epsilon) or
-                 (cd_a < -epsilon and cd_b > epsilon))
-        ):
-            return True
-        return (
-            on_segment(a, b, c)
-            or on_segment(a, b, d)
-            or on_segment(c, d, a)
-            or on_segment(c, d, b)
-        )
-
-    for a, b in zip(
-        first_xy,
-        first_xy[1:] + first_xy[:1],
-        strict=True,
-    ):
-        for c, d in zip(
-            second_xy,
-            second_xy[1:] + second_xy[:1],
-            strict=True,
-        ):
-            if segments_intersect(a, b, c, d):
-                return True
-
-    def contains(
-        point: tuple[float, float],
-        polygon: tuple[tuple[float, float], ...],
-    ) -> bool:
-        inside = False
-        previous = polygon[-1]
-        for current in polygon:
-            if on_segment(previous, current, point):
-                return True
-            if (current[1] > point[1]) != (previous[1] > point[1]):
-                crossing_x = (
-                    (previous[0] - current[0])
-                    * (point[1] - current[1])
-                    / (previous[1] - current[1])
-                    + current[0]
-                )
-                if point[0] < crossing_x:
-                    inside = not inside
-            previous = current
-        return inside
-
-    return contains(first_xy[0], second_xy) or contains(
-        second_xy[0],
-        first_xy,
-    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -242,10 +159,15 @@ def arc_pts(
     ry: float,
     a0: float,
     a1: float,
+    steps: int | None = None,
 ) -> list[RawPoint]:
-    """Port of ``arcPts``; sample count depends only on angular span."""
+    """Port of ``arcPts``; sample count depends only on angular span.
 
-    n = max(2, ceil(abs(a1 - a0) / 4))
+    ``steps`` pins the count for arcs whose terminal angle moves with the
+    axis location, which would otherwise change the point topology.
+    """
+
+    n = steps if steps is not None else max(2, ceil(abs(a1 - a0) / 4))
     out: list[RawPoint] = []
     for i in range(n + 1):
         t = (a0 + (a1 - a0) * i / n) * pi / 180
@@ -359,291 +281,276 @@ LC_COMPOSITES: dict[str, tuple[str, str]] = {
 }
 
 
-def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
-    """Return all 138 direct grid builders plus the CAP/LC compositions."""
+def glyph_defs(
+    params: ParamsLike | None = None,
+    *,
+    _nested: bool = False,
+) -> dict[str, Builder]:
+    """Return all 138 direct grid builders plus the CAP/LC compositions.
+
+    Every builder is written against one stroke model, so a junction that is
+    clean at Regular stays clean at every weight and width:
+
+    * skeleton x positions scale with ``w``; stroke thickness follows ``s``;
+    * a stroke's outer edge sits ``max(canonical, actual) / 2`` from its
+      skeleton, so light cuts carve the counter and heavy cuts grow evenly;
+    * vertical extremes stay on the alignment zones at every weight;
+    * attached pieces are derived from the edges of their parent stroke and
+      overlap it instead of abutting it.
+
+    At the default cut the union of every glyph equals the canonical grid.
+    """
 
     p = coerce_params(params)
     S, SH, W = p.s, p.sh, p.w
-    weight_ratio = S / 104.0
+    ratio = S / 104.0
+    heavy = max(1.0, ratio)
+    # 0 at Regular and lighter, 1 at the heaviest designed stroke.
+    heavy_progress = min(1.0, max(0.0, (S - 104.0) / 72.0))
+    JOIN = max(6.0, 0.15 * S)
 
-    def protected_curve_strokes(
-        ro: float,
-        ri: float,
-    ) -> tuple[float, float, float, float]:
-        """Return skeleton-scaled x radii and counter-safe y radii.
+    # ------------------------------------------------------------ primitives
 
-        Width acts on the round stroke's centreline rather than its outer
-        boundary.  This keeps the physical stroke independent from ``wdth``.
-        Weight grows into the counter, but compact bowls retain a deliberate
-        aperture instead of collapsing or inverting at Black Condensed.
+    def X(x: float) -> float:
+        """Scale a canonical skeleton x position."""
+
+        return x * W
+
+    def tk(b: float = 104.0) -> float:
+        """Vertical-stroke thickness for a canonical thickness ``b``."""
+
+        return b * ratio
+
+    def reach(b: float = 104.0) -> float:
+        """Distance from a stroke's skeleton to its outer edge."""
+
+        return b * heavy / 2.0
+
+    Span: TypeAlias = tuple[float, float]
+
+    def left(c: float, b: float = 104.0) -> Span:
+        """x range of a stroke on skeleton ``c`` whose outer edge faces left."""
+
+        edge = X(c) - reach(b)
+        return edge, edge + tk(b)
+
+    def right(c: float, b: float = 104.0) -> Span:
+        """x range of a stroke on skeleton ``c`` whose outer edge faces right."""
+
+        edge = X(c) + reach(b)
+        return edge - tk(b), edge
+
+    def centre(c: float, b: float = 104.0) -> Span:
+        """x range of an interior stroke centred on skeleton ``c``."""
+
+        half = tk(b) / 2.0
+        return X(c) - half, X(c) + half
+
+    def mid(span: Span) -> float:
+        return (span[0] + span[1]) / 2.0
+
+    def bar_t(b: float = 100.0) -> float:
+        """Horizontal-stroke thickness; 104-unit bars follow the stem."""
+
+        return S if abs(b - 104.0) < 1e-9 else b * SH / 100.0
+
+    def top(y: float, b: float = 100.0) -> Span:
+        """y range of a bar hanging from zone ``y``."""
+
+        return y, y + bar_t(b)
+
+    def bottom(y: float, b: float = 100.0) -> Span:
+        """y range of a bar standing on zone ``y``."""
+
+        return y - bar_t(b), y
+
+    def around(y: float, b: float = 100.0) -> Span:
+        """y range of an interior bar centred on ``y``."""
+
+        half = bar_t(b) / 2.0
+        return y - half, y + half
+
+    def box(xs: Span, ys: Span) -> Contour:
+        return rect(xs[0], ys[0], xs[1], ys[1])
+
+    def pc(outer: Contour, holes: Sequence[Contour] | None = None) -> Piece:
+        return _piece(outer, holes)
+
+    def band(first: Span, y_first: float, second: Span, y_second: float) -> Contour:
+        """Stroke with horizontal terminals ``first`` and ``second``."""
+
+        return quad(
+            [
+                (first[0], y_first),
+                (first[1], y_first),
+                (second[1], y_second),
+                (second[0], y_second),
+            ]
+        )
+
+    def cap_width(b: float, run: float, rise: float) -> float:
+        """Horizontal cut that keeps the canonical perpendicular thickness.
+
+        ``run`` and ``rise`` describe the canonical stroke; the width axis
+        changes the run, which would otherwise thin or fatten the diagonal.
         """
 
-        base_stroke = ro - ri
-        desired_stroke = base_stroke * weight_ratio
-        skeleton_rx = (ro + ri) * W / 2
-        counter_floor_x = max(16.0, ri * W * 0.35)
-        counter_floor_y = max(18.0, ri * 0.35)
+        return b * ratio * _js_hypot(run * W, rise) / _js_hypot(run, rise)
 
-        # Light cuts retain the Regular outer silhouette and open the counter.
-        # Previously only the side stroke became lighter while the top and
-        # bottom stayed at Regular weight, distorting O, C, and their accents.
-        if desired_stroke <= base_stroke:
-            outer_rx = skeleton_rx + base_stroke / 2
-            inner_rx = max(counter_floor_x, outer_rx - desired_stroke)
-            outer_ry = ro
-            inner_ry = max(counter_floor_y, ro - desired_stroke)
-            return outer_rx, inner_rx, outer_ry, inner_ry
+    def cap_l(c: float, width: float) -> Span:
+        edge = X(c) - width * max(1.0, 1.0 / ratio) / 2.0
+        return edge, edge + width
 
-        heavy_progress = min(
-            1.0,
-            max(0.0, (desired_stroke - base_stroke) / max(base_stroke * 0.7, 1)),
+    def cap_r(c: float, width: float) -> Span:
+        edge = X(c) + width * max(1.0, 1.0 / ratio) / 2.0
+        return edge - width, edge
+
+    def cap_c(c: float, width: float) -> Span:
+        return X(c) - width / 2.0, X(c) + width / 2.0
+
+    def at_y(first: Span, y_first: float, second: Span, y_second: float, y: float) -> float:
+        """Centreline x of a band at height ``y``."""
+
+        t = (y - y_first) / (y_second - y_first)
+        return mid(first) + (mid(second) - mid(first)) * t
+
+    def slab(
+        a: Sequence[float],
+        b: Sequence[float],
+        width: float,
+        cut_a: float | None = None,
+        cut_b: float | None = None,
+    ) -> Contour:
+        """Band of perpendicular ``width`` along ``a``→``b`` in master space.
+
+        ``cut_a``/``cut_b`` request a horizontal terminal at that height;
+        otherwise the terminal is a butt cap.
+        """
+
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        length = _js_hypot(dx, dy) or 1.0
+        ux, uy = dx / length, dy / length
+        px, py = -uy * width / 2.0, ux * width / 2.0
+
+        def end(point: Sequence[float], cut: float | None) -> tuple[
+            tuple[float, float], tuple[float, float]
+        ]:
+            first = (point[0] + px, point[1] + py)
+            second = (point[0] - px, point[1] - py)
+            if cut is None:
+                return first, second
+            return (
+                (first[0] + ux * (cut - first[1]) / uy, cut),
+                (second[0] + ux * (cut - second[1]) / uy, cut),
+            )
+
+        a1, a2 = end(a, cut_a)
+        b1, b2 = end(b, cut_b)
+        return quad([a1, b1, b2, a2])
+
+    def stroke_w(width: float) -> float:
+        """Thickness of a free stroke whose canonical value is ``width``."""
+
+        return width if abs(width - S) < 1e-9 else width * ratio
+
+    def bar(x1: float, y1: float, x2: float, y2: float, width: float) -> Piece:
+        return pc(slab((X(x1), y1), (X(x2), y2), stroke_w(width)))
+
+    # ---------------------------------------------------------------- rounds
+
+    def radii(
+        ro: float,
+        ri: float,
+        *,
+        ty: float | None = None,
+        k: float = 1.0,
+    ) -> tuple[float, float, float, float]:
+        """Return master ``(outer_rx, inner_rx, outer_ry, inner_ry)``.
+
+        Horizontally the stroke follows the same edge rule as a stem, so a
+        bowl and the stem it joins share one silhouette. Vertically the outer
+        radius never leaves its alignment zone; weight grows into the counter
+        and is limited before the counter closes.
+        """
+
+        b = ro - ri
+        thickness = tk(b) * k
+        outer_rx = (ro + ri) / 2.0 * W + max(b, thickness) / 2.0
+        inner_rx = max(
+            min(ri * W, max(16.0, ri * W * 0.35)),
+            outer_rx - thickness,
         )
-
-        stroke_x = min(
-            desired_stroke,
-            max(1.0, 2 * (skeleton_rx - counter_floor_x)),
-        )
-        outward_share = 0.5 + 0.12 * heavy_progress
-        outer_rx = skeleton_rx + stroke_x * outward_share
-        inner_rx = skeleton_rx - stroke_x * (1 - outward_share)
-
-        # Keep the canonical silhouette at Regular. Above it, distribute new
-        # curve weight both outside and inside instead of consuming the full
-        # counter. This is the round-glyph counterpart to the weight-aware
-        # skeleton expansion used by straight and diagonal construction.
-        added_stroke_y = max(0.0, desired_stroke - base_stroke)
-        outer_ry = ro + added_stroke_y * 0.35
+        outer_ry = ro
         inner_ry = max(
-            counter_floor_y,
-            ri - added_stroke_y * 0.65,
+            min(ri, max(18.0, 0.38 * ro)),
+            ro - (thickness if ty is None else ty),
         )
         return outer_rx, inner_rx, outer_ry, inner_ry
 
-    # ``w`` is applied to the canonical grid geometry, never to stale specimen
-    # outlines. Coordinates that place skeleton features scale in x while
-    # physical stroke thickness is controlled by weight. The tests below use
-    # the canonical rectangle dimensions, not the current weight, so a heavy
-    # short stem cannot accidentally change from a stem into a layout box.
-    def R(x0: float, y0: float, x1: float, y1: float) -> Contour:
-        width, height = abs(x1 - x0), abs(y1 - y0)
-        is_horizontal = (
-            (abs(height - S) < 1e-9 or abs(height - SH) < 1e-9)
-            and width > 1.01 * min(height, 104.0)
-        ) or (height <= 150.0 and width > 1.5 * height)
-        is_vertical = (
-            (abs(width - S) < 1e-9 or abs(width - 104.0) < 1e-9)
-            and height > 1.01 * min(width, 104.0)
-        ) or (width <= 150.0 and height > 1.5 * width)
-        if is_vertical and not is_horizontal:
-            target_width = (
-                width
-                if abs(width - S) < 1e-9
-                else width * weight_ratio
-            )
-            if x0 == 0:
-                xx0, xx1 = 0.0, target_width
-            else:
-                center = (x0 + x1) * W / 2
-                xx0, xx1 = center - target_width / 2, center + target_width / 2
-            return rect(xx0, y0, xx1, y1)
-        if is_horizontal:
-            if abs(height - S) < 1e-9 or abs(height - SH) < 1e-9:
-                target_height = height
-            elif abs(height - 104.0) < 1e-9:
-                target_height = S
-            elif abs(height - 100.0) < 1e-9:
-                target_height = SH
-            else:
-                target_height = height * (SH / 100.0)
-            if y0 == 0:
-                yy0, yy1 = 0.0, target_height
-            elif y1 == 700:
-                yy0, yy1 = 700.0 - target_height, 700.0
-            else:
-                center = (y0 + y1) / 2
-                yy0, yy1 = center - target_height / 2, center + target_height / 2
-            return rect(x0 * W, yy0, x1 * W, yy1)
-        return rect(x0 * W, y0, x1 * W, y1)
+    def hook_radii(ro: float, ri: float) -> tuple[float, float, float, float]:
+        """Radii for a short terminal hook (f, t, j, J).
 
-    def vstem(
-        center: float,
-        y0: float,
-        y1: float,
-        canonical_width: float = 104.0,
-    ) -> Contour:
-        """Build a vertical stroke about an explicitly scaled skeleton."""
-
-        width = canonical_width * weight_ratio
-        cx = center * W
-        return rect(cx - width / 2, y0, cx + width / 2, y1)
-
-    def hstem(
-        x0: float,
-        x1: float,
-        center: float,
-        canonical_height: float = 100.0,
-    ) -> Contour:
-        """Build a horizontal stroke with explicit attachment coordinates."""
-
-        height = canonical_height * (SH / 100.0)
-        return rect(x0, center - height / 2, x1, center + height / 2)
-
-    def Q(points: Sequence[Sequence[float]]) -> Contour:
-        if (
-            len(points) == 4
-            and abs(points[0][1] - points[1][1]) < 1e-9
-            and abs(points[2][1] - points[3][1]) < 1e-9
-        ):
-            transformed: list[tuple[float, float]] = []
-            for first, second in ((points[0], points[1]), (points[3], points[2])):
-                mx, my = (first[0] + second[0]) / 2, (first[1] + second[1]) / 2
-                dx, dy = (first[0] - second[0]) / 2, (first[1] - second[1]) / 2
-                transformed.extend(
-                    [
-                        (mx * W + dx * weight_ratio, my + dy * weight_ratio),
-                        (mx * W - dx * weight_ratio, my - dy * weight_ratio),
-                    ]
-                )
-            # The second pair was traversed 3 -> 2; restore source point order.
-            return quad([transformed[0], transformed[1], transformed[3], transformed[2]])
-
-        if len(points) == 4:
-            # General four-point strokes (R leg, 1 flag, comma tail, etc.)
-            # need the same skeleton/weight treatment as horizontal-paired
-            # diagonals.  Preserve the canonical default bit-for-bit.
-            if abs(W - 1.0) < 1e-12 and abs(weight_ratio - 1.0) < 1e-12:
-                return quad(points)
-
-            source = [(float(q[0]), float(q[1])) for q in points]
-
-            def edge_length(index: int) -> float:
-                first, second = source[index], source[(index + 1) % 4]
-                return _js_hypot(second[0] - first[0], second[1] - first[1])
-
-            # Opposite short edges are the stroke caps.
-            cap_start = min(
-                (0, 1),
-                key=lambda index: edge_length(index) + edge_length(index + 2),
-            )
-            cap_indices = (cap_start, (cap_start + 2) % 4)
-            base_width = sum(edge_length(index) for index in cap_indices) / 2
-            target_width = max(1.0, base_width * weight_ratio)
-            transformed: list[tuple[float, float] | None] = [None] * 4
-
-            cap_midpoints = []
-            for index in cap_indices:
-                first, second = source[index], source[(index + 1) % 4]
-                cap_midpoints.append(
-                    (
-                        (first[0] + second[0]) * W / 2,
-                        (first[1] + second[1]) / 2,
-                    )
-                )
-            dx = cap_midpoints[1][0] - cap_midpoints[0][0]
-            dy = cap_midpoints[1][1] - cap_midpoints[0][1]
-            length = _js_hypot(dx, dy) or 1.0
-            normal = (-dy / length, dx / length)
-
-            for index, midpoint in zip(cap_indices, cap_midpoints):
-                next_index = (index + 1) % 4
-                original_vector = (
-                    source[next_index][0] * W - source[index][0] * W,
-                    source[next_index][1] - source[index][1],
-                )
-                orientation = (
-                    1.0
-                    if original_vector[0] * normal[0]
-                    + original_vector[1] * normal[1]
-                    >= 0
-                    else -1.0
-                )
-                half_x = normal[0] * target_width / 2 * orientation
-                half_y = normal[1] * target_width / 2 * orientation
-                transformed[index] = (midpoint[0] - half_x, midpoint[1] - half_y)
-                transformed[next_index] = (
-                    midpoint[0] + half_x,
-                    midpoint[1] + half_y,
-                )
-            if all(point is not None for point in transformed):
-                return quad([point for point in transformed if point is not None])
-
-        return quad([(q[0] * W, q[1]) for q in points])
-
-    def diagonal_strip_hex(
-        center_a: tuple[float, float],
-        center_b: tuple[float, float],
-        base_thickness: float,
-        bounds: tuple[float, float, float, float],
-        canonical: Sequence[Sequence[float]],
-    ) -> Contour:
-        """Clip a constant-width diagonal skeleton to a rectangular box.
-
-        The selected Z/z geometry always has the same six intersections:
-        top edge, top-right corner, right edge, bottom edge,
-        bottom-left corner, and left edge. Keeping those semantic vertices
-        fixed gives interpolation a stable point order at every axis corner.
+        A hook is too small to absorb a heavy stroke, so above Regular it
+        keeps its canonical counter and grows outward; its horizontal part is
+        eased toward 70% of the stem so the terminal stays readable.
         """
 
-        if abs(W - 1.0) < 1e-12 and abs(weight_ratio - 1.0) < 1e-12:
-            return quad(canonical)
+        b = ro - ri
+        thickness = tk(b)
+        if ratio <= 1.0:
+            outer_rx = (ro + ri) / 2.0 * W + reach(b)
+            return outer_rx, outer_rx - thickness, ro, ro - thickness
+        inner_rx = (ro + ri) / 2.0 * W - b / 2.0
+        flat = thickness * (1.0 - 0.3 * heavy_progress)
+        return inner_rx + thickness, inner_rx, ri + flat, ri
 
-        ax, ay = center_a[0] * W, center_a[1]
-        bx, by = center_b[0] * W, center_b[1]
-        dx, dy = bx - ax, by - ay
+    def tangent(rx: float, ry: float, angle: float, sweep: float) -> tuple[float, float]:
+        radians = angle * pi / 180.0
+        sign = 1.0 if sweep >= 0 else -1.0
+        dx, dy = -rx * sin(radians) * sign, ry * cos(radians) * sign
         length = _js_hypot(dx, dy) or 1.0
-        nx, ny = -dy / length, dx / length
-        half = base_thickness * weight_ratio / 2
-        left, right, top, bottom = (
-            bounds[0] * W,
-            bounds[1] * W,
-            bounds[2],
-            bounds[3],
-        )
+        return dx / length, dy / length
 
-        def x_at(y: float, offset: float) -> float:
-            return ax + (offset - ny * (y - ay)) / nx
-
-        def y_at(x: float, offset: float) -> float:
-            return ay + (offset - nx * (x - ax)) / ny
-
-        return quad(
-            [
-                (x_at(top, half), top),
-                (right, top),
-                (right, y_at(right, -half)),
-                (x_at(bottom, -half), bottom),
-                (left, bottom),
-                (left, y_at(left, half)),
-            ]
-        )
-
-    def vertically_clipped_band(
-        top_center: tuple[float, float],
-        bottom_center: tuple[float, float],
-        top: float,
-        bottom: float,
-        canonical_cap_width: float = 104.0,
+    def sector(
+        cx: float,
+        cy: float,
+        outer_rx: float,
+        inner_rx: float,
+        outer_ry: float,
+        inner_ry: float,
+        oa0: float,
+        oa1: float,
+        ia0: float,
+        ia1: float,
+        caps: tuple[object, object] = (0, 0),
+        tails: tuple[float, float] = (0.0, 0.0),
+        steps: int | None = None,
     ) -> Contour:
-        """A diagonal band clipped to horizontal joins at both ends."""
+        """Ring sector in master space.
 
-        ax, ay = top_center[0] * W, top_center[1]
-        bx, by = bottom_center[0] * W, bottom_center[1]
-        if abs(by - ay) < 1e-9:
-            raise ValueError("clipped band requires a non-horizontal skeleton")
+        ``caps`` marks the (end, start) terminals as free forced caps.
+        ``tails`` extends the (end, start) terminals along their tangent so
+        an attached end overlaps its parent stroke. ``steps`` pins the sample
+        count when a terminal angle depends on the axis location.
+        """
 
-        def center_x(y: float) -> float:
-            return ax + (bx - ax) * (y - ay) / (by - ay)
-
-        half = canonical_cap_width * weight_ratio / 2
-        top_x, bottom_x = center_x(top), center_x(bottom)
-        return quad(
-            [
-                (top_x - half, top),
-                (top_x + half, top),
-                (bottom_x + half, bottom),
-                (bottom_x - half, bottom),
-            ]
-        )
+        outer = arc_pts(cx, cy, outer_rx, outer_ry, oa0, oa1, steps)
+        inner = arc_pts(cx, cy, inner_rx, inner_ry, ia0, ia1, steps)
+        points: list[RawPoint] = list(outer)
+        if caps[0]:
+            points[-1] = (points[-1][0], points[-1][1], 2)
+        if tails[0]:
+            dx, dy = tangent(outer_rx, outer_ry, oa1, oa1 - oa0)
+            points.append((outer[-1][0] + dx * tails[0], outer[-1][1] + dy * tails[0], 0))
+            points.append((inner[0][0] + dx * tails[0], inner[0][1] + dy * tails[0], 0))
+        points.extend(inner)
+        if caps[1]:
+            points[-1] = (points[-1][0], points[-1][1], 2)
+        if tails[1]:
+            dx, dy = tangent(inner_rx, inner_ry, ia1, ia1 - ia0)
+            points.append((inner[-1][0] + dx * tails[1], inner[-1][1] + dy * tails[1], 0))
+            points.append((outer[0][0] + dx * tails[1], outer[0][1] + dy * tails[1], 0))
+        return Contour(points)
 
     def RS(
         cx: float,
@@ -654,161 +561,75 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         oa1: float,
         ia0: float,
         ia1: float,
-        _sx: float | None = None,
-        caps: object = None,
+        caps: tuple[object, object] = (0, 0),
+        tails: tuple[float, float] = (0.0, 0.0),
+        ty: float | None = None,
+        steps: int | None = None,
     ) -> Contour:
-        outer_rx, inner_rx, outer_ry, inner_ry = protected_curve_strokes(ro, ri)
-        outer = arc_pts(cx * W, cy, outer_rx, outer_ry, oa0, oa1)
-        inner = arc_pts(cx * W, cy, inner_rx, inner_ry, ia0, ia1)
-        if caps:
-            outer[-1] = (outer[-1][0], outer[-1][1], 2)
-            inner[-1] = (inner[-1][0], inner[-1][1], 2)
-        return Contour(outer + inner)
-
-    def RSXY(
-        cx: float,
-        cy: float,
-        rox: float,
-        rix: float,
-        roy: float,
-        riy: float,
-        oa0: float,
-        oa1: float,
-        ia0: float,
-        ia1: float,
-        caps: object = None,
-    ) -> Contour:
-        """Anisotropic ring sector with skeleton-scaled x and explicit y."""
-
-        outer_rx, inner_rx, _outer_ry, _inner_ry = protected_curve_strokes(
-            rox, rix
+        outer_rx, inner_rx, outer_ry, inner_ry = radii(ro, ri, ty=ty)
+        return sector(
+            X(cx), cy, outer_rx, inner_rx, outer_ry, inner_ry,
+            oa0, oa1, ia0, ia1, caps, tails, steps,
         )
-        outer = arc_pts(cx * W, cy, outer_rx, roy, oa0, oa1)
-        inner = arc_pts(cx * W, cy, inner_rx, riy, ia0, ia1)
-        if caps:
-            outer[-1] = (outer[-1][0], outer[-1][1], 2)
-            inner[-1] = (inner[-1][0], inner[-1][1], 2)
-        return Contour(outer + inner)
 
-    def connected_half_bowl(
+    def arch(
+        x0: float,
+        x1: float,
+        cy: float,
+        ro: float,
+        ri: float,
+        oa0: float = 180.0,
+        oa1: float = 360.0,
+    ) -> Contour:
+        """Arch between two outer x extents, overlapping both supports."""
+
+        thickness = tk(ro - ri)
+        outer_rx = (x1 - x0) / 2.0
+        inner_rx = max(min(16.0, 0.5 * outer_rx), outer_rx - thickness)
+        inner_ry = max(min(ri, max(18.0, 0.38 * ro)), ro - thickness)
+        return sector(
+            (x0 + x1) / 2.0, cy, outer_rx, inner_rx, ro, inner_ry,
+            oa0, oa1, oa1, oa0, tails=(JOIN, JOIN),
+        )
+
+    def half_bowl(
         cx: float,
         first_center: float,
         second_center: float,
         rox: float,
         rix: float,
-        oa0: float,
-        oa1: float,
-        ia0: float,
-        ia1: float,
+        side: str,
+        stroke: float | None = None,
     ) -> Contour:
-        """Build a half-bowl whose caps share the adjoining stroke centres."""
+        """Half bowl whose ends share the centres of the bars it connects."""
 
-        cy = (first_center + second_center) / 2
-        skeleton_ry = abs(second_center - first_center) / 2
-        counter_floor = max(18.0, skeleton_ry * 0.18)
-        stroke_y = min(S, max(1.0, 2 * (skeleton_ry - counter_floor)))
-        outer_ry = skeleton_ry + stroke_y / 2
-        inner_ry = skeleton_ry - stroke_y / 2
-        return RSXY(
-            cx,
-            cy,
-            rox,
-            rix,
-            outer_ry,
-            inner_ry,
-            oa0,
-            oa1,
-            ia0,
-            ia1,
+        thickness = S if stroke is None else stroke
+        cy = (first_center + second_center) / 2.0
+        skeleton_ry = abs(second_center - first_center) / 2.0
+        outer_ry = skeleton_ry + thickness / 2.0
+        inner_ry = max(
+            min(10.0, 0.5 * skeleton_ry),
+            skeleton_ry - thickness / 2.0,
+        )
+        outer_rx, inner_rx, _unused_y, _unused_iy = radii(rox, rix)
+        angles = (-90, 90, 90, -90) if side == "right" else (90, 270, 270, 90)
+        return sector(
+            X(cx), cy, outer_rx, inner_rx, outer_ry, inner_ry,
+            *angles, tails=(JOIN, JOIN),
         )
 
-    def pc(outer: Contour, holes: Sequence[Contour] | None = None) -> Piece:
-        return _piece(outer, holes)
-
-    def attach_quad_cap(
-        body: Sequence[Piece],
-        contour: Contour,
-        moving_indices: Sequence[int],
-        direction: tuple[float, float],
-        overlap: float | None = None,
-    ) -> Contour:
-        """Extend one quad cap only enough to overlap its parent stroke."""
-
-        length = _js_hypot(*direction) or 1.0
-        ux, uy = direction[0] / length, direction[1] / length
-        moving = frozenset(moving_indices)
-
-        def extended(distance: float) -> Contour:
-            return Contour(
-                [
-                    (
-                        point[0] + (ux * distance if index in moving else 0),
-                        point[1] + (uy * distance if index in moving else 0),
-                        point[2],
-                    )
-                    for index, point in enumerate(contour.pts)
-                ]
-            )
-
-        def touches(candidate: Contour) -> bool:
-            return any(
-                _raw_contours_touch(piece.outer.pts, candidate.pts)
-                for piece in body
-            )
-
-        if touches(contour):
-            return contour
-
-        lower, upper = 0.0, 1.0
-        while upper < 256 and not touches(extended(upper)):
-            lower, upper = upper, upper * 2
-        if not touches(extended(upper)):
-            raise AssertionError("attachment cap cannot reach its parent stroke")
-        for _ in range(40):
-            middle = (lower + upper) / 2
-            if touches(extended(middle)):
-                upper = middle
-            else:
-                lower = middle
-
-        # A positive overlap survives integer rounding and ordinary gvar
-        # interpolation between the explicit width/weight source planes.
-        return extended(
-            upper
-            + (
-                max(2.0, 0.08 * S)
-                if overlap is None
-                else overlap
-            )
-        )
-
-    def disc(cx: float, cy: float, radius: float) -> Piece:
-        weighted_radius = max(8.0, radius + (S - 104.0) * 0.25)
-        return pc(ellipse(cx * W, cy, weighted_radius, weighted_radius))
-
-    def accent_disc(cx: float, cy: float, radius: float) -> Piece:
-        """Keep light dieresis dots in step with the active stroke."""
-
-        weighted_radius = (
-            radius * weight_ratio
-            if weight_ratio <= 1.0
-            else radius + (S - 104.0) * 0.25
-        )
-        weighted_radius = max(8.0, weighted_radius)
+    def ring_p(
+        cx: float,
+        cy: float,
+        ro: float,
+        ri: float,
+        ty: float | None = None,
+        k: float = 1.0,
+    ) -> Piece:
+        outer_rx, inner_rx, outer_ry, inner_ry = radii(ro, ri, ty=ty, k=k)
         return pc(
-            ellipse(
-                cx * W,
-                cy,
-                weighted_radius,
-                weighted_radius,
-            )
-        )
-
-    def ring_p(cx: float, cy: float, ro: float, ri: float) -> Piece:
-        outer_rx, inner_rx, outer_ry, inner_ry = protected_curve_strokes(ro, ri)
-        return pc(
-            ellipse(cx * W, cy, outer_rx, outer_ry),
-            [ellipse(cx * W, cy, inner_rx, inner_ry)],
+            ellipse(X(cx), cy, outer_rx, outer_ry),
+            [ellipse(X(cx), cy, inner_rx, inner_ry)],
         )
 
     def ellipse_ring_p(
@@ -819,53 +640,86 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         roy: float,
         riy: float,
     ) -> Piece:
-        outer_rx, inner_rx, _unused_outer_y, _unused_inner_y = (
-            protected_curve_strokes(rox, rix)
-        )
-        _unused_outer_x, _unused_inner_x, outer_ry, inner_ry = (
-            protected_curve_strokes(roy, riy)
-        )
+        outer_rx, inner_rx, _unused_y, _unused_iy = radii(rox, rix)
+        _unused_x, _unused_ix, outer_ry, inner_ry = radii(roy, riy)
         return pc(
-            ellipse(cx * W, cy, outer_rx, outer_ry),
-            [ellipse(cx * W, cy, inner_rx, inner_ry)],
+            ellipse(X(cx), cy, outer_rx, outer_ry),
+            [ellipse(X(cx), cy, inner_rx, inner_ry)],
         )
 
-    def bar(x1: float, y1: float, x2: float, y2: float, width: float) -> Piece:
-        width = width if abs(width - S) < 1e-9 else width * weight_ratio
-        x1, x2 = x1 * W, x2 * W
-        dx, dy = x2 - x1, y2 - y1
-        length = _js_hypot(dx, dy) or 1.0
-        px, py = -dy / length * width / 2, dx / length * width / 2
-        return pc(
-            Contour(
-                [
-                    (x1 + px, y1 + py, 0),
-                    (x2 + px, y2 + py, 0),
-                    (x2 - px, y2 - py, 0),
-                    (x1 - px, y1 - py, 0),
-                ]
-            )
-        )
+    # ------------------------------------------------------------------ dots
 
-    def leg(ax: float, ay: float, bx: float, by: float, width: float) -> Piece:
-        width = width if abs(width - S) < 1e-9 else width * weight_ratio
-        ax, bx = ax * W, bx * W
-        dx, dy = bx - ax, by - ay
-        length = _js_hypot(dx, dy) or 1.0
-        ux, uy = dx / length, dy / length
-        px, py = -dy / length * width / 2, dx / length * width / 2
-        a1, a2 = (ax + px, ay + py), (ax - px, ay - py)
-        t1, t2 = (700 - a1[1]) / uy, (700 - a2[1]) / uy
-        return pc(
-            Contour(
-                [
-                    (a1[0], a1[1], 0),
-                    (a1[0] + ux * t1, 700, 0),
-                    (a2[0] + ux * t2, 700, 0),
-                    (a2[0], a2[1], 0),
-                ]
-            )
+    def dot_radius(radius: float, light: float = 1.0) -> float:
+        """Dot size that tracks the stem instead of lagging behind it."""
+
+        if ratio <= 1.0:
+            return max(8.0, radius * ratio**light)
+        return radius * ratio**0.9
+
+    def dot_at(cx: float, cy: float, radius: float) -> Piece:
+        return pc(ellipse(cx, cy, radius, radius))
+
+    def point(cx: float, cy: float, radius: float) -> Piece:
+        """Punctuation dot centred on a canonical position."""
+
+        return dot_at(X(cx), cy, dot_radius(radius, 0.8))
+
+    def base_point(cx: float, radius: float = 63.0) -> Piece:
+        """Punctuation dot that sits on the baseline at every weight."""
+
+        size = dot_radius(radius, 0.8)
+        return dot_at(cx, 700.0 - size, size)
+
+    def accent_disc(
+        cx: float,
+        cy: float,
+        radius: float,
+        pair: float | None = None,
+    ) -> Piece:
+        """Dieresis dot; heavy dots grow upward from a fixed clearance."""
+
+        size = dot_radius(radius)
+        if pair is not None:
+            size = min(size, 0.84 * pair * W)
+        if ratio > 1.0:
+            cy = cy + radius - size
+        return dot_at(X(cx), cy, size)
+
+    # ------------------------------------------------------------ transforms
+    def settle(pieces: Sequence[Piece], floor: float) -> list[Piece]:
+        """Shift an accent so its lowest point rests on ``floor``.
+
+        Accents keep one clearance above their base and grow upward; a
+        centred accent would sink into the letter as the weight rises.
+        """
+
+        low = max(q[1] for piece in pieces for q in piece.outer.pts)
+        return map_pieces(pieces, lambda q: (q[0], q[1] + floor - low, q[2]))
+
+    def accent_w(width: float) -> float:
+        """Accent stroke: in step when light, eased when heavy."""
+
+        return width * (ratio if ratio <= 1.0 else ratio**0.7)
+
+    def accent_bar(x1: float, y1: float, x2: float, y2: float, width: float, floor: float) -> list[Piece]:
+        return settle([pc(slab((X(x1), y1), (X(x2), y2), accent_w(width)))], floor)
+
+    def accent_chev(
+        ax: float,
+        ay: float,
+        b1: Sequence[float],
+        b2: Sequence[float],
+        width: float,
+        floor: float,
+    ) -> list[Piece]:
+        piece = chev_abs(
+            (X(ax), ay),
+            (X(b1[0]), b1[1]),
+            (X(b2[0]), b2[1]),
+            accent_w(width),
         )
+        return settle([piece], floor)
+
 
     def map_pieces(
         pieces: Sequence[Piece], transform: Callable[[RawPoint], RawPoint]
@@ -890,14 +744,18 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
     def scale(pieces: Sequence[Piece], factor: float) -> list[Piece]:
         return map_pieces(pieces, lambda q: (q[0] * factor, q[1] * factor, q[2]))
 
+    def extent(pieces: Sequence[Piece]) -> Span:
+        xs = [q[0] for piece in pieces for q in piece.outer.pts]
+        return min(xs), max(xs)
+
     def wave(cx: float, cy: float, half_len: float, amp: float, half_w: float) -> Piece:
-        top: list[RawPoint] = []
-        bottom: list[RawPoint] = []
+        upper: list[RawPoint] = []
+        lower: list[RawPoint] = []
         # Bound the offset by the sinusoid's minimum radius of curvature.
         # Without this cap, Black Condensed tildes fold back through themselves.
         curvature_radius = (half_len * W) ** 2 / (amp * pi**2)
         effective_half_w = min(
-            half_w * weight_ratio,
+            accent_w(half_w),
             0.72 * curvature_radius,
         )
         for i in range(41):
@@ -907,21 +765,20 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
             d = -amp * cos(2 * pi * t) * pi / (half_len * W)
             length = _js_hypot(1, d)
             nx, ny = d / length, -1 / length
-            top.append((x + nx * effective_half_w, y + ny * effective_half_w, 1))
-            bottom.append((x - nx * effective_half_w, y - ny * effective_half_w, 1))
-        return pc(Contour(top + list(reversed(bottom))))
+            upper.append((x + nx * effective_half_w, y + ny * effective_half_w, 1))
+            lower.append((x - nx * effective_half_w, y - ny * effective_half_w, 1))
+        return pc(Contour(upper + list(reversed(lower))))
 
-    def chev(
-        ax: float,
-        ay: float,
+    def chev_abs(
+        apex: Sequence[float],
         b1: Sequence[float],
         b2: Sequence[float],
         width: float,
     ) -> Piece:
-        width *= weight_ratio
-        ax *= W
-        b1 = (b1[0] * W, b1[1])
-        b2 = (b2[0] * W, b2[1])
+        """Mitred two-arm chevron in master space."""
+
+        ax, ay = apex
+
         def arm(b: Sequence[float]) -> tuple[float, float]:
             dx, dy = b[0] - ax, b[1] - ay
             length = _js_hypot(dx, dy) or 1.0
@@ -931,6 +788,7 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
         # The contour path is b1 → apex → b2. With both helpers expressed as
         # apex → endpoint, the incoming arm's normal must be reversed.
         n1, n2 = (u1[1], -u1[0]), (-u2[1], u2[0])
+
         def intersect_offsets(
             first: tuple[float, float],
             first_direction: tuple[float, float],
@@ -1004,782 +862,1342 @@ def glyph_defs(params: ParamsLike | None = None) -> dict[str, Builder]:
             minus_join,
             (b1[0] - nn1[0], b1[1] - nn1[1]),
         ]
-        return pc(
-            Contour(
-                [(x, y, 0) for x, y in points]
-            )
+        return pc(Contour([(x, y, 0) for x, y in points]))
+
+    def chev(
+        ax: float,
+        ay: float,
+        b1: Sequence[float],
+        b2: Sequence[float],
+        width: float,
+    ) -> Piece:
+        return chev_abs(
+            (X(ax), ay),
+            (X(b1[0]), b1[1]),
+            (X(b2[0]), b2[1]),
+            width * ratio,
+        )
+
+    def corner_diagonal(
+        upper: Sequence[float],
+        lower: Sequence[float],
+        thickness: float,
+        y_clip: Span,
+    ) -> Contour:
+        """Z diagonal whose edges pass through two inner bar corners.
+
+        ``upper`` is the bottom-right corner of the top bar and ``lower`` the
+        top-left corner of the bottom bar. The six vertices keep one
+        semantic order at every axis location.
+        """
+
+        dx, dy = lower[0] - upper[0], lower[1] - upper[1]
+        span = _js_hypot(dx, dy) or 1.0
+        # Rotate the corner-to-corner chord until the two parallel edges are
+        # exactly ``thickness`` apart.
+        swing = asin(min(0.95, thickness / span))
+        base = atan2(dy, dx)
+        direction = base - swing
+        ux, uy = cos(direction), sin(direction)
+
+        def x_on(edge_point: Sequence[float], y: float) -> float:
+            return edge_point[0] + ux * (y - edge_point[1]) / uy
+
+        y0, y1 = y_clip
+        return quad(
+            [
+                (x_on(lower, y0), y0),
+                (upper[0], y0),
+                (upper[0], upper[1]),
+                (x_on(upper, y1), y1),
+                (lower[0], y1),
+                (lower[0], lower[1]),
+            ]
         )
 
     G: dict[str, Builder] = {}
 
-    # Uppercase -- assignment order mirrors the canonical source.
+    # ============================================================= capitals
     G["O"] = lambda: [ring_p(362, 350, 362, 258)]
     G["Ö"] = lambda: G["O"]() + [
-        accent_disc(225.5, -115, 63),
-        accent_disc(498.5, -115, 63),
+        accent_disc(225.5, -115, 63, 136.5),
+        accent_disc(498.5, -115, 63, 136.5),
     ]
-    G["C"] = lambda: [pc(RS(362, 350, 362, 258, -38, -322, -330, -30, 1, 1))]
+    G["C"] = lambda: [pc(RS(362, 350, 362, 258, -38, -322, -330, -30, caps=(1, 1)))]
 
     def glyph_g_cap() -> list[Piece]:
-        outer_rx, _inner_rx, _outer_ry, _inner_ry = protected_curve_strokes(
-            362, 258
-        )
-        outer_right = 362 * W + outer_rx
-        aperture_x = 362 * W + outer_rx * cos(38 * pi / 180)
-        terminal_left = outer_right - 116 * weight_ratio
-        aperture_y = 350 + 362 * sin(38 * pi / 180)
-        connector_padding = max(6.0, 0.1 * S)
-        connector_left = min(aperture_x, terminal_left) - connector_padding
-        connector_right = max(aperture_x, terminal_left) + connector_padding
+        outer_rx, inner_rx, outer_ry, inner_ry = radii(362, 258)
+        outer_right = X(362) + outer_rx
+        terminal_left = outer_right - tk(116)
+        bury = max(4.0, 0.08 * S)
+
+        def meets(radius_x: float, limit: float) -> float:
+            # Largest angle at which this radius is still inside the terminal.
+            cosine = min(1.0, max(0.0, (terminal_left + bury - X(362)) / radius_x))
+            return min(limit, atan2(sqrt(1 - cosine * cosine), cosine) * 180 / pi)
+
+        outer_end = meets(outer_rx, 38.0)
+        inner_end = meets(inner_rx, 15.0)
         return [
-            pc(RS(362, 350, 362, 258, -38, -322, -345, -30, 1, 1)),
-            pc(rect(terminal_left, 325, outer_right, 700)),
             pc(
-                hstem(
-                    connector_left,
-                    connector_right,
-                    aperture_y,
+                sector(
+                    X(362), 350, outer_rx, inner_rx, outer_ry, inner_ry,
+                    -38, -360 + outer_end, -360 + inner_end, -30,
+                    caps=(1, 1), steps=71,
                 )
             ),
+            pc(rect(terminal_left, 325, outer_right, 700)),
         ]
 
     G["G"] = glyph_g_cap
 
     def glyph_h_cap() -> list[Piece]:
-        left_center, right_center = 52 * W, 578 * W
+        first, second = left(52), right(578)
         return [
-            pc(vstem(52, 0, 700)),
-            pc(vstem(578, 0, 700)),
-            pc(hstem(left_center + S / 2, right_center - S / 2, 371)),
+            pc(box(first, (0, 700))),
+            pc(box(second, (0, 700))),
+            pc(box((mid(first), mid(second)), around(371))),
         ]
 
     G["H"] = glyph_h_cap
-    G["E"] = lambda: [
-        pc(R(0, 0, 104, 700)),
-        pc(R(0, 0, 590, SH)),
-        pc(R(0, 310, 425, 410)),
-        pc(R(0, 600, 596, 700)),
+
+    def glyph_e_cap() -> list[Piece]:
+        stem = left(52)
+        return [
+            pc(box(stem, (0, 700))),
+            pc(box((mid(stem), X(590)), top(0))),
+            pc(box((mid(stem), X(425)), around(360))),
+            pc(box((mid(stem), X(596)), bottom(700))),
+        ]
+
+    G["E"] = glyph_e_cap
+
+    def glyph_l_cap() -> list[Piece]:
+        stem = left(52)
+        return [pc(box(stem, (0, 700))), pc(box((mid(stem), X(615)), bottom(700)))]
+
+    G["L"] = glyph_l_cap
+    G["T"] = lambda: [
+        pc(box((X(0), X(700)), top(0, 104))),
+        pc(box(centre(350), (0, 700))),
     ]
-    G["L"] = lambda: [pc(R(0, 0, 104, 700)), pc(R(0, 600, 615, 700))]
-    G["T"] = lambda: [pc(R(0, 0, 700, S)), pc(R(298, 0, 402, 700))]
-    G["I"] = lambda: [pc(R(0, 0, 104, 700))]
+    G["I"] = lambda: [pc(box(left(52), (0, 700)))]
+
     def glyph_s_cap() -> list[Piece]:
         top_center = S / 2
         middle_center = 345
         bottom_center = 700 - S / 2
         return [
-            pc(R(198.5, 0, 690, S)),
-            pc(
-                connected_half_bowl(
-                    198.5,
-                    top_center,
-                    middle_center,
-                    198.5,
-                    94.5,
-                    90,
-                    270,
-                    270,
-                    90,
-                )
-            ),
-            pc(R(198.5, 345 - S / 2, 501.5, 345 + S / 2)),
-            pc(
-                connected_half_bowl(
-                    501.5,
-                    middle_center,
-                    bottom_center,
-                    203.5,
-                    99.5,
-                    -90,
-                    90,
-                    90,
-                    -90,
-                )
-            ),
-            pc(R(10, 700 - S, 501.5, 700)),
+            pc(box((X(198.5), X(690)), (0, S))),
+            pc(half_bowl(198.5, top_center, middle_center, 198.5, 94.5, "left")),
+            pc(box((X(198.5), X(501.5)), (middle_center - S / 2, middle_center + S / 2))),
+            pc(half_bowl(501.5, middle_center, bottom_center, 203.5, 99.5, "right")),
+            pc(box((X(10), X(501.5)), (700 - S, 700))),
         ]
 
     G["S"] = glyph_s_cap
 
     def glyph_b_cap() -> list[Piece]:
+        stem = left(52)
         top_center = S / 2
         middle_center = 350
         bottom_center = 700 - S / 2
         return [
-            pc(R(0, 0, 104, 700)),
-            pc(R(0, 0, 404, S)),
-            pc(R(0, 350 - S / 2, 419, 350 + S / 2)),
-            pc(R(0, 700 - S, 419, 700)),
-            pc(
-                connected_half_bowl(
-                    404,
-                    top_center,
-                    middle_center,
-                    201,
-                    97,
-                    -90,
-                    90,
-                    90,
-                    -90,
-                )
-            ),
-            pc(
-                connected_half_bowl(
-                    419,
-                    middle_center,
-                    bottom_center,
-                    201,
-                    97,
-                    -90,
-                    90,
-                    90,
-                    -90,
-                )
-            ),
+            pc(box(stem, (0, 700))),
+            pc(box((mid(stem), X(404)), (0, S))),
+            pc(box((mid(stem), X(419)), (350 - S / 2, 350 + S / 2))),
+            pc(box((mid(stem), X(419)), (700 - S, 700))),
+            pc(half_bowl(404, top_center, middle_center, 201, 97, "right")),
+            pc(half_bowl(419, middle_center, bottom_center, 201, 97, "right")),
         ]
 
     G["B"] = glyph_b_cap
 
     def glyph_p_cap() -> list[Piece]:
+        stem = left(52)
         top_center = S / 2
         lower_center = 371
         return [
-            pc(R(0, 0, 104, 700)),
-            pc(R(0, 0, 393.5, S)),
-            pc(R(0, lower_center - S / 2, 393.5, lower_center + S / 2)),
-            pc(
-                connected_half_bowl(
-                    393.5,
-                    top_center,
-                    lower_center,
-                    211.5,
-                    107.5,
-                    -90,
-                    90,
-                    90,
-                    -90,
-                )
-            ),
+            pc(box(stem, (0, 700))),
+            pc(box((mid(stem), X(393.5)), (0, S))),
+            pc(box((mid(stem), X(393.5)), (lower_center - S / 2, lower_center + S / 2))),
+            pc(half_bowl(393.5, top_center, lower_center, 211.5, 107.5, "right")),
         ]
 
     G["P"] = glyph_p_cap
 
     def glyph_r() -> list[Piece]:
-        leg_top, u, px = (480, 380), (0.417, 0.909), (0.909, -0.417)
-        tl = (leg_top[0] - px[0] * 52, leg_top[1] - px[1] * 52)
-        tr = (leg_top[0] + px[0] * 52, leg_top[1] + px[1] * 52)
-        br = (tr[0] + u[0] * ((700 - tr[1]) / u[1]), 700)
-        bl = (tl[0] + u[0] * ((700 - tl[1]) / u[1]), 700)
-        body = G["P"]()
-        leg_contour = Q([tl, tr, br, bl])
-        top_midpoint = (
-            (leg_contour.pts[0][0] + leg_contour.pts[1][0]) / 2,
-            (leg_contour.pts[0][1] + leg_contour.pts[1][1]) / 2,
-        )
-        bottom_midpoint = (
-            (leg_contour.pts[2][0] + leg_contour.pts[3][0]) / 2,
-            (leg_contour.pts[2][1] + leg_contour.pts[3][1]) / 2,
-        )
-        leg_contour = attach_quad_cap(
-            body,
-            leg_contour,
-            (0, 1),
-            (
-                top_midpoint[0] - bottom_midpoint[0],
-                top_midpoint[1] - bottom_midpoint[1],
-            ),
-        )
-        return body + [pc(leg_contour)]
+        # The leg keeps the canonical axis and thickness; its top is cut at
+        # the upper edge of the middle bar, where it is buried in the bowl.
+        axis_top = (X(480), 380.0)
+        axis_bottom = (X(480) + 146.799 * W, 700.0)
+        return G["P"]() + [
+            pc(slab(axis_top, axis_bottom, S, cut_a=371 - S / 2, cut_b=700.0))
+        ]
 
     G["R"] = glyph_r
 
     def glyph_m_cap() -> list[Piece]:
-        center = 385 * W
-        left_inner = 52 * W + S / 2
-        right_inner = 718 * W - S / 2
-        top_inset = 49.48120950323974 * weight_ratio
+        first, second = left(52), right(718)
+        center = X(385)
+        left_inner, right_inner = first[1], second[0]
+        top_inset = 49.48120950323974 * ratio
         inner_apex_y = 381.470462633452
         outer_apex_y = inner_apex_y + (
             487.9110320284698 - inner_apex_y
-        ) * weight_ratio
-        outer_cap_half = 48 * weight_ratio
+        ) * ratio
+        outer_cap_half = 48 * ratio
         return [
-            pc(vstem(52, 0, 700)),
-            pc(vstem(718, 0, 700)),
+            pc(box(first, (0, 700))),
+            pc(box(second, (0, 700))),
             pc(
                 quad(
                     [
-                        (left_inner, 0),
+                        (mid(first), 0),
                         (left_inner + top_inset, 0),
                         (center, inner_apex_y),
                         (right_inner - top_inset, 0),
-                        (right_inner, 0),
+                        (mid(second), 0),
+                        (mid(second), S),
                         (right_inner, S),
                         (center + outer_cap_half, outer_apex_y),
                         (center - outer_cap_half, outer_apex_y),
                         (left_inner, S),
+                        (mid(first), S),
                     ]
                 )
             ),
         ]
 
     G["M"] = glyph_m_cap
+
     def glyph_n_cap() -> list[Piece]:
-        left = pc(R(0, 0, 104, 700))
-        right = pc(R(521, 0, 625, 700))
-        diagonal = Q([(0, 0), (129.7, 0), (625, 700), (495.3, 700)])
-        diagonal = attach_quad_cap([left], diagonal, (0, 1), (-1, 0))
-        diagonal = attach_quad_cap([right], diagonal, (2, 3), (1, 0))
-        return [left, right, pc(diagonal)]
+        first, second = left(52), right(573)
+        width = cap_width(129.7, 495.3, 700)
+        return [
+            pc(box(first, (0, 700))),
+            pc(box(second, (0, 700))),
+            pc(band((first[0], first[0] + width), 0, (second[1] - width, second[1]), 700)),
+        ]
 
     G["N"] = glyph_n_cap
-    G["A"] = lambda: [
-        pc(Q([(302, 0), (406, 0), (104, 700), (0, 700)])),
-        pc(Q([(302, 0), (406, 0), (708, 700), (604, 700)])),
-        pc(R(120, 440, 590, 540)),
-    ]
-    G["D"] = lambda: [
-        pc(R(0, 0, 104, 700)),
-        pc(R(0, 0, 340, 104)),
-        pc(R(0, 596, 340, 700)),
-        pc(RS(340, 350, 350, 246, -90, 90, 90, -90)),
-    ]
-    G["F"] = lambda: [pc(R(0, 0, 104, 700)), pc(R(0, 0, 590, SH)), pc(R(0, 310, 425, 410))]
-    G["J"] = lambda: [
-        pc(R(396, 0, 500, 550)),
-        pc(RS(347, 547, 153, 49, 0, 180, 180, 0, 1, 1)),
-    ]
-    G["K"] = lambda: [pc(R(0, 0, 104, 700)), bar(50, 478, 590, 48, S), leg(240, 335, 620, 700, S)]
-    G["Q"] = lambda: G["O"]() + [bar(440, 460, 760, 790, S)]
-    G["U"] = lambda: [
-        pc(vstem(52, 0, 400)),
-        pc(vstem(578, 0, 400)),
-        pc(RS(315, 397, 315, 211, 180, 0, 0, 180)),
-    ]
-    G["V"] = lambda: [
-        pc(Q([(0, 0), (104, 0), (389, 700), (285, 700)])),
-        pc(Q([(570, 0), (674, 0), (389, 700), (285, 700)])),
-    ]
-    G["W"] = lambda: [
-        pc(Q([(0, 0), (104, 0), (292, 700), (188, 700)])),
-        pc(Q([(292, 700), (188, 700), (428, 60), (532, 60)])),
-        pc(Q([(428, 60), (532, 60), (772, 700), (668, 700)])),
-        pc(Q([(668, 700), (772, 700), (960, 0), (856, 0)])),
-    ]
-    G["X"] = lambda: [
-        pc(Q([(0, 0), (104, 0), (644, 700), (540, 700)])),
-        pc(Q([(540, 0), (644, 0), (104, 700), (0, 700)])),
-    ]
-    G["Y"] = lambda: [
-        pc(Q([(0, 0), (104, 0), (374, 380), (270, 380)])),
-        pc(Q([(536, 0), (640, 0), (374, 380), (270, 380)])),
-        pc(R(268, 360, 372, 700)),
-    ]
-    G["Z"] = lambda: [
-        pc(R(0, 0, 620, SH)),
-        pc(R(0, 600, 620, 700)),
-        pc(
-            diagonal_strip_hex(
-                (581.7, 60),
-                (38.3, 640),
-                110.59591548657296,
-                (0, 620, 20, 680),
-                [
-                    (543.4, 20),
-                    (620, 20),
-                    (620, 100),
-                    (76.6, 680),
-                    (0, 680),
-                    (0, 600),
-                ],
-            )
-        ),
-    ]
 
-    # Digits.
+    def glyph_a_cap() -> list[Piece]:
+        width = cap_width(104, 302, 700)
+        apex, foot_l, foot_r = cap_c(354, width), cap_l(52, width), cap_r(656, width)
+        bar_y = around(490)
+        return [
+            pc(band(apex, 0, foot_l, 700)),
+            pc(band(apex, 0, foot_r, 700)),
+            pc(
+                box(
+                    (at_y(apex, 0, foot_l, 700, 490), at_y(apex, 0, foot_r, 700, 490)),
+                    bar_y,
+                )
+            ),
+        ]
+
+    G["A"] = glyph_a_cap
+
+    def glyph_d_cap() -> list[Piece]:
+        stem = left(52)
+        return [
+            pc(box(stem, (0, 700))),
+            pc(box((mid(stem), X(340)), (0, S))),
+            pc(box((mid(stem), X(340)), (700 - S, 700))),
+            pc(RS(340, 350, 350, 246, -90, 90, 90, -90, tails=(JOIN, JOIN))),
+        ]
+
+    G["D"] = glyph_d_cap
+
+    def glyph_f_cap() -> list[Piece]:
+        stem = left(52)
+        return [
+            pc(box(stem, (0, 700))),
+            pc(box((mid(stem), X(590)), top(0))),
+            pc(box((mid(stem), X(425)), around(360))),
+        ]
+
+    G["F"] = glyph_f_cap
+
+    def glyph_j_cap() -> list[Piece]:
+        stem = right(448)
+        outer_rx, inner_rx, outer_ry, inner_ry = hook_radii(153, 49)
+        cx, cy = stem[1] - outer_rx, 700 - outer_ry
+        return [
+            pc(box(stem, (0, cy + 3))),
+            pc(
+                sector(
+                    cx, cy, outer_rx, inner_rx, outer_ry, inner_ry,
+                    0, 180, 180, 0, caps=(1, 0), tails=(0.0, JOIN),
+                )
+            ),
+        ]
+
+    G["J"] = glyph_j_cap
+
+    def kay(
+        top_y: float,
+        arm: tuple[float, float, float, float],
+        leg: tuple[float, float, float],
+    ) -> list[Piece]:
+        """K/k: stem, upper arm with a butt terminal, and a baseline leg."""
+
+        stem = left(52)
+        ax, ay, bx, by = arm
+        a = (mid(stem) + (ax - 52) * ratio, ay)
+        run, drop = X(bx) - a[0], by - ay
+        length = _js_hypot(run, drop) or 1.0
+        nx, ny = abs(drop) / length, abs(run) / length
+        canonical = _js_hypot(bx - ax, by - ay)
+        tip_y = by - 52 * abs(bx - ax) / canonical
+        slack = reach() - S / 2
+        b = (X(bx) + slack * nx, tip_y + S / 2 * ny)
+        fraction, offset, foot = leg
+        leg_top = (
+            a[0] + (b[0] - a[0]) * fraction,
+            a[1] + (b[1] - a[1]) * fraction + offset,
+        )
+        foot_run = X(foot) - leg_top[0]
+        cosine = (700 - leg_top[1]) / (_js_hypot(foot_run, 700 - leg_top[1]) or 1.0)
+        leg_bottom = (X(foot) + slack / cosine, 700.0)
+        return [
+            pc(box(stem, (top_y, 700))),
+            pc(slab(a, b, S)),
+            pc(slab(leg_top, leg_bottom, S, cut_b=700.0)),
+        ]
+
+    G["K"] = lambda: kay(
+        0,
+        (50, 478, 590, 48),
+        (190 / 540, 335 - (478 - 430 * 190 / 540), 620),
+    )
+    G["Q"] = lambda: G["O"]() + [bar(440, 460, 760, 790, S)]
+
+    def glyph_u_cap() -> list[Piece]:
+        return [
+            pc(box(left(52), (0, 400))),
+            pc(box(right(578), (0, 400))),
+            pc(RS(315, 397, 315, 211, 180, 0, 0, 180, tails=(JOIN, JOIN))),
+        ]
+
+    G["U"] = glyph_u_cap
+
+    def glyph_v_cap() -> list[Piece]:
+        width = cap_width(104, 285, 700)
+        apex = cap_c(337, width)
+        return [
+            pc(band(cap_l(52, width), 0, apex, 700)),
+            pc(band(cap_r(622, width), 0, apex, 700)),
+        ]
+
+    G["V"] = glyph_v_cap
+
+    def glyph_w_cap() -> list[Piece]:
+        width = cap_width(104, 214, 670)
+        low_l, low_r, peak = cap_c(240, width), cap_c(720, width), cap_c(480, width)
+        return [
+            pc(band(cap_l(52, width), 0, low_l, 700)),
+            pc(band(low_l, 700, peak, 60)),
+            pc(band(peak, 60, low_r, 700)),
+            pc(band(low_r, 700, cap_r(908, width), 0)),
+        ]
+
+    G["W"] = glyph_w_cap
+
+    def glyph_x_cap() -> list[Piece]:
+        width = cap_width(104, 540, 700)
+        return [
+            pc(band(cap_l(52, width), 0, cap_r(592, width), 700)),
+            pc(band(cap_r(592, width), 0, cap_l(52, width), 700)),
+        ]
+
+    G["X"] = glyph_x_cap
+
+    def glyph_y_cap() -> list[Piece]:
+        width = cap_width(104, 270, 380)
+        stem = centre(320)
+        return [
+            pc(band(cap_l(52, width), 0, stem, 380)),
+            pc(band(cap_r(588, width), 0, stem, 380)),
+            pc(box(stem, (360, 700))),
+        ]
+
+    G["Y"] = glyph_y_cap
+
+    def zed(x0: float, x1: float, y0: float, y1: float, b: float, thickness: float) -> list[Piece]:
+        upper_bar, lower_bar = top(y0, b), bottom(y1, b)
+        bury = 0.3 * bar_t(b)
+        return [
+            pc(box((X(x0), X(x1)), upper_bar)),
+            pc(box((X(x0), X(x1)), lower_bar)),
+            pc(
+                corner_diagonal(
+                    (X(x1), upper_bar[1]),
+                    (X(x0), lower_bar[0]),
+                    thickness * ratio,
+                    (upper_bar[1] - bury, lower_bar[0] + bury),
+                )
+            ),
+        ]
+
+    G["Z"] = lambda: zed(0, 620, 0, 700, 100, 110.59591548657296)
+
+    # =============================================================== digits
     G["0"] = lambda: [ellipse_ring_p(310, 350, 310, 206, 362, 258)]
 
     def glyph_one() -> list[Piece]:
-        x0, u, pp = 150, (-0.743, 0.669), (0.669, 0.743)
-        a = (x0, 0)
-        b = (x0 + u[0] * 150, u[1] * 150)
-        # Q applies the active weight to this canonical 104-unit band.
-        # Feeding S here would scale the Thin flag twice.
-        c = (b[0] + pp[0] * 104, b[1] + pp[1] * 104)
-        d = (a[0] + pp[0] * 104, a[1] + pp[1] * 104)
-        stem = pc(R(x0, 0, x0 + 104, 700))
-        flag = Q([a, b, c, d])
-        far_midpoint = (
-            (flag.pts[1][0] + flag.pts[2][0]) / 2,
-            (flag.pts[1][1] + flag.pts[2][1]) / 2,
-        )
-        attachment_midpoint = (
-            (flag.pts[3][0] + flag.pts[0][0]) / 2,
-            (flag.pts[3][1] + flag.pts[0][1]) / 2,
-        )
-        flag = attach_quad_cap(
-            [stem],
-            flag,
-            (0, 3),
-            (
-                attachment_midpoint[0] - far_midpoint[0],
-                attachment_midpoint[1] - far_midpoint[1],
-            ),
-            overlap=max(6.0, 0.16 * S),
-        )
-        return [stem, pc(flag)]
+        stem = centre(202)
+        # The flag hangs from the stem's top-left corner at every weight.
+        length = 150.0 + 0.5 * max(0.0, S - 104.0)
+        ux, uy = -0.743 * W, 0.669
+        norm = _js_hypot(ux, uy)
+        ux, uy = ux / norm, uy / norm
+        px, py = -uy, ux
+        if py < 0:
+            px, py = -px, -py
+        a = (stem[0], 0.0)
+        b = (a[0] + ux * length, a[1] + uy * length)
+        c = (b[0] + px * S, b[1] + py * S)
+        d = (a[0] + px * S, a[1] + py * S)
+        return [pc(box(stem, (0, 700))), pc(quad([a, b, c, d]))]
 
     G["1"] = glyph_one
+
     def glyph_two() -> list[Piece]:
-        outer_rx, inner_rx, outer_ry, inner_ry = protected_curve_strokes(
-            322, 218
-        )
-        angle = 30 * pi / 180
-        inner_cap = (
-            322 * W + inner_rx * cos(angle),
-            322 + inner_ry * sin(angle),
-        )
-        outer_cap = (
-            322 * W + outer_rx * cos(angle),
-            322 + outer_ry * sin(angle),
+        outer_rx, inner_rx, outer_ry, inner_ry = radii(322, 218)
+        cx = X(322)
+        # A heavy base rises toward the hook; ending the hook sooner keeps
+        # the wedge between neck and base open.
+        end = 30 - 15 * heavy_progress
+        angle = end * pi / 180
+        inner_cap = (cx + inner_rx * cos(angle), 322 + inner_ry * sin(angle))
+        outer_cap = (cx + outer_rx * cos(angle), 322 + outer_ry * sin(angle))
+        base = bottom(700)
+        x_left = cx - outer_rx
+        # The neck tapers; a light cut keeps more of it so it does not vanish.
+        foot = (x_left + 140 * (ratio**0.6 if ratio < 1.0 else ratio), base[0])
+        heel = (x_left, base[0])
+        nub = 0.4 * bar_t()
+
+        def toward(a: tuple[float, float], b: tuple[float, float]) -> RawPoint:
+            dx, dy = b[0] - a[0], b[1] - a[1]
+            length = _js_hypot(dx, dy) or 1.0
+            return (a[0] + dx / length * JOIN, a[1] + dy / length * JOIN, 0)
+
+        outer = arc_pts(cx, 322, outer_rx, outer_ry, 180, 360 + end, 53)
+        inner = arc_pts(cx, 322, inner_rx, inner_ry, 360 + end, 180, 53)
+        inner[-1] = (inner[-1][0], inner[-1][1], 2)
+        hook = Contour(
+            outer + [toward(outer_cap, foot), toward(inner_cap, heel)] + inner
         )
         return [
-            pc(RS(322, 322, 322, 218, 180, 390, 390, 180, 1, 1)),
+            pc(hook),
             pc(
                 quad(
                     [
                         inner_cap,
                         outer_cap,
-                        (140 * W, 600),
-                        (140 * W, 640),
-                        (0, 640),
-                        (0, 600),
+                        foot,
+                        (foot[0], base[0] + nub),
+                        (x_left, base[0] + nub),
+                        heel,
                     ]
                 )
             ),
-            pc(R(0, 600, 640, 700)),
+            pc(box((x_left, cx + outer_rx - 4 * ratio), base)),
         ]
 
     G["2"] = glyph_two
+
     def glyph_three() -> list[Piece]:
         top_center = S / 2
         middle_center = 308
         bottom_center = 700 - S / 2
         return [
-            pc(R(80, 0, 320, SH)),
-            pc(
-                connected_half_bowl(
-                    320,
-                    top_center,
-                    middle_center,
-                    180,
-                    76,
-                    -90,
-                    90,
-                    90,
-                    -90,
-                )
-            ),
-            pc(R(190, middle_center - S / 2, 320, middle_center + S / 2)),
-            pc(
-                connected_half_bowl(
-                    320,
-                    middle_center,
-                    bottom_center,
-                    222,
-                    118,
-                    -90,
-                    90,
-                    90,
-                    -90,
-                )
-            ),
-            pc(R(70, 700 - S, 320, 700)),
+            pc(box((X(80), X(320)), (0, S))),
+            pc(half_bowl(320, top_center, middle_center, 180, 76, "right")),
+            pc(box((X(190), X(320)), (middle_center - S / 2, middle_center + S / 2))),
+            pc(half_bowl(320, middle_center, bottom_center, 222, 118, "right")),
+            pc(box((X(70), X(320)), (700 - S, 700))),
         ]
 
     G["3"] = glyph_three
-    G["4"] = lambda: [
-        pc(R(430, 0, 534, 700)),
-        pc(R(0, 480, 620, 580)),
-        pc(vertically_clipped_band((482, 0), (67, 486), 0, 520)),
-    ]
+
+    def glyph_four() -> list[Piece]:
+        stem = centre(482)
+        bar_y = around(530)
+        half = S / 2
+        foot_center = mid(stem) - 415 * W * 520 / 486
+
+        def edge_x(side: float, y: float) -> float:
+            return mid(stem) + (foot_center - mid(stem)) * y / 520 + side * half
+
+        # The diagonal's outer edge lands on the crossbar's top-left corner.
+        corner = edge_x(-1, bar_y[0])
+        bury = bar_y[0] + 0.4 * bar_t()
+        return [
+            pc(box(stem, (0, 700))),
+            pc(box((corner, X(620)), bar_y)),
+            pc(
+                quad(
+                    [
+                        (stem[0], 0),
+                        (stem[1], 0),
+                        (edge_x(1, bury), bury),
+                        (corner, bury),
+                        (corner, bar_y[0]),
+                    ]
+                )
+            ),
+        ]
+
+    G["4"] = glyph_four
+
     def glyph_five() -> list[Piece]:
+        stem = left(142)
         middle_center = 336
         bottom_center = 700 - S / 2
-        bowl_overlap = max(5.0, 0.12 * S)
         return [
-            pc(R(90, 0, 650, SH)),
-            pc(R(90, 0, 194, middle_center + S / 2)),
-            pc(
-                R(
-                    90,
-                    middle_center - S / 2,
-                    470 + bowl_overlap / W,
-                    middle_center + S / 2,
-                )
-            ),
-            pc(
-                connected_half_bowl(
-                    470,
-                    middle_center,
-                    bottom_center,
-                    208,
-                    104,
-                    -90,
-                    90,
-                    90,
-                    -90,
-                )
-            ),
-            pc(R(96, 700 - S, 470 + bowl_overlap / W, 700)),
+            pc(box((mid(stem), X(650)), top(0))),
+            pc(box(stem, (0, middle_center + S / 2))),
+            pc(box((mid(stem), X(470)), (middle_center - S / 2, middle_center + S / 2))),
+            pc(half_bowl(470, middle_center, bottom_center, 208, 104, "right")),
+            pc(box((X(96), X(470)), (700 - S, 700))),
         ]
 
     G["5"] = glyph_five
     G["6"] = lambda: [
         ring_p(322, 462, 250, 146),
-        pc(R(72, 290, 176, 462)),
-        pc(RS(362, 290, 290, 186, 180, 310, 310, 180, 1, 1)),
+        pc(box(left(124), (290, 462))),
+        pc(RS(362, 290, 290, 186, 180, 310, 310, 180, caps=(1, 0), tails=(0.0, JOIN))),
     ]
-    G["7"] = lambda: [pc(R(0, 0, 620, SH)), pc(Q([(478, 90), (620, 90), (292, 700), (150, 700)]))]
+
+    def glyph_seven() -> list[Piece]:
+        bar_y = top(0)
+        width = cap_width(142, 328, 600)
+        foot = cap_c(221, width)
+        corner = X(620)
+        # The diagonal leaves from the bar's lower right corner; above it the
+        # stroke is buried in the bar and shares the bar's vertical end.
+        bury = bar_y[1] - 0.5 * bar_t()
+        lean = (foot[1] - corner) / (700 - bar_y[1])
+        return [
+            pc(box((X(0), corner), bar_y)),
+            pc(
+                quad(
+                    [
+                        (corner - width + lean * (bury - bar_y[1]), bury),
+                        (corner, bury),
+                        (corner, bar_y[1]),
+                        (foot[1], 700),
+                        (foot[0], 700),
+                    ]
+                )
+            ),
+        ]
+
+    G["7"] = glyph_seven
     G["8"] = lambda: [ring_p(310, 168, 180, 76), ring_p(310, 512, 200, 96)]
     G["9"] = lambda: rotate_180(G["6"](), 322, 356)
 
-    # Lowercase.
-    G["a"] = lambda: [ring_p(262, 450, 262, 158), pc(R(420, 195, 524, 700))]
-    G["b"] = lambda: [pc(vstem(52, 0, 700)), ring_p(262, 450, 262, 158)]
-    G["c"] = lambda: [pc(RS(262, 450, 262, 158, -35, -325, -333, -27, 1, 1))]
-    G["d"] = lambda: [ring_p(262, 450, 262, 158), pc(R(420, 0, 524, 700))]
-    G["e"] = lambda: [pc(RS(262, 450, 262, 158, 38, 365, 365, 38, 1, 1)), pc(R(8, 400, 516, 500))]
-    G["f"] = lambda: [
-        pc(RS(354, 150, 150, 46, 180, 270, 270, 180, 1, 1)),
-        pc(R(200, 144, 304, 700)),
-        pc(R(30, 200, 470, 300)),
-    ]
-    G["g"] = lambda: [
-        ring_p(262, 450, 262, 158),
-        pc(R(420, 195, 524, 660)),
-        pc(RS(284, 660, 240, 136, 0, 150, 150, 0, 1, 1)),
-    ]
-    G["h"] = lambda: [
-        pc(vstem(52, 0, 700)),
-        pc(RS(262, 462, 262, 158, 180, 360, 360, 180)),
-        pc(R(420, 462, 524, 700)),
-    ]
-    G["i"] = lambda: [pc(R(0, 200, 104, 700)), disc(52, 75, 55)]
-    G["ı"] = lambda: [pc(R(0, 200, 104, 700))]
-    G["j"] = lambda: [
-        pc(R(150, 200, 254, 760)),
-        pc(RS(101, 747, 153, 49, 0, 150, 150, 0, 1, 1)),
-        disc(202, 75, 55),
-    ]
-    G["k"] = lambda: [pc(R(0, 0, 104, 700)), bar(60, 485, 440, 205, S), leg(235, 345, 470, 700, S)]
-    G["l"] = lambda: [pc(R(0, 0, 104, 700))]
-    G["m"] = lambda: [
-        pc(vstem(52, 200, 700)),
-        pc(RS(233, 433, 233, 129, 180, 360, 360, 180)),
-        pc(R(362, 433, 466, 700)),
-        pc(RS(595, 433, 233, 129, 180, 360, 360, 180)),
-        pc(R(724, 433, 828, 700)),
-    ]
-    G["n"] = lambda: [
-        pc(vstem(52, 200, 700)),
-        pc(RS(262, 462, 262, 158, 180, 360, 360, 180)),
-        pc(R(420, 462, 524, 700)),
-    ]
-    G["o"] = lambda: [ring_p(262, 450, 262, 158)]
-    G["p"] = lambda: [pc(vstem(52, 200, 900)), ring_p(262, 450, 262, 158)]
-    G["q"] = lambda: [ring_p(262, 450, 262, 158), pc(R(420, 200, 524, 900))]
-    G["r"] = lambda: [pc(R(0, 200, 104, 700)), pc(RS(240, 440, 240, 136, 180, 310, 310, 180, 1, 1))]
-    def glyph_s_lower() -> list[Piece]:
-        top_center = 256
-        middle_center = 448
-        bottom_center = 660
+    # ============================================================ lowercase
+    def bowl() -> Piece:
+        return ring_p(262, 450, 262, 158)
+
+    G["a"] = lambda: [bowl(), pc(box(right(472), (195, 700)))]
+    G["b"] = lambda: [pc(box(left(52), (0, 700))), bowl()]
+    G["c"] = lambda: [pc(RS(262, 450, 262, 158, -35, -325, -333, -27, caps=(1, 1)))]
+    G["d"] = lambda: [bowl(), pc(box(right(472), (0, 700)))]
+
+    def three_strokes(height: float, counters: float) -> float:
+        """Stroke for three stacked horizontals inside ``height``."""
+
+        return min(S, (height - 0.45 * counters) / 3.0)
+
+    def e_parts(cx: float, ro: float, ri: float) -> list[Piece]:
+        stroke = three_strokes(2 * ro, 2 * ri - 100.0)
+        outer_rx, inner_rx, outer_ry, _inner_ry = radii(ro, ri, ty=stroke)
+        bar_h = min(SH, stroke * 100.0 / 104.0)
+        # The ring runs down to the underside of the bar, so the terminal
+        # corner sits exactly on the outer curve at every weight.
+        tuck_sin = (bar_h / 2) / outer_ry
+        tuck = asin(tuck_sin) * 180 / pi
         return [
-            pc(R(148, top_center - S / 2, 500, top_center + S / 2)),
             pc(
-                connected_half_bowl(
-                    148,
-                    top_center,
-                    middle_center,
-                    148,
-                    44,
-                    90,
-                    270,
-                    270,
-                    90,
+                RS(
+                    cx, 450, ro, ri, 38, 360 + tuck, 360 + tuck, 38,
+                    caps=(1, 1), ty=stroke, steps=82,
                 )
             ),
-            pc(R(148, middle_center - S / 2, 352, middle_center + S / 2)),
             pc(
-                connected_half_bowl(
-                    352,
-                    middle_center,
-                    bottom_center,
-                    158,
-                    54,
-                    -90,
-                    90,
-                    90,
-                    -90,
+                box(
+                    (
+                        X(cx) - (outer_rx + inner_rx) / 2,
+                        X(cx) + outer_rx * sqrt(1 - tuck_sin * tuck_sin),
+                    ),
+                    (450 - bar_h / 2, 450 + bar_h / 2),
                 )
             ),
-            pc(R(10, bottom_center - S / 2, 352, bottom_center + S / 2)),
+        ]
+
+    G["e"] = lambda: e_parts(262, 262, 158)
+
+    def glyph_f() -> list[Piece]:
+        stem = centre(252)
+        outer_rx, inner_rx, outer_ry, inner_ry = hook_radii(150, 46)
+        cx, cy = stem[0] + outer_rx, outer_ry
+        return [
+            pc(
+                sector(
+                    cx, cy, outer_rx, inner_rx, outer_ry, inner_ry,
+                    180, 270, 270, 180, caps=(1, 0), tails=(0.0, JOIN),
+                )
+            ),
+            pc(box(stem, (cy, 700))),
+            pc(box((mid(stem) - 222 * W, mid(stem) + 218 * W), top(200))),
+        ]
+
+    G["f"] = glyph_f
+    def glyph_g() -> list[Piece]:
+        # An eased, shorter tail keeps clear of the bowl when heavy.
+        end = 150 - 20 * heavy_progress
+        flat = tk() * (1 - 0.25 * heavy_progress)
+        return [
+            bowl(),
+            pc(box(right(472), (195, 660))),
+            pc(
+                RS(
+                    284, 660, 240, 136, 0, end, end, 0,
+                    caps=(1, 0), tails=(0.0, JOIN), ty=flat, steps=38,
+                )
+            ),
+        ]
+
+    G["g"] = glyph_g
+    G["h"] = lambda: [
+        pc(box(left(52), (0, 700))),
+        pc(RS(262, 462, 262, 158, 180, 360, 360, 180, tails=(JOIN, JOIN))),
+        pc(box(right(472), (462, 700))),
+    ]
+
+    def dotted(stem: Span, y0: float, y1: float) -> list[Piece]:
+        return [
+            pc(box(stem, (y0, y1))),
+            dot_at(mid(stem), 75, dot_radius(55)),
+        ]
+
+    G["i"] = lambda: dotted(left(52), 200, 700)
+    G["ı"] = lambda: [pc(box(left(52), (200, 700)))]
+
+    def glyph_j() -> list[Piece]:
+        stem = right(202)
+        outer_rx, inner_rx, outer_ry, inner_ry = hook_radii(153, 49)
+        cx, cy = stem[1] - outer_rx, 900 - outer_ry
+        return [
+            pc(box(stem, (200, cy + 13))),
+            pc(
+                sector(
+                    cx, cy, outer_rx, inner_rx, outer_ry, inner_ry,
+                    0, 150, 150, 0, caps=(1, 0), tails=(0.0, JOIN),
+                )
+            ),
+            dot_at(mid(stem), 75, dot_radius(55)),
+        ]
+
+    G["j"] = glyph_j
+    G["k"] = lambda: kay(
+        0,
+        (60, 485, 440, 205),
+        (175 / 380, 345 - (485 - 280 * 175 / 380), 470),
+    )
+    G["l"] = lambda: [pc(box(left(52), (0, 700)))]
+
+    def glyph_m() -> list[Piece]:
+        first, middle, last = left(52), centre(414), right(776)
+        return [
+            pc(box(first, (200, 700))),
+            pc(arch(first[0], middle[1], 433, 233, 129)),
+            pc(box(middle, (433, 700))),
+            pc(arch(middle[0], last[1], 433, 233, 129)),
+            pc(box(last, (433, 700))),
+        ]
+
+    G["m"] = glyph_m
+    G["n"] = lambda: [
+        pc(box(left(52), (200, 700))),
+        pc(RS(262, 462, 262, 158, 180, 360, 360, 180, tails=(JOIN, JOIN))),
+        pc(box(right(472), (462, 700))),
+    ]
+    G["o"] = lambda: [bowl()]
+    G["p"] = lambda: [pc(box(left(52), (200, 900))), bowl()]
+    G["q"] = lambda: [bowl(), pc(box(right(472), (200, 900)))]
+    G["r"] = lambda: [
+        pc(box(left(52), (200, 700))),
+        pc(RS(240, 440, 240, 136, 180, 310, 310, 180, caps=(1, 0), tails=(0.0, JOIN))),
+    ]
+
+    def glyph_s_lower() -> list[Piece]:
+        stroke = three_strokes(508, 196)
+        top_center = 204 + stroke / 2
+        middle_center = 448
+        bottom_center = 712 - stroke / 2
+        half = stroke / 2
+        return [
+            pc(box((X(148), X(500)), (top_center - half, top_center + half))),
+            pc(half_bowl(148, top_center, middle_center, 148, 44, "left", stroke)),
+            pc(box((X(148), X(352)), (middle_center - half, middle_center + half))),
+            pc(half_bowl(352, middle_center, bottom_center, 158, 54, "right", stroke)),
+            pc(box((X(10), X(352)), (bottom_center - half, bottom_center + half))),
         ]
 
     G["s"] = glyph_s_lower
-    G["t"] = lambda: [
-        pc(R(130, 80, 234, 560)),
-        pc(R(0, 200, 420, 300)),
-        pc(RS(270, 560, 140, 36, 180, 0, 0, 180, 1, 1)),
-    ]
+
+    def glyph_t() -> list[Piece]:
+        stem = left(182)
+        outer_rx, inner_rx, outer_ry, inner_ry = hook_radii(140, 36)
+        cx, cy = stem[0] + outer_rx, 700 - outer_ry
+        return [
+            pc(box(stem, (80, cy))),
+            pc(box((mid(stem) - 182 * W, mid(stem) + 238 * W), top(200))),
+            pc(
+                sector(
+                    cx, cy, outer_rx, inner_rx, outer_ry, inner_ry,
+                    180, 0, 0, 180, caps=(1, 0), tails=(0.0, JOIN),
+                )
+            ),
+        ]
+
+    G["t"] = glyph_t
     G["u"] = lambda: [
-        pc(vstem(52, 200, 440)),
-        pc(RS(262, 438, 262, 158, 180, 0, 0, 180)),
-        pc(R(420, 200, 524, 700)),
-    ]
-    G["v"] = lambda: [
-        pc(Q([(0, 200), (104, 200), (312, 700), (208, 700)])),
-        pc(Q([(416, 200), (520, 200), (312, 700), (208, 700)])),
-    ]
-    G["w"] = lambda: [
-        pc(Q([(0, 200), (104, 200), (244, 700), (140, 700)])),
-        pc(Q([(244, 700), (140, 700), (348, 240), (452, 240)])),
-        pc(Q([(348, 240), (452, 240), (660, 700), (556, 700)])),
-        pc(Q([(556, 700), (660, 700), (800, 200), (696, 200)])),
-    ]
-    G["x"] = lambda: [
-        pc(Q([(0, 200), (104, 200), (500, 700), (396, 700)])),
-        pc(Q([(396, 200), (500, 200), (104, 700), (0, 700)])),
-    ]
-    G["y"] = lambda: [
-        pc(Q([(416, 200), (520, 200), (164, 900), (60, 900)])),
-        pc(Q([(0, 200), (104, 200), (290, 655), (186, 655)])),
-    ]
-    G["z"] = lambda: [
-        pc(R(20, 200, 520, 296)),
-        pc(R(20, 604, 520, 700)),
-        pc(
-            diagonal_strip_hex(
-                (486.2, 263),
-                (53.8, 637),
-                94.1409813428312,
-                (20, 520, 230, 670),
-                [
-                    (452.4, 230),
-                    (520, 230),
-                    (520, 296),
-                    (87.6, 670),
-                    (20, 670),
-                    (20, 604),
-                ],
-            )
-        ),
+        pc(box(left(52), (200, 440))),
+        pc(RS(262, 438, 262, 158, 180, 0, 0, 180, tails=(JOIN, JOIN))),
+        pc(box(right(472), (200, 700))),
     ]
 
-    # ASCII punctuation.
-    G["!"] = lambda: [pc(R(0, 0, 104, 470)), disc(52, 637, 63)]
-    G['"'] = lambda: [pc(R(0, 0, 90, 210)), pc(R(170, 0, 260, 210))]
-    G["#"] = lambda: [pc(R(150, 60, 240, 640)), pc(R(380, 60, 470, 640)), pc(R(0, 200, 620, 280)), pc(R(0, 420, 620, 500))]
-    G["$"] = lambda: G["S"]() + [pc(R(310, -70, 386, 770))]
-    G["%"] = lambda: [ring_p(150, 150, 150, 60), ring_p(490, 550, 150, 60), pc(Q([(520, 0), (624, 0), (120, 700), (16, 700)]))]
-    G["&"] = lambda: [
-        ring_p(250, 470, 230, 126),
-        ring_p(230, 170, 170, 66),
-        bar(310, 230, 620, 690, S),
-        pc(Q([(364, 542), (437, 587), (724, 360), (656, 280)])),
-    ]
-    G["'"] = lambda: [pc(R(0, 0, 90, 210))]
-    G["("] = lambda: [pc(RS(560, 350, 560, 456, 128, 232, 232, 128, 1, 1))]
+    def glyph_v() -> list[Piece]:
+        width = cap_width(104, 208, 500)
+        apex = cap_c(260, width)
+        return [
+            pc(band(cap_l(52, width), 200, apex, 700)),
+            pc(band(cap_r(468, width), 200, apex, 700)),
+        ]
+
+    G["v"] = glyph_v
+
+    def glyph_w() -> list[Piece]:
+        width = cap_width(104, 174, 480)
+        low_l, low_r, peak = cap_c(192, width), cap_c(608, width), cap_c(400, width)
+        return [
+            pc(band(cap_l(52, width), 200, low_l, 700)),
+            pc(band(low_l, 700, peak, 240)),
+            pc(band(peak, 240, low_r, 700)),
+            pc(band(low_r, 700, cap_r(748, width), 200)),
+        ]
+
+    G["w"] = glyph_w
+
+    def glyph_x() -> list[Piece]:
+        width = cap_width(104, 396, 500)
+        return [
+            pc(band(cap_l(52, width), 200, cap_r(448, width), 700)),
+            pc(band(cap_r(448, width), 200, cap_l(52, width), 700)),
+        ]
+
+    G["x"] = glyph_x
+
+    def glyph_y() -> list[Piece]:
+        width = cap_width(104, 356, 700)
+        long_top, long_bottom = cap_r(468, width), cap_c(112, width)
+        short_width = cap_width(104, 186, 455)
+        joint = at_y(long_top, 200, long_bottom, 900, 655)
+        return [
+            pc(band(long_top, 200, long_bottom, 900)),
+            pc(
+                band(
+                    cap_l(52, short_width),
+                    200,
+                    (joint - width / 2, joint + width / 2),
+                    655,
+                )
+            ),
+        ]
+
+    G["y"] = glyph_y
+    G["z"] = lambda: zed(20, 520, 200, 700, 96, 94.1409813428312)
+
+    # ====================================================== ASCII punctuation
+    def exclamation(stem: Span) -> list[Piece]:
+        size = dot_radius(63, 0.8)
+        gap = 104.0 - 30.0 * heavy_progress
+        return [
+            pc(box(stem, (0, 700 - 2 * size - gap))),
+            dot_at(mid(stem), 700 - size, size),
+        ]
+
+    G["!"] = lambda: exclamation(left(52))
+
+    def tick_width() -> float:
+        return 90 * ratio if ratio <= 1.0 else 90 * ratio**0.8
+
+    def glyph_quotedbl() -> list[Piece]:
+        width = tick_width()
+        gap = 80 * ratio**0.3 * W
+        return [
+            pc(rect(0, 0, width, 210)),
+            pc(rect(width + gap, 0, 2 * width + gap, 210)),
+        ]
+
+    G['"'] = glyph_quotedbl
+
+    def glyph_hash() -> list[Piece]:
+        return [
+            pc(box(centre(195, 90), (60, 640))),
+            pc(box(centre(425, 90), (60, 640))),
+            pc(box((X(0), X(620)), around(240, 80))),
+            pc(box((X(0), X(620)), around(460, 80))),
+        ]
+
+    G["#"] = glyph_hash
+    G["$"] = lambda: G["S"]() + [pc(box(centre(348, 76), (-70, 770)))]
+
+    def glyph_percent() -> list[Piece]:
+        width = cap_width(104, 504, 700)
+        away = 0.4 * max(0.0, tk(90) - 90) / W
+        return [
+            ring_p(150 - away, 150, 150, 60),
+            ring_p(490 + away, 550, 150, 60),
+            pc(band(cap_c(572, width), 0, cap_c(68, width), 700)),
+        ]
+
+    G["%"] = glyph_percent
+
+    def axis_exit(
+        a: Sequence[float],
+        b: Sequence[float],
+        cx: float,
+        cy: float,
+        ro: float,
+        ri: float,
+    ) -> tuple[float, float]:
+        """Point where the axis ``a``→``b`` leaves a ring's stroke centreline."""
+
+        outer_rx, inner_rx, outer_ry, inner_ry = radii(ro, ri)
+        rx, ry = (outer_rx + inner_rx) / 2, (outer_ry + inner_ry) / 2
+        px, py = (a[0] - X(cx)) / rx, (a[1] - cy) / ry
+        dx, dy = (b[0] - a[0]) / rx, (b[1] - a[1]) / ry
+        qa, qb, qc = dx * dx + dy * dy, 2 * (px * dx + py * dy), px * px + py * py - 1
+        root = sqrt(max(0.0, qb * qb - 4 * qa * qc))
+        t = (-qb + root) / (2 * qa)
+        return a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t
+
+    def glyph_ampersand() -> list[Piece]:
+        # Both strokes keep their canonical axis and start where that axis
+        # leaves the centreline of the ring they grow from.
+        leg_start = axis_exit((X(310), 230), (X(620), 690), 230, 170, 170, 66)
+        arm_start = axis_exit((X(400.5), 564.5), (X(690), 320), 250, 470, 230, 126)
+        leg_run, leg_drop = X(620) - leg_start[0], 690 - leg_start[1]
+        leg_len = _js_hypot(leg_run, leg_drop) or 1.0
+        foot_y = 719.1 - S / 2 * abs(leg_run) / leg_len
+        # The arm keeps its canonical, slightly flared terminals.
+        arm_end = (X(690), 320.0)
+        near = (36.5 * ratio, 22.5 * ratio)
+        far = (34.0 * ratio, 40.0 * ratio)
+        return [
+            ring_p(250, 470, 230, 126),
+            ring_p(230, 170, 170, 66),
+            pc(slab(leg_start, (X(620), foot_y), S)),
+            pc(
+                quad(
+                    [
+                        (arm_start[0] - near[0], arm_start[1] - near[1]),
+                        (arm_start[0] + near[0], arm_start[1] + near[1]),
+                        (arm_end[0] + far[0], arm_end[1] + far[1]),
+                        (arm_end[0] - far[0], arm_end[1] - far[1]),
+                    ]
+                )
+            ),
+        ]
+
+    G["&"] = glyph_ampersand
+    G["'"] = lambda: [pc(rect(0, 0, tick_width(), 210))]
+    G["("] = lambda: [pc(RS(560, 350, 560, 456, 128, 232, 232, 128, caps=(1, 1)))]
     G[")"] = lambda: mirror_x(G["("](), 230)
-    G["*"] = lambda: [bar(200, 40, 200, 320, 84), bar(79, 110, 321, 250, 84), bar(79, 250, 321, 110, 84)]
-    G["+"] = lambda: [pc(R(0, 310, 440, 410)), pc(R(170, 140, 270, 580))]
-    G[","] = lambda: [disc(63, 637, 63), pc(Q([(20, 650), (106, 650), (52, 815), (-16, 815)]))]
-    G["-"] = lambda: [pc(R(0, 310, 400, 410))]
-    G["\u00ad"] = lambda: [pc(R(0, 310, 400, 410))]
-    G["."] = lambda: [disc(63, 637, 63)]
-    G["/"] = lambda: [pc(Q([(356, 0), (460, 0), (104, 700), (0, 700)]))]
-    G[":"] = lambda: [disc(63, 315, 63), disc(63, 637, 63)]
-    G[";"] = lambda: [disc(63, 315, 63), disc(63, 637, 63), pc(Q([(20, 650), (106, 650), (52, 815), (-16, 815)]))]
-    G["<"] = lambda: [chev(50, 360, (430, 155), (430, 565), 96)]
-    G["="] = lambda: [pc(R(0, 240, 440, 330)), pc(R(0, 430, 440, 520))]
-    G[">"] = lambda: mirror_x(G["<"](), 480)
-    G["?"] = lambda: [pc(RS(300, 210, 210, 106, 215, 450, 450, 215, 1, 1)), pc(R(300, 316, 404, 490)), disc(352, 637, 63)]
-    G["@"] = lambda: [
-        pc(RS(360, 390, 350, 290, 20, 330, 330, 20, 1, 1)),
-        ring_p(350, 390, 150, 70),
-        pc(R(424, 254, 500, 526)),
-        pc(R(424, 450, 604, 526)),
+
+    def glyph_asterisk() -> list[Piece]:
+        # A heavy asterisk keeps six readable arms instead of filling in.
+        width = 84 * min(1.0, ratio) * heavy**0.4
+        grow = heavy**0.35
+        cx, cy = X(200), 180.0
+        spokes = []
+        for dx, dy in ((0.0, 140.0), (121.0, 70.0), (121.0, -70.0)):
+            dx, dy = dx * W * grow, dy * grow
+            spokes.append(pc(slab((cx - dx, cy - dy), (cx + dx, cy + dy), width)))
+        return spokes
+
+    G["*"] = glyph_asterisk
+    G["+"] = lambda: [
+        pc(box((X(0), X(440)), around(360))),
+        pc(box(centre(220, 100), (140, 580))),
     ]
-    G["["] = lambda: [pc(R(0, -40, 104, 780)), pc(R(0, -40, 300, 40)), pc(R(0, 700, 300, 780))]
-    G["\\"] = lambda: [pc(Q([(0, 0), (104, 0), (460, 700), (356, 700)]))]
+
+    def comma_parts(cx: float) -> list[Piece]:
+        size = dot_radius(63, 0.8)
+        factor = size / 63.0
+        cy = 700 - size
+        length = 165 * (0.5 + 0.5 * factor)
+        return [
+            dot_at(cx, cy, size),
+            pc(
+                band(
+                    (cx - 43 * factor, cx + 43 * factor),
+                    cy + 13 * factor,
+                    (cx - 79 * factor, cx - 11 * factor),
+                    cy + 13 * factor + length,
+                )
+            ),
+        ]
+
+    G[","] = lambda: comma_parts(X(63))
+    G["-"] = lambda: [pc(box((X(0), X(400)), around(360)))]
+    G["­"] = lambda: [pc(box((X(0), X(400)), around(360)))]
+    G["."] = lambda: [base_point(X(63))]
+
+    def glyph_slash() -> list[Piece]:
+        width = cap_width(104, 356, 700)
+        return [pc(band(cap_r(408, width), 0, cap_l(52, width), 700))]
+
+    G["/"] = glyph_slash
+    G[":"] = lambda: [point(63, 315, 63), base_point(X(63))]
+    G[";"] = lambda: [point(63, 315, 63)] + comma_parts(X(63))
+    G["<"] = lambda: [chev(50, 360, (430, 155), (430, 565), 96)]
+
+    def glyph_equal() -> list[Piece]:
+        thickness = bar_t(90)
+        offset = 95 + 0.25 * max(0.0, thickness - 90)
+        return [
+            pc(rect(0, 380 - offset - thickness / 2, X(440), 380 - offset + thickness / 2)),
+            pc(rect(0, 380 + offset - thickness / 2, X(440), 380 + offset + thickness / 2)),
+        ]
+
+    G["="] = glyph_equal
+    G[">"] = lambda: mirror_x(G["<"](), 480)
+
+    def glyph_question() -> list[Piece]:
+        outer_rx, inner_rx, outer_ry, inner_ry = radii(210, 106)
+        stem = (X(300), X(300) + S)
+        size = dot_radius(63, 0.8)
+        gap = 84.0 - 30.0 * heavy_progress
+        return [
+            pc(RS(300, 210, 210, 106, 215, 450, 450, 215, caps=(0, 1))),
+            pc(box(stem, (210 + inner_ry, 700 - 2 * size - gap))),
+            dot_at(mid(stem), 700 - size, size),
+        ]
+
+    G["?"] = glyph_question
+
+    def glyph_at() -> list[Piece]:
+        outer_rx, inner_rx, outer_ry, inner_ry = radii(350, 290)
+        # The enclosed a carries an eased stroke so its counter survives.
+        k = 1.0 if ratio <= 1.0 else (1.0 + 0.45 * (ratio - 1.0)) / ratio
+        bowl_rx, _bowl_irx, _bowl_ry, _bowl_iry = radii(150, 70, k=k)
+        bowl_right = X(350) + bowl_rx
+        stem = (bowl_right - tk(76) * k, bowl_right)
+        foot = (526 - bar_t(76) * k, 526.0)
+        # The tail of the inner a runs into the spiral, whose lower terminal
+        # is cut level with the top of that tail.
+        rise = foot[0] - 390
+        outer_start = asin(min(0.9, rise / outer_ry)) * 180 / pi
+        inner_start = asin(min(0.9, rise / inner_ry)) * 180 / pi
+        mid_rx, mid_ry = (outer_rx + inner_rx) / 2, (outer_ry + inner_ry) / 2
+        lift = min(0.95, (mid(foot) - 390) / mid_ry)
+        reach_x = X(360) + mid_rx * sqrt(1 - lift * lift)
+        return [
+            pc(
+                sector(
+                    X(360), 390, outer_rx, inner_rx, outer_ry, inner_ry,
+                    outer_start, 330, 330, inner_start, caps=(1, 1), steps=78,
+                )
+            ),
+            ring_p(350, 390, 150, 70, k=k),
+            pc(box(stem, (254, 526))),
+            pc(box((mid(stem), reach_x), foot)),
+        ]
+
+    G["@"] = glyph_at
+
+    def bracket() -> list[Piece]:
+        stem = left(52)
+        return [
+            pc(box(stem, (-40, 780))),
+            pc(box((mid(stem), X(300)), top(-40, 80))),
+            pc(box((mid(stem), X(300)), bottom(780, 80))),
+        ]
+
+    G["["] = bracket
+
+    def glyph_backslash() -> list[Piece]:
+        width = cap_width(104, 356, 700)
+        return [pc(band(cap_l(52, width), 0, cap_r(408, width), 700))]
+
+    G["\\"] = glyph_backslash
     G["]"] = lambda: mirror_x(G["["](), 300)
     G["^"] = lambda: [chev(230, 10, (60, 250), (400, 250), 92)]
-    G["_"] = lambda: [pc(R(0, 730, 560, 820))]
+    G["_"] = lambda: [pc(box((X(0), X(560)), top(730, 90)))]
     G["`"] = lambda: [bar(50, 25, 190, 170, 88)]
-    G["{"] = lambda: [
-        pc(R(170, -40, 300, 45)),
-        pc(R(170, -40, 258, 370)),
-        chev(70, 370, (214, 330), (214, 410), 88),
-        pc(R(170, 370, 258, 780)),
-        pc(R(170, 695, 300, 780)),
-    ]
-    G["|"] = lambda: [pc(R(0, -40, 104, 780))]
+
+    def brace() -> list[Piece]:
+        stem = centre(214, 88)
+        hook_t = bar_t(85)
+        spike = 88 * ratio
+        return [
+            pc(box((mid(stem), X(300) + (tk(88) - 88) / 2), (-40, -40 + hook_t))),
+            pc(box(stem, (-40, 370 + JOIN))),
+            chev_abs((stem[0] - 100 * W, 370), (mid(stem), 330), (mid(stem), 410), spike),
+            pc(box(stem, (370 - JOIN, 780))),
+            pc(box((mid(stem), X(300) + (tk(88) - 88) / 2), (780 - hook_t, 780))),
+        ]
+
+    G["{"] = brace
+    G["|"] = lambda: [pc(box(left(52), (-40, 780)))]
     G["}"] = lambda: mirror_x(G["{"](), 300)
     G["~"] = lambda: [wave(220, 360, 220, 32, 45)]
 
-    # Latin-1 symbols.
+    # ======================================================= Latin-1 symbols
     G["¡"] = lambda: rotate_180(G["!"](), 52, 350)
-    G["¢"] = lambda: G["c"]() + [pc(R(224, 110, 300, 790))]
-    G["£"] = lambda: [
-        pc(RS(350, 190, 190, 86, 180, 330, 330, 180, 1, 1)),
-        pc(R(160, 180, 264, 610)),
-        pc(R(30, 330, 420, 430)),
-        pc(R(0, 600, 570, 700)),
-    ]
-    G["¤"] = lambda: [
-        ring_p(230, 360, 150, 70),
-        bar(335, 255, 415, 175, 80),
-        bar(125, 255, 45, 175, 80),
-        bar(335, 465, 415, 545, 80),
-        bar(125, 465, 45, 545, 80),
-    ]
-    G["¥"] = lambda: G["Y"]() + [pc(R(70, 350, 570, 420)), pc(R(70, 490, 570, 560))]
-    G["¦"] = lambda: [pc(R(0, -40, 104, 300)), pc(R(0, 420, 104, 780))]
-    G["§"] = lambda: translate(scale(G["S"](), 0.85) + [ring_p(297, 297, 140, 72)], 20, 55)
-    G["¨"] = lambda: [disc(10, 90, 55), disc(250, 90, 55)]
-    G["©"] = lambda: [ring_p(350, 350, 350, 290), pc(RS(350, 350, 190, 118, -38, -322, -330, -30, 1, 1))]
-    G["ª"] = lambda: translate(scale(G["a"](), 0.55), 0, -100)
-    G["«"] = lambda: [chev(50, 400, (190, 255), (190, 545), 86), chev(260, 400, (400, 255), (400, 545), 86)]
-    G["¬"] = lambda: [pc(R(0, 320, 460, 408)), pc(R(372, 408, 460, 570))]
-    G["®"] = lambda: [
+    G["¢"] = lambda: G["c"]() + [pc(box(centre(262, 76), (110, 790)))]
+
+    def glyph_sterling() -> list[Piece]:
+        stem = left(212)
+        return [
+            pc(RS(350, 190, 190, 86, 180, 330, 330, 180, caps=(1, 0), tails=(0.0, JOIN))),
+            pc(box(stem, (190, 700 - bar_t() / 2))),
+            pc(box((mid(stem) - 182 * W, mid(stem) + 208 * W), around(380))),
+            pc(box((mid(stem) - 212 * W, mid(stem) + 358 * W), bottom(700))),
+        ]
+
+    G["£"] = glyph_sterling
+
+    def glyph_currency() -> list[Piece]:
+        outer_rx, inner_rx, outer_ry, inner_ry = radii(150, 70)
+        cx, cy = X(230), 360.0
+        width = 80 * ratio
+        pieces = [ring_p(230, 360, 150, 70)]
+        for sx, sy in ((1, -1), (-1, -1), (1, 1), (-1, 1)):
+            root = (
+                cx + sx * (outer_rx + inner_rx) / 2 * 0.7071,
+                cy + sy * (outer_ry + inner_ry) / 2 * 0.7071,
+            )
+            tip = (
+                cx + sx * (outer_rx + 111.6 * W) * 0.7071,
+                cy + sy * (outer_ry + 111.6) * 0.7071,
+            )
+            pieces.append(pc(slab(root, tip, width)))
+        return pieces
+
+    G["¤"] = glyph_currency
+    def glyph_yen() -> list[Piece]:
+        offset = 70 + 0.3 * max(0.0, bar_t(70) - 70)
+        return G["Y"]() + [
+            pc(box((X(70), X(570)), around(455 - offset, 70))),
+            pc(box((X(70), X(570)), around(455 + offset, 70))),
+        ]
+
+    G["¥"] = glyph_yen
+    G["¦"] = lambda: [pc(box(left(52), (-40, 300))), pc(box(left(52), (420, 780)))]
+    def glyph_section() -> list[Piece]:
+        if S > 104.0 and not _nested:
+            # Three bars and a ring cannot carry a heavy stroke; ease it.
+            lighter = replace(
+                p,
+                s=104.0 + 0.12 * (S - 104.0),
+                sh=100.0 + 0.12 * (SH - 100.0),
+            )
+            return glyph_defs(lighter, _nested=True)["§"]()
+        return translate(
+            scale(G["S"](), 0.85) + [ring_p(297, 297, 140, 72)], 20, 55
+        )
+
+    G["§"] = glyph_section
+    G["¨"] = lambda: [accent_disc(10, 90, 55, 120), accent_disc(250, 90, 55, 120)]
+    G["©"] = lambda: [
         ring_p(350, 350, 350, 290),
-        pc(R(255, 220, 320, 480)),
-        pc(R(255, 220, 390, 282)),
-        pc(R(255, 340, 390, 402)),
-        pc(RS(390, 311, 91, 29, -90, 90, 90, -90)),
-        pc(Q([(350, 380), (420, 380), (470, 480), (400, 480)])),
+        pc(RS(350, 350, 190, 118, -38, -322, -330, -30, caps=(1, 1))),
     ]
-    G["¯"] = lambda: [pc(R(0, 40, 360, 128))]
+    G["ª"] = lambda: translate(scale(G["a"](), 0.55), 0, -100)
+    def glyph_guillemet() -> list[Piece]:
+        # The second chevron steps away as the strokes thicken.
+        step = 210 + 0.9 * max(0.0, tk(86) - 86) / W
+        return [
+            chev(50, 400, (190, 255), (190, 545), 86),
+            chev(50 + step, 400, (190 + step, 255), (190 + step, 545), 86),
+        ]
+
+    G["«"] = glyph_guillemet
+
+    def glyph_not() -> list[Piece]:
+        bar_y = around(364, 88)
+        return [
+            pc(box((X(0), X(460)), bar_y)),
+            pc(rect(X(460) - tk(88), bar_y[0], X(460), 570)),
+        ]
+
+    G["¬"] = glyph_not
+
+    def glyph_registered() -> list[Piece]:
+        # The enclosed R carries a damped stroke so its counters survive.
+        local = ratio if ratio <= 1.0 else 1.0 + 0.2 * (ratio - 1.0)
+        stem_w, bar_h, leg_w = 65 * local, 62 * local, 70 * local
+        edge = X(287.5) - max(65.0, stem_w) / 2
+        stem = (edge, edge + stem_w)
+        bowl_x = X(390)
+        outer_rx = 60 * W + max(62.0, bar_h) / 2
+        leg_y = 402 - bar_h / 2
+        return [
+            ring_p(350, 350, 350, 290),
+            pc(rect(stem[0], 220, stem[1], 480)),
+            pc(rect(mid(stem), 220, bowl_x, 220 + bar_h)),
+            pc(rect(mid(stem), 402 - bar_h, bowl_x, 402)),
+            pc(
+                sector(
+                    bowl_x, 311, outer_rx, max(8.0, outer_rx - bar_h),
+                    91, max(6.0, 91 - bar_h),
+                    -90, 90, 90, -90, tails=(JOIN / 2, JOIN / 2),
+                )
+            ),
+            pc(
+                band(
+                    cap_c(385 + 0.5 * (leg_y - 380), leg_w),
+                    leg_y,
+                    cap_c(435, leg_w),
+                    480,
+                )
+            ),
+        ]
+
+    G["®"] = glyph_registered
+    G["¯"] = lambda: [pc(box((X(0), X(360)), around(84, 88)))]
     G["°"] = lambda: [ring_p(115, 115, 115, 50)]
-    G["±"] = lambda: [pc(R(176, 110, 264, 510)), pc(R(0, 266, 440, 354)), pc(R(0, 610, 440, 698))]
+    G["±"] = lambda: [
+        pc(box(centre(220, 88), (110, 510))),
+        pc(box((X(0), X(440)), around(310, 88))),
+        pc(box((X(0), X(440)), bottom(698, 88))),
+    ]
     G["²"] = lambda: scale(G["2"](), 0.5)
     G["³"] = lambda: scale(G["3"](), 0.5)
     G["´"] = lambda: [bar(190, 25, 50, 170, 88)]
     G["µ"] = lambda: [
-        pc(vstem(52, 200, 900)),
-        pc(RS(262, 438, 262, 158, 180, 0, 0, 180)),
-        pc(R(420, 200, 524, 700)),
+        pc(box(left(52), (200, 900))),
+        pc(RS(262, 438, 262, 158, 180, 0, 0, 180, tails=(JOIN, JOIN))),
+        pc(box(right(472), (200, 700))),
     ]
-    G["¶"] = lambda: [
-        pc(Contour(arc_pts(330 * W, 180, 180 * W, 180, 90, 270))),
-        pc(R(330, 0, 434, 700)),
-        pc(R(540, 0, 644, 700)),
-        pc(R(330, 0, 644, 90)),
-    ]
-    G["·"] = lambda: [disc(63, 360, 63)]
-    G["¸"] = lambda: [pc(R(66, 690, 134, 772)), pc(R(-4, 772, 134, 836))]
+
+    def glyph_pilcrow() -> list[Piece]:
+        # Two stems share a 210-unit skeleton; an eased stroke keeps the gap.
+        width = tk() * (1 - 0.35 * heavy_progress)
+        first = (X(382) - width / 2, X(382) + width / 2)
+        edge = X(592) + max(104.0, width) / 2
+        second = (edge - width, edge)
+        bar_y = top(0, 90)
+        return [
+            pc(
+                Contour(
+                    arc_pts(first[0], 180, 180 * W, 180, 90, 270)
+                    + [(first[0] + JOIN, 0.0, 0), (first[0] + JOIN, 360.0, 0)]
+                )
+            ),
+            pc(box(first, (0, 700))),
+            pc(box(second, (0, 700))),
+            pc(box((first[0], second[1]), bar_y)),
+        ]
+
+    G["¶"] = glyph_pilcrow
+    G["·"] = lambda: [point(63, 360, 63)]
+
+    def cedilla(cx: float) -> list[Piece]:
+        stem = centre(cx, 68)
+        foot = bottom(836, 64)
+        return [
+            pc(box(stem, (690, 836))),
+            pc(box((stem[1] - 138 * max(1.0, ratio**0.6), stem[1]), foot)),
+        ]
+
+    G["¸"] = lambda: cedilla(100)
     G["¹"] = lambda: scale(G["1"](), 0.5)
     G["º"] = lambda: translate(scale(G["o"](), 0.55), 0, -100)
-    G["»"] = lambda: mirror_x(G["«"](), 450)
+    G["»"] = lambda: mirror_x(
+        G["«"](), 450 + 0.9 * max(0.0, tk(86) - 86) / W
+    )
 
-    def fraction_slash() -> Piece:
-        return pc(Q([(400, 0), (470, 0), (120, 700), (50, 700)]))
+    def fraction(top_name: str, bottom_name: str, dx: float) -> list[Piece]:
+        """Numerator, slash and denominator with a guaranteed clearance.
 
-    G["¼"] = lambda: scale(G["1"](), 0.44) + [fraction_slash()] + translate(scale(G["4"](), 0.44), 330, 392)
-    G["½"] = lambda: scale(G["1"](), 0.44) + [fraction_slash()] + translate(scale(G["2"](), 0.44), 330, 392)
-    G["¾"] = lambda: scale(G["3"](), 0.44) + [fraction_slash()] + translate(scale(G["4"](), 0.44), 350, 392)
+        The canonical positions stand wherever they leave room. A heavy or
+        condensed figure that would reach the slash pushes it, and the
+        denominator behind it, to the right.
+        """
+
+        upper = scale(G[top_name](), 0.44)
+        lower = translate(scale(G[bottom_name](), 0.44), dx, 392)
+        width = cap_width(70, 350, 700)
+        head, foot = cap_c(435, width), cap_c(85, width)
+        clearance = 10.0 + 0.25 * width
+
+        def slash_edge(y: float, side: float) -> float:
+            return at_y(head, 0, foot, 700, y) + side * width / 2
+
+        upper_bottom = max(q[1] for piece in upper for q in piece.outer.pts)
+        push = max(
+            0.0,
+            extent(upper)[1] + clearance - slash_edge(upper_bottom, -1),
+        )
+        lower_top = min(q[1] for piece in lower for q in piece.outer.pts)
+        pull = max(
+            0.0,
+            slash_edge(lower_top, 1) + push + clearance - extent(lower)[0],
+        )
+        slash = pc(
+            band((head[0] + push, head[1] + push), 0, (foot[0] + push, foot[1] + push), 700)
+        )
+        return upper + [slash] + map_pieces(
+            lower, lambda q: (q[0] + pull, q[1], q[2])
+        )
+
+    G["¼"] = lambda: fraction("1", "4", 330)
+    G["½"] = lambda: fraction("1", "2", 330)
+    G["¾"] = lambda: fraction("3", "4", 350)
     G["¿"] = lambda: rotate_180(G["?"](), 319, 350)
     G["×"] = lambda: [bar(139, 219, 421, 501, 96), bar(421, 219, 139, 501, 96)]
-    G["÷"] = lambda: [pc(R(0, 316, 440, 404)), disc(220, 150, 63), disc(220, 570, 63)]
 
-    # Special letters.
-    G["Æ"] = lambda: [
-        pc(Q([(340, 0), (444, 0), (104, 700), (0, 700)])),
-        pc(R(340, 0, 444, 700)),
-        pc(R(340, 0, 900, SH)),
-        pc(R(340, 310, 760, 410)),
-        pc(R(340, 600, 910, 700)),
-        pc(R(180, 430, 400, 530)),
-    ]
-    G["æ"] = lambda: [ring_p(250, 450, 250, 146), pc(RS(690, 450, 250, 146, 38, 365, 365, 38, 1, 1)), pc(R(452, 400, 928, 500))]
+    def glyph_divide() -> list[Piece]:
+        bar_y = around(360, 88)
+        size = dot_radius(63, 0.8)
+        offset = max(210.0, bar_t(88) / 2 + 0.45 * size + size)
+        return [
+            pc(box((X(0), X(440)), bar_y)),
+            dot_at(X(220), 360 - offset, size),
+            dot_at(X(220), 360 + offset, size),
+        ]
+
+    G["÷"] = glyph_divide
+
+    # ======================================================= special letters
+    def glyph_ae_cap() -> list[Piece]:
+        stem = centre(392)
+        width = cap_width(104, 340, 700)
+        # The foot steps out with weight so the A counter stays open.
+        foot = cap_l(52 - 0.9 * max(0.0, S - 104.0) / W, width)
+        return [
+            pc(band(stem, 0, foot, 700)),
+            pc(box(stem, (0, 700))),
+            pc(box((mid(stem), X(900)), top(0))),
+            pc(box((mid(stem), X(760)), around(360))),
+            pc(box((mid(stem), X(910)), bottom(700))),
+            pc(box((at_y(stem, 0, foot, 700, 480), mid(stem)), around(480))),
+        ]
+
+    G["Æ"] = glyph_ae_cap
+    G["æ"] = lambda: [ring_p(250, 450, 250, 146)] + e_parts(690, 250, 146)
     G["Ø"] = lambda: G["O"]() + [bar(40, 770, 690, -70, 76)]
     G["ø"] = lambda: G["o"]() + [bar(30, 760, 494, 140, 66)]
-    G["Ð"] = lambda: G["D"]() + [pc(R(-70, 304, 250, 400))]
-    G["ð"] = lambda: [ring_p(240, 490, 222, 118), bar(300, 300, 480, 40, 96), bar(310, 110, 480, 230, 66)]
-    G["Þ"] = lambda: [
-        pc(R(0, 0, 104, 700)),
-        pc(R(0, 150, 400, 254)),
-        pc(R(0, 456, 400, 560)),
-        pc(RS(400, 355, 205, 101, -90, 90, 90, -90)),
+
+    def glyph_eth_cap() -> list[Piece]:
+        stem = left(52)
+        return G["D"]() + [
+            pc(box((mid(stem) - 122 * W, mid(stem) + 198 * W), around(352, 96)))
+        ]
+
+    G["Ð"] = glyph_eth_cap
+    G["ð"] = lambda: [
+        ring_p(240, 490, 222, 118),
+        bar(300, 300, 480, 40, 96),
+        bar(310, 110, 480, 230, 66),
     ]
-    G["þ"] = lambda: [pc(vstem(52, 0, 900)), ring_p(262, 450, 262, 158)]
-    G["ß"] = lambda: [
-        pc(R(0, 0, 104, 700)),
-        pc(RS(175, 175, 175, 71, 180, 360, 360, 180)),
-        pc(R(246, 160, 350, 400)),
-        pc(RS(298, 498, 202, 98, -90, 90, 90, -90, 1, 1)),
-    ]
+
+    def glyph_thorn_cap() -> list[Piece]:
+        stem = left(52)
+        return [
+            pc(box(stem, (0, 700))),
+            pc(box((mid(stem), X(400)), (202 - S / 2, 202 + S / 2))),
+            pc(box((mid(stem), X(400)), (508 - S / 2, 508 + S / 2))),
+            pc(half_bowl(400, 202, 508, 205, 101, "right")),
+        ]
+
+    G["Þ"] = glyph_thorn_cap
+    G["þ"] = lambda: [pc(box(left(52), (0, 900))), bowl()]
+
+    def glyph_germandbls() -> list[Piece]:
+        stem, link = left(52), right(298)
+        outer_rx, inner_rx, outer_ry, inner_ry = radii(202, 98)
+        return [
+            pc(box(stem, (0, 700))),
+            pc(arch(stem[0], link[1], 175, 175, 71)),
+            pc(box(link, (175, 498 - inner_ry))),
+            pc(
+                sector(
+                    mid(link), 498, outer_rx, inner_rx, outer_ry, inner_ry,
+                    -90, 90, 90, -90, caps=(1, 0), tails=(0.0, JOIN),
+                )
+            ),
+        ]
+
+    G["ß"] = glyph_germandbls
 
     direct_count = len(G)
 
+    # ================================================================ accents
     def cap_accent(kind: str, cx: float) -> list[Piece]:
         if kind == "grave":
-            return [bar(cx - 110, -255, cx + 45, -90, 94)]
+            return accent_bar(cx - 110, -255, cx + 45, -90, 94, -57.8)
         if kind == "acute":
-            return [bar(cx + 110, -255, cx - 45, -90, 94)]
+            return accent_bar(cx + 110, -255, cx - 45, -90, 94, -57.8)
         if kind == "circ":
-            return [chev(cx, -260, (cx - 155, -85), (cx + 155, -85), 90)]
+            return accent_chev(
+                cx, -260, (cx - 155, -85), (cx + 155, -85), 90, -55.2
+            )
         if kind == "dier":
             return [
-                accent_disc(cx - 136, -115, 63),
-                accent_disc(cx + 136, -115, 63),
+                accent_disc(cx - 136, -115, 63, 136),
+                accent_disc(cx + 136, -115, 63, 136),
             ]
         if kind == "ring":
             return [ring_p(cx, -150, 96, 42)]
         if kind == "tilde":
-            return [wave(cx, -160, 190, 26, 44)]
+            return settle([wave(cx, -160, 190, 26, 44)], -90.0)
         if kind == "ced":
-            return [pc(R(cx - 34, 690, cx + 34, 772)), pc(R(cx - 104, 772, cx + 34, 836))]
+            return cedilla(cx)
         return []
 
     def lc_accent(kind: str, cx: float) -> list[Piece]:
+        # Lowercase accents rest 26 units above the round overshoot line;
+        # the canonical grave, acute and circumflex ran into their letters.
         if kind == "grave":
-            return [bar(cx - 100, 25, cx + 40, 170, 88)]
+            return accent_bar(cx - 100, 25, cx + 40, 170, 88, 162.0)
         if kind == "acute":
-            return [bar(cx + 100, 25, cx - 40, 170, 88)]
+            return accent_bar(cx + 100, 25, cx - 40, 170, 88, 162.0)
         if kind == "circ":
             # Preserve the canonical ±140 default while keeping the terminal
             # caps clear of the extrusion direction away from wdth=100.
             half_span = 140 / max(1.0, W)
-            return [
-                chev(
-                    cx,
-                    20,
-                    (cx - half_span, 170),
-                    (cx + half_span, 170),
-                    84,
-                )
-            ]
+            return accent_chev(
+                cx, 20, (cx - half_span, 170), (cx + half_span, 170), 84, 162.0
+            )
         if kind == "dier":
             return [
-                accent_disc(cx - 120, 85, 55),
-                accent_disc(cx + 120, 85, 55),
+                accent_disc(cx - 120, 85, 55, 120),
+                accent_disc(cx + 120, 85, 55, 120),
             ]
         if kind == "ring":
             return [ring_p(cx, 70, 88, 36)]
         if kind == "tilde":
-            return [wave(cx, 95, 170, 24, 40)]
+            return settle([wave(cx, 95, 170, 24, 40)], 159.0)
         if kind == "ced":
-            return cap_accent("ced", cx)
+            return cedilla(cx)
         return []
 
     def x_center(pieces: Sequence[Piece]) -> float:
-        left, right = 1e9, -1e9
-        for piece in pieces:
-            for x, _y, _flag in piece.outer.pts:
-                left = min(left, x)
-                right = max(right, x)
-        return (left + right) / (2 * W)
+        low, high = extent(pieces)
+        return (low + high) / (2 * W)
 
     def composed(base: str, accent: str, lowercase: bool) -> Builder:
         def builder() -> list[Piece]:
@@ -1804,43 +2222,147 @@ arcPts = arc_pts
 ringSector = ring_sector
 
 
+# ------------------------------------------------------------- design space
+DESIGN_WEIGHTS = (100.0, 400.0, 700.0, 900.0)
+DESIGN_WIDTHS = (75.0, 100.0, 125.0)
+DEFAULT_LOCATION = (400.0, 100.0)
+
+
+def _lerp(a: float, b: float, t: float) -> float:
+    return a + (b - a) * t
+
+
+def _smoothstep(value: float) -> float:
+    value = min(1.0, max(0.0, value))
+    return value * value * (3 - 2 * value)
+
+
+def heavy_width_factor(width: float) -> float:
+    """Limit added Black ink where the condensed skeleton has less room."""
+
+    if width <= 100:
+        return _lerp(0.9, 1.0, (width - 75) / 25)
+    return _lerp(1.0, 1.04, (width - 100) / 25)
+
+
+def weight_strokes(weight: float, width: float = 100) -> tuple[float, float]:
+    """Return coordinated vertical/horizontal strokes for the family.
+
+    Thin through Regular retains the canonical donor values. Above Regular,
+    growth eases toward a deliberate Black ceiling instead of scaling every
+    piece to 200 units. The added ink is width-aware, so condensed counters and
+    joins retain the same visual margin as the normal and expanded cuts.
+    """
+
+    if weight <= 400:
+        t = (weight - 100) / 300
+        return _lerp(40, 104, t), _lerp(36, 100, t)
+    progress = _smoothstep((weight - 400) / 500)
+    width_factor = heavy_width_factor(width)
+    return (
+        104 + (176 - 104) * progress * width_factor,
+        100 + (170 - 100) * progress * width_factor,
+    )
+
+
+def design_params(
+    wght: float = 400.0,
+    wdth: float = 100.0,
+    *,
+    hand: bool = False,
+) -> GeneratorParams:
+    """Map a Weight/Width location onto generator parameters."""
+
+    s, sh = weight_strokes(wght, wdth)
+    heavy_progress = _smoothstep((wght - 400) / 500)
+    # Heavy cuts need more skeleton room as well as more stroke. Expanding
+    # the skeleton most at Condensed prevents counters and joins from being
+    # consumed while preserving the requested width ordering.
+    skeleton_growth = _lerp(0.08, 0.04, (wdth - 75) / 50)
+    return GeneratorParams(
+        s=s,
+        sh=sh,
+        w=(wdth / 100) * (1 + skeleton_growth * heavy_progress),
+        v=(60, 70),
+        hatch_n=HATCH_N,
+        hatch_t=9,
+        hatch_sp=17,
+        jit=3.4 if hand else 0,
+    )
+
+
+def design_masters() -> tuple[GeneratorParams, ...]:
+    """Return the twelve source cuts, default first."""
+
+    locations = [DEFAULT_LOCATION] + [
+        (weight, width)
+        for weight in DESIGN_WEIGHTS
+        for width in DESIGN_WIDTHS
+        if (weight, width) != DEFAULT_LOCATION
+    ]
+    return tuple(design_params(weight, width) for weight, width in locations)
+
+
+# ------------------------------------------------------------------ sampling
 @dataclass(frozen=True, slots=True)
 class SamplePoint:
-    """A subdivided point with interpolation-stable arc and cap metadata."""
+    """A sampled outline point.
+
+    ``arc``, ``force`` and ``hidden`` describe the edge that starts here:
+    whether it belongs to a curve, is a forced terminal cap, or lies inside
+    another piece of the same glyph.
+    """
 
     x: float
     y: float
     arc: bool = False
     force: bool = False
+    hidden: bool = False
 
     @property
     def flag(self) -> int:
         return 2 if self.force else (1 if self.arc else 0)
 
     def translated(self, dx: float, dy: float) -> "SamplePoint":
-        return SamplePoint(self.x + dx, self.y + dy, self.arc, self.force)
+        return SamplePoint(self.x + dx, self.y + dy, self.arc, self.force, self.hidden)
 
 
 @dataclass(frozen=True, slots=True)
-class EdgeTopology:
-    """Frozen sample count and flags for one raw source edge."""
+class SpanTopology:
+    """Frozen sampling recipe for one smooth run of raw edges.
 
-    count: int
+    A span is a single straight raw edge or a maximal run of curve chords.
+    ``cuts`` are the positions, in raw-edge units from the span start, where
+    the span enters or leaves another piece at the structure master. Each
+    interval between cuts owns a fixed sample count, so the same sample
+    index marks the same junction at every axis location.
+    """
+
+    start: int
+    edges: int
     arc: bool
     force: bool
+    closed: bool
+    hidden_first: bool
+    cuts: tuple[float, ...]
+    counts: tuple[int, ...]
 
 
 @dataclass(frozen=True, slots=True)
 class ContourTopology:
-    """Frozen raw-edge recipe and default-master winding normalization."""
+    """Frozen spans plus the default-master winding normalization."""
 
-    edges: tuple[EdgeTopology, ...]
+    spans: tuple[SpanTopology, ...]
     reverse: bool
+
+    @property
+    def point_count(self) -> int:
+        return sum(sum(span.counts) for span in self.spans)
 
 
 @dataclass(frozen=True, slots=True)
 class GlyphTopology:
-    """Per-piece topology frozen once at the default master."""
+    """Per-piece topology frozen once across the design masters."""
 
     pieces: tuple[tuple[ContourTopology, ...], ...]
 
@@ -1871,13 +2393,15 @@ class BuiltPiece:
 
 @dataclass(frozen=True, slots=True)
 class GlyphOutline:
-    """A glyph's default-topology source outline in y-down coordinates."""
+    """A glyph's frozen-topology source outline in y-down coordinates."""
 
     name: str
     pieces: tuple[BuiltPiece, ...]
     params: GeneratorParams
     seed: float
     topology: GlyphTopology
+    #: Spans whose junction structure differs from the structure master.
+    unmatched: int = 0
 
     @property
     def contours(self) -> tuple[BuiltContour, ...]:
@@ -1890,47 +2414,27 @@ def _xy(point: SamplePoint | Sequence[float]) -> tuple[float, float]:
     return float(point[0]), float(point[1])
 
 
-def _edge_topology(contour: Contour, max_len: float) -> tuple[EdgeTopology, ...]:
-    points = contour.pts
-    edges: list[EdgeTopology] = []
-    for index, a in enumerate(points):
-        b = points[(index + 1) % len(points)]
-        length = _js_hypot(b[0] - a[0], b[1] - a[1])
-        count = max(1, ceil(length / max_len))
-        edges.append(
-            EdgeTopology(
-                count=count,
-                arc=a[2] == 1 and b[2] == 1 and length < 40,
-                force=a[2] == 2,
-            )
-        )
-    return tuple(edges)
-
-
 def subdivide(
     contour: Contour,
     max_len: float = SUBDIVISION_MAX_LENGTH,
-    topology: ContourTopology | Sequence[EdgeTopology] | None = None,
 ) -> list[SamplePoint]:
-    """Port ``subdivide``; optionally replay default-master edge counts/flags."""
+    """Port ``subdivide``: uniform samples on every raw edge."""
 
-    edges = topology.edges if isinstance(topology, ContourTopology) else topology
-    if edges is None:
-        edges = _edge_topology(contour, max_len)
-    if len(edges) != len(contour.pts):
-        raise ValueError("raw contour edge count differs from frozen topology")
+    points = contour.pts
     out: list[SamplePoint] = []
-    for index, a in enumerate(contour.pts):
-        b = contour.pts[(index + 1) % len(contour.pts)]
-        edge = edges[index]
+    for index, a in enumerate(points):
+        b = points[(index + 1) % len(points)]
         dx, dy = b[0] - a[0], b[1] - a[1]
-        for k in range(edge.count):
+        length = _js_hypot(dx, dy)
+        count = max(1, ceil(length / max_len))
+        arc = a[2] == 1 and b[2] == 1 and length < 40
+        for k in range(count):
             out.append(
                 SamplePoint(
-                    a[0] + dx * k / edge.count,
-                    a[1] + dy * k / edge.count,
-                    edge.arc,
-                    edge.force,
+                    a[0] + dx * k / count,
+                    a[1] + dy * k / count,
+                    arc,
+                    a[2] == 2,
                 )
             )
     return out
@@ -1963,10 +2467,10 @@ def point_in(x: float, y: float, points: Sequence[SamplePoint | Sequence[float]]
 
 
 def jitter_points(points: Sequence[SamplePoint], amp: float, seed: float) -> list[SamplePoint]:
-    """Port ``jitterPts`` while retaining both load-bearing point flags."""
+    """Port ``jitterPts`` while retaining the load-bearing edge flags."""
 
     if not amp:
-        return [SamplePoint(p.x, p.y, p.arc, p.force) for p in points]
+        return [SamplePoint(p.x, p.y, p.arc, p.force, p.hidden) for p in points]
     s1, s2 = seed * 1.7 + 0.4, seed * 2.3 + 1.9
     s3, s4 = seed * 3.1 + 0.7, seed * 1.3 + 2.6
     return [
@@ -1975,6 +2479,7 @@ def jitter_points(points: Sequence[SamplePoint], amp: float, seed: float) -> lis
             p.y + amp * 0.5 * (sin(p.x * 0.015 + s3) + sin(p.y * 0.009 + s4)),
             p.arc,
             p.force,
+            p.hidden,
         )
         for p in points
     ]
@@ -1991,28 +2496,787 @@ def _raw_piece_contours(piece: Piece) -> tuple[Contour, ...]:
     return (piece.outer, *piece.holes)
 
 
+# A boundary point counts as buried when the point this far outside it lies in
+# another piece. The offset also treats abutting pieces as joined.
+HIDE_OFFSET = 1.5
+# Buried stretches shorter than this, and gaps this short between them, are
+# not worth a sample point.
+MIN_CUT_LENGTH = 1.0
+# A junction this close to a span end is the span end: the outward offset
+# rounds a corner slightly early or late.
+END_SNAP = 4.0
+# Diagnostic switch: also report junctions that exist at a location but not at
+# the structure master. Costs one extra containment pass per span.
+AUDIT_NEW_JUNCTIONS = False
+
+XY: TypeAlias = tuple[float, float]
+Cut: TypeAlias = tuple[float, int]
+
+
+@dataclass(frozen=True, slots=True)
+class _Shape:
+    """One raw piece prepared for containment queries."""
+
+    outer: tuple[XY, ...]
+    holes: tuple[tuple[XY, ...], ...]
+    box: tuple[float, float, float, float]
+
+    def contains(self, x: float, y: float) -> bool:
+        if not (self.box[0] <= x <= self.box[2] and self.box[1] <= y <= self.box[3]):
+            return False
+        return point_in(x, y, self.outer) and not any(
+            point_in(x, y, hole) for hole in self.holes
+        )
+
+
+def _shape(piece: Piece) -> _Shape:
+    outer = tuple((q[0], q[1]) for q in piece.outer.pts)
+    holes = tuple(tuple((q[0], q[1]) for q in hole.pts) for hole in piece.holes)
+    xs = [q[0] for q in outer]
+    ys = [q[1] for q in outer]
+    return _Shape(outer, holes, (min(xs), min(ys), max(xs), max(ys)))
+
+
+def _crossings(p: XY, q: XY, polygon: Sequence[XY]) -> list[float]:
+    """Parameters in (0, 1) where segment ``p``→``q`` meets a closed polygon."""
+
+    px, py = p
+    dx, dy = q[0] - px, q[1] - py
+    lo_x, hi_x = min(px, q[0]), max(px, q[0])
+    lo_y, hi_y = min(py, q[1]), max(py, q[1])
+    out: list[float] = []
+    ax, ay = polygon[-1]
+    for bx, by in polygon:
+        if not (
+            (ax < lo_x and bx < lo_x)
+            or (ax > hi_x and bx > hi_x)
+            or (ay < lo_y and by < lo_y)
+            or (ay > hi_y and by > hi_y)
+        ):
+            ex, ey = bx - ax, by - ay
+            den = dx * ey - dy * ex
+            if abs(den) > 1e-12:
+                t = ((ax - px) * ey - (ay - py) * ex) / den
+                s = ((ax - px) * dy - (ay - py) * dx) / den
+                if -1e-9 <= s <= 1 + 1e-9 and 0.0 < t < 1.0:
+                    out.append(t)
+        ax, ay = bx, by
+    return out
+
+
+def _buried_intervals(a: XY, b: XY, others: Sequence[_Shape]) -> list[tuple[float, float]]:
+    """Parameter intervals of segment ``a``→``b`` that lie inside ``others``."""
+
+    lo_x, hi_x = min(a[0], b[0]), max(a[0], b[0])
+    lo_y, hi_y = min(a[1], b[1]), max(a[1], b[1])
+    found: list[tuple[float, float]] = []
+    for shape in others:
+        box = shape.box
+        if hi_x < box[0] or lo_x > box[2] or hi_y < box[1] or lo_y > box[3]:
+            continue
+        breaks = [0.0, 1.0]
+        breaks.extend(_crossings(a, b, shape.outer))
+        for hole in shape.holes:
+            breaks.extend(_crossings(a, b, hole))
+        breaks.sort()
+        for first, second in zip(breaks, breaks[1:]):
+            if second - first < 1e-9:
+                continue
+            middle = (first + second) / 2
+            if shape.contains(
+                a[0] + (b[0] - a[0]) * middle,
+                a[1] + (b[1] - a[1]) * middle,
+            ):
+                found.append((first, second))
+    if not found:
+        return found
+    found.sort()
+    merged = [found[0]]
+    for first, second in found[1:]:
+        if first <= merged[-1][1] + 1e-9:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], second))
+        else:
+            merged.append((first, second))
+    return merged
+
+
+def _normalized(contour: Contour, reverse: bool) -> tuple[list[XY], list[tuple[bool, bool, float]]]:
+    """Return points and per-edge ``(arc, force, length)`` in normalized order."""
+
+    raw = contour.pts
+    count = len(raw)
+    edges: list[tuple[bool, bool, float]] = []
+    for index, a in enumerate(raw):
+        b = raw[(index + 1) % count]
+        length = _js_hypot(b[0] - a[0], b[1] - a[1])
+        edges.append((a[2] == 1 and b[2] == 1 and length < 40, a[2] == 2, length))
+    points = [(q[0], q[1]) for q in raw]
+    if reverse:
+        points.reverse()
+        # Normalized edge k runs raw edge (count - 2 - k) backwards.
+        edges = [edges[(count - 2 - k) % count] for k in range(count)]
+    return points, edges
+
+
+def _span_layout(edges: Sequence[tuple[bool, bool, float]]) -> list[tuple[int, int, bool, bool, bool]]:
+    """Group raw edges into ``(start, edges, arc, force, closed)`` spans."""
+
+    count = len(edges)
+    if all(edge[0] for edge in edges):
+        return [(0, count, True, False, True)]
+    # Begin at an edge that does not continue a curve run, so no run wraps.
+    first = next(
+        index
+        for index in range(count)
+        if not (edges[index][0] and edges[index - 1][0])
+    )
+    spans: list[tuple[int, int, bool, bool, bool]] = []
+    offset = 0
+    while offset < count:
+        index = (first + offset) % count
+        arc, force, _length = edges[index]
+        run = 1
+        if arc:
+            while offset + run < count and edges[(first + offset + run) % count][0]:
+                run += 1
+        spans.append((index, run, arc, force, False))
+        offset += run
+    return spans
+
+
+def _span_cuts(
+    points: Sequence[XY],
+    start: int,
+    edge_count: int,
+    closed: bool,
+    others: Sequence[_Shape],
+) -> tuple[bool, list[Cut]]:
+    """Return the start state and the junction cuts of one span.
+
+    A cut is ``(position, polarity)`` with the position in raw-edge units from
+    the span start and polarity ``+1`` where the span becomes buried.
+    """
+
+    count = len(points)
+    intervals: list[tuple[float, float]] = []
+    lengths: list[float] = []
+    for local in range(edge_count):
+        a = points[(start + local) % count]
+        b = points[(start + local + 1) % count]
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        length = _js_hypot(dx, dy)
+        lengths.append(length)
+        if length < 1e-9 or not others:
+            continue
+        nx, ny = dy / length * HIDE_OFFSET, -dx / length * HIDE_OFFSET
+        for first, second in _buried_intervals(
+            (a[0] + nx, a[1] + ny), (b[0] + nx, b[1] + ny), others
+        ):
+            intervals.append((local + first, local + second))
+
+    def distance(first: float, second: float) -> float:
+        """Polyline length between two span positions."""
+
+        total = 0.0
+        index = int(first)
+        position = first
+        while position < second - 1e-12:
+            step_end = min(float(index + 1), second)
+            total += (step_end - position) * lengths[min(index, edge_count - 1)]
+            position = step_end
+            index += 1
+        return total
+
+    merged: list[tuple[float, float]] = []
+    for first, second in sorted(intervals):
+        if merged and distance(merged[-1][1], first) < MIN_CUT_LENGTH:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], second))
+        else:
+            merged.append((first, second))
+    merged = [
+        (first, second)
+        for first, second in merged
+        if distance(first, second) >= MIN_CUT_LENGTH
+    ]
+    total = float(edge_count)
+    if closed and merged:
+        if merged[0][0] <= 1e-9 and merged[-1][1] >= total - 1e-9:
+            if len(merged) == 1:
+                return True, []
+            # One buried run wraps the closing point.
+            wrap = (merged[-1][0], merged[0][1] + total)
+            merged = merged[1:-1] + [wrap]
+    hidden_first = False
+    cuts: list[Cut] = []
+    for first, second in merged:
+        if closed:
+            cuts.append((first % total, 1))
+            cuts.append((second % total, -1))
+            continue
+        starts_here = distance(0.0, first) < END_SNAP
+        ends_here = distance(second, total) < END_SNAP
+        if starts_here:
+            hidden_first = True
+        else:
+            cuts.append((first, 1))
+        if not ends_here:
+            cuts.append((second, -1))
+    cuts.sort()
+    if closed and cuts:
+        # The state at the closing point follows from the first cut.
+        hidden_first = cuts[0][1] == -1
+    return hidden_first, cuts
+
+
+CUT_SEPARATION = 1e-4
+
+
+def _align_cuts(
+    reference: Sequence[Cut],
+    found: Sequence[Cut],
+    penalty: float,
+) -> tuple[float, list[int | None]]:
+    """Order-preserving alignment of reference cuts with found cuts.
+
+    Returns the cost and, per reference cut, the index of its found
+    counterpart or ``None``. A reference cut may stay unmatched at
+    ``penalty``; surplus found cuts are free to skip.
+    """
+
+    rows, cols = len(reference), len(found)
+    cost = [[0.0] * (cols + 1) for _ in range(rows + 1)]
+    move = [[2] * (cols + 1) for _ in range(rows + 1)]
+    for i in range(1, rows + 1):
+        cost[i][0] = cost[i - 1][0] + penalty
+        move[i][0] = 1
+    for i in range(1, rows + 1):
+        ref_position, ref_polarity = reference[i - 1]
+        for j in range(1, cols + 1):
+            position, polarity = found[j - 1]
+            best, how = cost[i][j - 1], 2
+            skip = cost[i - 1][j] + penalty
+            if skip < best:
+                best, how = skip, 1
+            if polarity == ref_polarity:
+                pair = cost[i - 1][j - 1] + abs(position - ref_position)
+                if pair <= best:
+                    best, how = pair, 0
+            cost[i][j], move[i][j] = best, how
+    pairs: list[int | None] = [None] * rows
+    i, j = rows, cols
+    while i > 0:
+        how = move[i][j]
+        if how == 0:
+            pairs[i - 1] = j - 1
+            i, j = i - 1, j - 1
+        elif how == 1:
+            i -= 1
+        else:
+            j -= 1
+    return cost[rows][cols], pairs
+
+
+def _end_cuts(
+    found: Sequence[Cut],
+    found_first: bool,
+    reference_first: bool,
+    reference_count: int,
+    total: float,
+) -> list[Cut]:
+    """Express a span's state against the reference's start and end states.
+
+    Where the span starts or ends in the other state, a junction has slid
+    off that end; a cut pinned to the end stands in for it.
+    """
+
+    cuts = list(found)
+    if found_first != reference_first:
+        cuts.insert(0, (0.0, 1 if found_first else -1))
+    found_last = found_first ^ (len(found) % 2 == 1)
+    reference_last = reference_first ^ (reference_count % 2 == 1)
+    if found_last != reference_last:
+        cuts.append((total, 1 if reference_last else -1))
+    return cuts
+
+
+def _rotations(found: Sequence[Cut], total: float) -> list[list[Cut]]:
+    """Every unrolled rotation of a closed span's cuts, either side of 0."""
+
+    out: list[list[Cut]] = []
+    size = len(found)
+    for shift in range(size):
+        unrolled: list[Cut] = []
+        offset = 0.0
+        previous = found[shift][0]
+        for index in range(size):
+            position, polarity = found[(index + shift) % size]
+            if position + offset < previous:
+                offset += total
+            previous = position + offset
+            unrolled.append((previous, polarity))
+        out.append(unrolled)
+        out.append([(position - total, polarity) for position, polarity in unrolled])
+    return out
+
+
+def _best_alignment(
+    reference: Sequence[Cut],
+    found: Sequence[Cut],
+    closed: bool,
+    total: float,
+    penalty: float,
+) -> tuple[list[Cut], list[int | None]]:
+    candidates = _rotations(found, total) if closed and found else [list(found)]
+    best: tuple[float, list[Cut], list[int | None]] | None = None
+    for candidate in candidates:
+        cost, pairs = _align_cuts(reference, candidate, penalty)
+        if best is None or cost < best[0]:
+            best = (cost, candidate, pairs)
+    assert best is not None
+    return best[1], best[2]
+
+
+def _merge_cuts(
+    reference: Sequence[Cut],
+    found: Sequence[Cut],
+    closed: bool,
+    total: float,
+) -> list[Cut]:
+    """Add to ``reference`` the junctions that only exist at another source.
+
+    Surplus cuts are taken in alternating pairs between matched neighbours,
+    so the merged list still alternates. At a source without that junction
+    the pair collapses onto one point.
+    """
+
+    if not found:
+        return list(reference)
+    if not reference:
+        return list(found) if len(found) % 2 == 0 else []
+    candidate, pairs = _best_alignment(reference, found, closed, total, 0.25 * total)
+    matched = [(i, j) for i, j in enumerate(pairs) if j is not None]
+    if not matched:
+        return list(reference)
+    merged: list[Cut] = []
+
+    def surplus(j0: int, j1: int, low: float, high: float) -> list[Cut]:
+        """Found cuts j0..j1-1 mapped into the reference interval."""
+
+        if (j1 - j0) % 2 or j1 <= j0:
+            return []
+        first, last = candidate[j0][0], candidate[j1 - 1][0]
+        span_low = candidate[j0 - 1][0] if j0 > 0 else min(first, low)
+        span_high = candidate[j1][0] if j1 < len(candidate) else max(last, high)
+        scale = (high - low) / (span_high - span_low) if span_high > span_low else 0.0
+        return [
+            (low + (position - span_low) * scale, polarity)
+            for position, polarity in candidate[j0:j1]
+        ]
+
+    first_i, first_j = matched[0]
+    last_i, last_j = matched[-1]
+    if not closed and first_i == 0:
+        merged.extend(surplus(0, first_j, 0.0, reference[0][0]))
+    merged.extend(reference[: first_i + 1])
+    for (i0, j0), (i1, j1) in zip(matched, matched[1:]):
+        if i1 == i0 + 1:
+            merged.extend(surplus(j0 + 1, j1, reference[i0][0], reference[i1][0]))
+        merged.extend(reference[i0 + 1 : i1 + 1])
+    merged.extend(reference[last_i + 1 :])
+    if not closed:
+        if last_i == len(reference) - 1:
+            merged.extend(
+                surplus(last_j + 1, len(candidate), reference[-1][0], total)
+            )
+        return merged
+    if first_i == 0 and last_i == len(reference) - 1:
+        # On a loop the cuts after the last match and before the first one
+        # share the stretch that wraps the origin.
+        wrapped = list(candidate[last_j + 1 :]) + [
+            (position + total, polarity) for position, polarity in candidate[:first_j]
+        ]
+        if wrapped and len(wrapped) % 2 == 0:
+            low, high = reference[-1][0], reference[0][0] + total
+            span_low, span_high = candidate[last_j][0], candidate[first_j][0] + total
+            scale = (high - low) / (span_high - span_low) if span_high > span_low else 0.0
+            merged.extend(
+                (low + (position - span_low) * scale, polarity)
+                for position, polarity in wrapped
+            )
+    return merged
+
+
+def _match_cuts(
+    reference: Sequence[Cut],
+    found: Sequence[Cut],
+    hidden_first: bool,
+    found_hidden_first: bool,
+    closed: bool,
+    total: float,
+    arc: bool = False,
+) -> tuple[list[float], bool]:
+    """Place the reference cuts at this source's junctions.
+
+    Returns one position per reference cut and whether every junction was
+    found. On a straight edge, a junction that does not exist here collapses
+    with its partner onto one point: points may slide along a line without
+    changing it. On a curve they may not, because a point interpolated
+    between two positions on an arc falls inside the arc. There a missing
+    junction keeps its reference position, and the wall it bounds is
+    flattened instead.
+    """
+
+    if not reference:
+        return [], not found and hidden_first == found_hidden_first
+    if not closed:
+        found = _end_cuts(found, found_hidden_first, hidden_first, len(reference), total)
+    candidate, pairs = _best_alignment(
+        reference, found, closed, total, 8.0 if arc else 0.25 * total
+    )
+    exact = all(pair is not None for pair in pairs) and len(candidate) == len(reference)
+
+    positions: list[float | None] = [
+        None if pair is None else candidate[pair][0] for pair in pairs
+    ]
+    # A cut never sits exactly on a span end: that would repeat the point it
+    # shares with the neighbouring span.
+    low = (reference[0][0] - total) if closed else CUT_SEPARATION
+    high = (reference[0][0] + 2 * total) if closed else total - CUT_SEPARATION
+    index = 0
+    while index < len(positions):
+        if positions[index] is not None:
+            index += 1
+            continue
+        end = index
+        while end < len(positions) and positions[end] is None:
+            end += 1
+        before = positions[index - 1] if index > 0 else None
+        after = positions[end] if end < len(positions) else None
+        floor = before if before is not None else low
+        ceiling = after if after is not None else high
+        # A skipped found cut inside the gap marks where the state really
+        # changes; otherwise stay near the reference position.
+        if arc:
+            for slot in range(index, end):
+                positions[slot] = min(ceiling, max(floor, reference[slot][0]))
+            index = end
+            continue
+        j0 = pairs[index - 1] if index > 0 else None
+        j1 = pairs[end] if end < len(positions) else None
+        between = candidate[(j0 + 1 if j0 is not None else 0) : (j1 if j1 is not None else len(candidate))]
+        if between:
+            anchor = between[len(between) // 2][0]
+        else:
+            anchor = reference[index][0]
+        anchor = min(ceiling, max(floor, anchor))
+        for slot in range(index, end):
+            positions[slot] = anchor
+        index = end
+
+    placed: list[float] = []
+    for position in positions:
+        assert position is not None
+        position = max(position, low)
+        if placed:
+            position = max(position, placed[-1] + CUT_SEPARATION)
+        placed.append(position)
+    limit = (placed[0] + total) if closed else total
+    for index in range(len(placed) - 1, -1, -1):
+        ceiling = limit - (len(placed) - index) * CUT_SEPARATION
+        if placed[index] > ceiling:
+            placed[index] = ceiling
+    return placed, exact
+
+
+def _span_point(points: Sequence[XY], start: int, position: float) -> XY:
+    count = len(points)
+    index = int(position)
+    fraction = position - index
+    a = points[(start + index) % count]
+    if fraction < 1e-12:
+        return a
+    b = points[(start + index + 1) % count]
+    return a[0] + (b[0] - a[0]) * fraction, a[1] + (b[1] - a[1]) * fraction
+
+
+def _span_intervals(span: SpanTopology, cuts: Sequence[float]) -> list[tuple[float, float]]:
+    """Return the sampled intervals of a span that has junction cuts."""
+
+    if span.closed:
+        bounds = list(cuts) + [cuts[0] + span.edges]
+    else:
+        bounds = [0.0, *cuts, float(span.edges)]
+    return list(zip(bounds, bounds[1:]))
+
+
+def _curve_point(points: Sequence[XY], span: SpanTopology, position: float) -> XY:
+    """Point on a curve span, interpolated through its neighbouring chords.
+
+    A sample between two raw points of an ellipse belongs on the ellipse, not
+    on the chord. A Catmull-Rom segment through the four surrounding raw
+    points stays within a hundredth of a unit of it.
+    """
+
+    count = len(points)
+    index = int(position)
+    fraction = position - index
+    if fraction < 1e-12:
+        return points[(span.start + index) % count]
+
+    def raw(local: int) -> XY:
+        if span.closed:
+            return points[(span.start + local) % count]
+        if local < 0:
+            a, b = points[span.start % count], points[(span.start + 1) % count]
+            return 2 * a[0] - b[0], 2 * a[1] - b[1]
+        if local > span.edges:
+            a = points[(span.start + span.edges) % count]
+            b = points[(span.start + span.edges - 1) % count]
+            return 2 * a[0] - b[0], 2 * a[1] - b[1]
+        return points[(span.start + local) % count]
+
+    p0, p1, p2, p3 = raw(index - 1), raw(index), raw(index + 1), raw(index + 2)
+    t, t2, t3 = fraction, fraction * fraction, fraction**3
+    return tuple(
+        0.5
+        * (
+            2 * p1[axis]
+            + (p2[axis] - p0[axis]) * t
+            + (2 * p0[axis] - 5 * p1[axis] + 4 * p2[axis] - p3[axis]) * t2
+            + (3 * p1[axis] - p0[axis] - 3 * p2[axis] + p3[axis]) * t3
+        )
+        for axis in (0, 1)
+    )  # type: ignore[return-value]
+
+
+def _buried_ranges(
+    state: bool,
+    found: Sequence[Cut],
+    closed: bool,
+    total: float,
+) -> list[tuple[float, float]]:
+    """Stretches of a span, in raw-edge units, that are buried at a source."""
+
+    bounds = [0.0] + sorted(position % total if closed else position for position, _p in found) + [total]
+    ranges: list[tuple[float, float]] = []
+    hidden = state
+    for first, second in zip(bounds, bounds[1:]):
+        if hidden and second > first:
+            ranges.append((first, second))
+        hidden = not hidden
+    return ranges
+
+
+def _sample_span(
+    points: Sequence[XY],
+    span: SpanTopology,
+    cuts: Sequence[float],
+    buried: Sequence[tuple[float, float]] | None = None,
+) -> list[SamplePoint]:
+    """Sample one span.
+
+    ``hidden`` on each sample says whether the edge that starts there is
+    buried in another piece at this source. Without ``buried`` the frozen
+    structure answers; with it, the source's own junctions do.
+    """
+
+    def at(position: float) -> XY:
+        if span.arc and span.edges > 1:
+            return _curve_point(points, span, position)
+        return _span_point(points, span.start, position)
+
+    out: list[SamplePoint] = []
+    if not span.cuts:
+        for local, count in enumerate(span.counts):
+            for k in range(count):
+                first = local + k / count
+                x, y = at(first)
+                state = span.hidden_first
+                if buried is not None:
+                    # A chord counts as buried only when all of it is: a wall
+                    # that overruns a junction hides behind the face, a wall
+                    # that stops short of it leaves a gap.
+                    second = local + (k + 1) / count
+                    state = any(
+                        low - 1e-6 <= first and second <= high + 1e-6
+                        for low, high in buried
+                    )
+                out.append(SamplePoint(x, y, span.arc, span.force, state))
+        return out
+    total = float(span.edges)
+    hidden = span.hidden_first
+    for (first, second), count in zip(_span_intervals(span, cuts), span.counts):
+        for k in range(count):
+            x, y = at(first + (second - first) * k / count)
+            state = hidden
+            if buried is not None:
+                middle = first + (second - first) * (k + 0.5) / count
+                if span.closed:
+                    middle %= total
+                state = any(low <= middle < high for low, high in buried)
+            out.append(SamplePoint(x, y, span.arc, span.force, state))
+        hidden = not hidden
+    return out
+
+
+def _glyph_shapes(pieces: Sequence[Piece]) -> list[_Shape]:
+    return [_shape(piece) for piece in pieces]
+
+
+def _params_key(params: GeneratorParams) -> tuple[float, float, float]:
+    return params.s, params.sh, params.w
+
+
+# Ideal (unjittered) samples per ``(glyph, cut, topology)``; jitter is applied
+# on top, so Regular and Handdrawn share one sampling pass.
+_IDEAL_CACHE: dict[tuple, tuple] = {}
+
+
 def freeze_topology(
     params: ParamsLike | None = None,
     names: Iterable[str] | None = None,
     max_len: float = SUBDIVISION_MAX_LENGTH,
+    masters: Sequence[ParamsLike] | None = None,
 ) -> dict[str, GlyphTopology]:
-    """Freeze default-master edge sample counts, flags, winding, and starts."""
+    """Freeze winding, spans, junction cuts and sample counts.
 
-    p = coerce_params(params)
-    builders = glyph_defs(p)
-    selected = tuple(builders) if names is None else tuple(names)
+    ``params`` is the structure master: it decides how many junctions each
+    span has. ``masters`` (the twelve design sources by default) only raise
+    sample counts, so an interval that is short at the structure master but
+    long elsewhere is still sampled finely enough.
+    """
+
+    structure = coerce_params(params)
+    others = [coerce_params(master) for master in (masters if masters is not None else design_masters())]
+    cuts_only = [structure] + [
+        master for master in others if _params_key(master) != _params_key(structure)
+    ]
+    builder_sets = [glyph_defs(master) for master in cuts_only]
+    selected = tuple(builder_sets[0]) if names is None else tuple(names)
     result: dict[str, GlyphTopology] = {}
     for name in selected:
-        if name not in builders:
+        if name not in builder_sets[0]:
             raise KeyError(name)
+        raw_sets = [builders[name]() for builders in builder_sets]
+        shape_sets = [_glyph_shapes(raw) for raw in raw_sets]
         piece_topologies: list[tuple[ContourTopology, ...]] = []
-        for piece in builders[name]():
+        for piece_index, piece in enumerate(raw_sets[0]):
             contours: list[ContourTopology] = []
             for contour_index, contour in enumerate(_raw_piece_contours(piece)):
-                edges = _edge_topology(contour, max_len)
-                sampled = subdivide(contour, max_len, edges)
-                reverse_winding = (signed_area(sampled) > 0) != (contour_index == 0)
-                contours.append(ContourTopology(edges, reverse_winding))
+                sampled = subdivide(contour, max_len)
+                reverse = (signed_area(sampled) > 0) != (contour_index == 0)
+                points, edges = _normalized(contour, reverse)
+                spans: list[SpanTopology] = []
+                for start, edge_count, arc, force, closed in _span_layout(edges):
+                    total = float(edge_count)
+                    states: list[tuple[list[XY], bool, list[Cut]]] = []
+                    for master_index, raw in enumerate(raw_sets):
+                        master_contour = _raw_piece_contours(raw[piece_index])[contour_index]
+                        master_points, _master_edges = _normalized(master_contour, reverse)
+                        other_shapes = [
+                            shape
+                            for index, shape in enumerate(shape_sets[master_index])
+                            if index != piece_index
+                        ]
+                        state, found = _span_cuts(
+                            master_points, start, edge_count, closed, other_shapes
+                        )
+                        states.append((master_points, state, found))
+
+                    # The structure master fixes the start state; every other
+                    # source may add junctions that only exist there.
+                    hidden_first = states[0][1]
+                    reference: list[Cut] = [] if arc else list(states[0][2])
+                    for _points, state, found in states[1:]:
+                        if arc:
+                            # A point that slides along a curve bends it at
+                            # every location between two sources. Curves keep
+                            # their chord samples; their walls follow a
+                            # junction chord by chord instead.
+                            break
+                        if not closed:
+                            found = _end_cuts(found, state, hidden_first, len(reference), total)
+                        reference = _merge_cuts(reference, found, closed, total)
+                    if closed and reference:
+                        if not states[0][2]:
+                            # Collapsed at the structure master, the loop must
+                            # read as its single state there.
+                            wanted = -1 if states[0][1] else 1
+                            if reference[0][1] != wanted:
+                                reference = reference[1:] + [
+                                    (reference[0][0] + total, reference[0][1])
+                                ]
+                        hidden_first = reference[0][1] == 1
+
+                    def samples(length: float, master_index: int) -> int:
+                        # Curves are already resolved by their chords.
+                        limit = (
+                            max_len
+                            if master_index == 0 and not arc
+                            else RELAXED_MAX_LENGTH
+                        )
+                        return max(1, ceil(length / limit - 1e-9))
+
+                    if not reference:
+                        counts = []
+                        for local in range(edge_count):
+                            needed = 1
+                            for master_index, (master_points, _state, _found) in enumerate(states):
+                                a = _span_point(master_points, start, float(local))
+                                b = _span_point(master_points, start, float(local + 1))
+                                needed = max(
+                                    needed,
+                                    samples(_js_hypot(b[0] - a[0], b[1] - a[1]), master_index),
+                                )
+                            counts.append(needed)
+                        spans.append(
+                            SpanTopology(
+                                start, edge_count, arc, force, closed,
+                                hidden_first, (), tuple(counts),
+                            )
+                        )
+                        continue
+
+                    probe = SpanTopology(
+                        start, edge_count, arc, force, closed, hidden_first,
+                        tuple(position for position, _p in reference), (),
+                    )
+                    counts = [1] * len(_span_intervals(probe, probe.cuts))
+                    for master_index, (master_points, state, found) in enumerate(states):
+                        positions, _exact = _match_cuts(
+                            reference, found, hidden_first, state, closed, total, arc
+                        )
+                        for index, (first, second) in enumerate(
+                            _span_intervals(probe, positions)
+                        ):
+                            if second - first <= 2 * CUT_SEPARATION:
+                                continue
+                            if arc:
+                                # Never sample a curve more coarsely than its chords.
+                                longest = 0.0
+                                local = int(first)
+                                while local < second:
+                                    a = _span_point(master_points, start, float(local))
+                                    b = _span_point(master_points, start, float(local + 1))
+                                    longest = max(longest, _js_hypot(b[0] - a[0], b[1] - a[1]))
+                                    local += 1
+                                needed = max(1, ceil(second - first - 1e-9)) * samples(
+                                    longest, master_index
+                                )
+                            else:
+                                a = _span_point(master_points, start, first)
+                                b = _span_point(master_points, start, second)
+                                needed = samples(
+                                    _js_hypot(b[0] - a[0], b[1] - a[1]), master_index
+                                )
+                            counts[index] = max(counts[index], needed)
+                    spans.append(
+                        SpanTopology(
+                            start, edge_count, arc, force, closed, hidden_first,
+                            probe.cuts, tuple(counts),
+                        )
+                    )
+                contours.append(ContourTopology(tuple(spans), reverse))
             piece_topologies.append(tuple(contours))
         result[name] = GlyphTopology(tuple(piece_topologies))
     return result
@@ -2026,8 +3290,8 @@ def _resolve_topology(
         return topology
     if topology is not None:
         return topology[name]
-    # Counts are always frozen at D, even when the requested outline is another
-    # master.  This is the core interpolation invariant.
+    # Structure is always frozen at D, even when the requested outline is
+    # another master.  This is the core interpolation invariant.
     return freeze_topology(GeneratorParams(), (name,))[name]
 
 
@@ -2038,35 +3302,124 @@ def build_contours(
     seed: float | None = None,
     topology: GlyphTopology | Mapping[str, GlyphTopology] | None = None,
 ) -> GlyphOutline:
-    """Build one glyph by replaying its default-master subdivision topology."""
+    """Build one glyph by replaying its frozen sampling topology.
+
+    Sample points that mark a junction at the structure master are placed on
+    the same junction here, so every wall run starts and stops where two
+    pieces actually meet at this location.
+    """
 
     p = coerce_params(params)
     frozen = _resolve_topology(name, topology)
+    actual_seed = glyph_seed(name) if seed is None else seed
+    key = (name, *_params_key(p), id(frozen), AUDIT_NEW_JUNCTIONS)
+    cached = _IDEAL_CACHE.get(key)
+    if cached is not None and cached[0] is frozen:
+        return GlyphOutline(
+            name,
+            tuple(
+                BuiltPiece(
+                    tuple(
+                        BuiltContour(
+                            tuple(jitter_points(ideal, p.jit, actual_seed)),
+                            ideal,
+                            contour_index > 0,
+                        )
+                        for contour_index, ideal in enumerate(piece)
+                    )
+                )
+                for piece in cached[1]
+            ),
+            p,
+            actual_seed,
+            frozen,
+            cached[2],
+        )
     builders = glyph_defs(p)
     if name not in builders:
         raise KeyError(name)
     pieces = builders[name]()
     if len(pieces) != len(frozen.pieces):
         raise ValueError(f"{name!r}: piece count differs from default topology")
-    actual_seed = glyph_seed(name) if seed is None else seed
+    shapes = _glyph_shapes(pieces)
     built_pieces: list[BuiltPiece] = []
+    unmatched = 0
     for piece_index, piece in enumerate(pieces):
         raw_contours = _raw_piece_contours(piece)
         contour_topologies = frozen.pieces[piece_index]
         if len(raw_contours) != len(contour_topologies):
             raise ValueError(f"{name!r}: contour count differs from default topology")
+        other_shapes = [shape for index, shape in enumerate(shapes) if index != piece_index]
         built_contours: list[BuiltContour] = []
         for contour_index, raw in enumerate(raw_contours):
             contour_topology = contour_topologies[contour_index]
-            ideal = subdivide(raw, topology=contour_topology)
-            if contour_topology.reverse:
-                ideal.reverse()
+            points, _edges = _normalized(raw, contour_topology.reverse)
+            if sum(span.edges for span in contour_topology.spans) != len(points):
+                raise ValueError("raw contour edge count differs from frozen topology")
+            ideal: list[SamplePoint] = []
+            for span in contour_topology.spans:
+                positions: Sequence[float] = ()
+                buried: list[tuple[float, float]] | None = None
+                if span.cuts:
+                    state, found = _span_cuts(
+                        points, span.start, span.edges, span.closed, other_shapes
+                    )
+                    reference = _reference_cuts(span)
+                    positions, exact = _match_cuts(
+                        reference, found, span.hidden_first, state,
+                        span.closed, float(span.edges), span.arc,
+                    )
+                    buried = _buried_ranges(
+                        state, found, span.closed, float(span.edges)
+                    )
+                    if not exact:
+                        unmatched += 1
+                elif span.arc and other_shapes:
+                    state, found = _span_cuts(
+                        points, span.start, span.edges, span.closed, other_shapes
+                    )
+                    buried = _buried_ranges(
+                        state, found, span.closed, float(span.edges)
+                    )
+                elif AUDIT_NEW_JUNCTIONS and other_shapes:
+                    state, found = _span_cuts(
+                        points, span.start, span.edges, span.closed, other_shapes
+                    )
+                    if found or state != span.hidden_first:
+                        unmatched += 1
+                ideal.extend(_sample_span(points, span, positions, buried))
             jittered = jitter_points(ideal, p.jit, actual_seed)
             built_contours.append(
                 BuiltContour(tuple(jittered), tuple(ideal), contour_index > 0)
             )
         built_pieces.append(BuiltPiece(tuple(built_contours)))
-    return GlyphOutline(name, tuple(built_pieces), p, actual_seed, frozen)
+    if len(_IDEAL_CACHE) > 8192:
+        _IDEAL_CACHE.clear()
+    _IDEAL_CACHE[key] = (
+        frozen,
+        tuple(
+            tuple(contour.ideal for contour in piece.contours)
+            for piece in built_pieces
+        ),
+        unmatched,
+    )
+    return GlyphOutline(name, tuple(built_pieces), p, actual_seed, frozen, unmatched)
+
+
+def _reference_cuts(span: SpanTopology) -> list[Cut]:
+    """Rebuild ``(position, polarity)`` pairs from a frozen span."""
+
+    if span.closed:
+        # A closed span starts sampling at its first cut, which enters the
+        # state of the first interval.
+        polarity = 1 if span.hidden_first else -1
+    else:
+        polarity = -1 if span.hidden_first else 1
+    cuts: list[Cut] = []
+    for position in span.cuts:
+        cuts.append((position, polarity))
+        polarity = -polarity
+    return cuts
 
 
 def topology_signature(outline: GlyphOutline) -> tuple[int, tuple[int, ...]]:
@@ -2095,7 +3448,12 @@ WallColor = Literal["bronze", "dark"]
 
 @dataclass(frozen=True, slots=True)
 class WallRun:
-    """One frozen visible edge run; ``end`` may wrap beyond contour length."""
+    """One frozen visible edge run; ``end`` may wrap beyond contour length.
+
+    ``segments`` splits the run wherever the set of sources at which an edge
+    faces the extrusion changes. Each segment becomes its own wall contour,
+    so a wall is either fully raised or fully flat at any one source.
+    """
 
     piece_index: int
     contour_index: int
@@ -2104,6 +3462,11 @@ class WallRun:
     color: WallColor
     arc: bool
     default_length: float
+    segments: tuple[tuple[int, int], ...] = ()
+
+    @property
+    def walls(self) -> tuple[tuple[int, int], ...]:
+        return self.segments or ((self.start, self.end),)
 
 
 @dataclass(frozen=True, slots=True)
@@ -2139,14 +3502,6 @@ class _MutableRun:
     length: float = 0.0
 
 
-def _in_outline(x: float, y: float, outline: GlyphOutline) -> bool:
-    return any(
-        point_in(x, y, piece.outer.ideal)
-        and not any(point_in(x, y, hole.ideal) for hole in piece.holes)
-        for piece in outline.pieces
-    )
-
-
 def _run_points(points: Sequence[SamplePoint], start: int, end: int) -> list[SamplePoint]:
     count = len(points)
     return [points[index % count] for index in range(start, end + 1)]
@@ -2166,8 +3521,18 @@ def freeze_recipe(
     hand: bool = False,
     seed: float | None = None,
     topology: GlyphTopology | Mapping[str, GlyphTopology] | None = None,
+    masters: Sequence[ParamsLike] | None = None,
 ) -> FrozenRecipe:
-    """Freeze edge visibility/labels at D, separately for regular and hand."""
+    """Freeze edge visibility/labels at D, separately for regular and hand.
+
+    Junction burial and wall colour come from D. Whether an edge faces the
+    extrusion is taken across ``masters`` (the design sources by default): a
+    stroke that lies almost along the depth vector shows one side at one
+    width and the other side at another, so both sides own a wall and each
+    is raised only where it faces. A terminal cap that faces away gets no
+    wall: under a nonzero fill its reversed winding would erase the wall
+    beside it.
+    """
 
     p = coerce_params(params)
     p = replace(p, jit=3.4 if hand else 0.0, hatch_n=HATCH_N)
@@ -2176,24 +3541,64 @@ def freeze_recipe(
     vx, vy = p.v
     frozen_runs: list[WallRun] = []
     hatch_groups: list[HatchGroup] = []
+    sources = [outline] + [
+        build_contours(name, replace(coerce_params(master), jit=0.0), topology=frozen)
+        for master in (design_masters() if masters is None else masters)
+    ]
+
+    depth = _js_hypot(vx, vy) or 1.0
+
+    def facing_pattern(
+        piece_index: int, contour_index: int, index: int
+    ) -> tuple[bool, tuple[int, ...]]:
+        """Return whether the edge ever shows a wall, and its state per source.
+
+        States are +1 raised (exposed and facing the extrusion), -1 flat
+        (buried in another piece, or facing away), 0 edge-on. Only an
+        exposed curve chord may be edge-on. Its wall is a sliver there, so
+        it can share a contour with either neighbour; a straight edge is
+        long enough that a wrongly raised wall would show.
+        """
+
+        ever = False
+        pattern: list[int] = []
+        for source in sources:
+            points = source.pieces[piece_index].contours[contour_index].ideal
+            a = points[index]
+            b = points[(index + 1) % len(points)]
+            dx, dy = b.x - a.x, b.y - a.y
+            length = _js_hypot(dx, dy)
+            if length <= 1e-9:
+                pattern.append(0)
+                continue
+            if a.hidden:
+                pattern.append(-1)
+                continue
+            dot = (dy * vx - dx * vy) / length
+            ever = ever or dot > 0.02
+            if a.arc and abs(dot) <= EDGE_ON_TOLERANCE * depth:
+                pattern.append(0)
+            else:
+                pattern.append(1 if dot > 0.02 else -1)
+        return ever, tuple(pattern)
 
     for piece_index, piece in enumerate(outline.pieces):
         for contour_index, contour in enumerate(piece.contours):
             ideal, drawn = contour.ideal, contour.points
             count = len(ideal)
             edge_data: list[tuple[bool, WallColor | None, bool]] = []
+            patterns: list[tuple[int, ...]] = []
             for index, point in enumerate(ideal):
                 other = ideal[(index + 1) % count]
                 dx, dy = other.x - point.x, other.y - point.y
                 length = _js_hypot(dx, dy) or 1.0
                 nx, ny = dy / length, -dx / length
-                visible = (
-                    nx * vx + ny * vy > 0.02 or point.force
-                ) and not _in_outline(
-                    (point.x + other.x) / 2 + nx * 6,
-                    (point.y + other.y) / 2 + ny * 6,
-                    outline,
-                )
+                # An edge owns a wall if it is exposed and faces the
+                # extrusion at any source; sampling put a point on every
+                # junction, so no edge straddles one.
+                ever, pattern = facing_pattern(piece_index, contour_index, index)
+                patterns.append(pattern)
+                visible = ever
                 color: WallColor | None
                 if not visible:
                     color = None
@@ -2207,7 +3612,7 @@ def freeze_recipe(
                     color = "dark"
                 else:
                     color = "bronze"
-                edge_data.append((visible, color, point.arc and other.arc))
+                edge_data.append((visible, color, point.arc))
 
             runs: list[_MutableRun] = []
             current: _MutableRun | None = None
@@ -2237,6 +3642,20 @@ def freeze_recipe(
             local_global_indices: list[int] = []
             for run in runs:
                 local_global_indices.append(len(frozen_runs))
+                # Split the run wherever an edge faces the other way from
+                # the wall collected so far at any source.
+                segments: list[tuple[int, int]] = []
+                segment_start = run.start
+                held = list(patterns[run.start % count])
+                for edge in range(run.start + 1, run.end):
+                    signs = patterns[edge % count]
+                    if any(a * b < 0 for a, b in zip(held, signs)):
+                        segments.append((segment_start, edge))
+                        segment_start = edge
+                        held = list(signs)
+                    else:
+                        held = [a or b for a, b in zip(held, signs)]
+                segments.append((segment_start, run.end))
                 frozen_runs.append(
                     WallRun(
                         piece_index,
@@ -2246,6 +3665,7 @@ def freeze_recipe(
                         run.color,
                         run.arc,
                         run.length,
+                        tuple(segments),
                     )
                 )
 
@@ -2301,10 +3721,15 @@ def freeze_recipes(
 
 @dataclass(frozen=True, slots=True)
 class LayerPiece:
-    """One closed layer shape and optional holes, ready for UFO conversion."""
+    """One closed layer shape and optional holes, ready for UFO conversion.
+
+    ``flat`` marks a wall that faces away from the extrusion at this source
+    and therefore carries no depth.
+    """
 
     outer: tuple[SamplePoint, ...]
     holes: tuple[tuple[SamplePoint, ...], ...] = ()
+    flat: bool = False
 
     @property
     def contours(self) -> tuple[tuple[SamplePoint, ...], ...]:
@@ -2323,12 +3748,39 @@ class ReplayedLayers:
     face: tuple[LayerPiece, ...]
 
 
+# A curve chord within this sine of the depth direction counts as edge-on.
+EDGE_ON_TOLERANCE = 0.06
+# Share of the depth vector kept by a wall that faces away from the extrusion.
+FLAT_WALL_DEPTH = 1e-3
+
+
 def _wall_piece(
-    points: Sequence[SamplePoint], run: WallRun, vector: tuple[float, float]
+    points: Sequence[SamplePoint],
+    start: int,
+    end: int,
+    vector: tuple[float, float],
 ) -> LayerPiece:
-    run_points = _run_points(points, run.start, run.end)
-    back = [point.translated(*vector) for point in reversed(run_points)]
-    return LayerPiece(tuple(run_points + back))
+    """Return one wall contour: a front run and its translated rear run.
+
+    A run that faces away from the extrusion here, or that another piece
+    buries here, is kept flat. It keeps its point structure for
+    interpolation and cannot cancel a neighbouring wall. The residual depth only keeps its points distinct, so no tool
+    merges them and changes the point count.
+    """
+
+    run_points = _run_points(points, start, end)
+    swept = 0.0
+    buried = 0
+    for a, b in zip(run_points, run_points[1:]):
+        swept += (b.y - a.y) * vector[0] - (b.x - a.x) * vector[1]
+        buried += a.hidden
+    flat = swept <= 0 or 2 * buried > len(run_points) - 1
+    depth = FLAT_WALL_DEPTH if flat else 1.0
+    back = [
+        point.translated(vector[0] * depth, vector[1] * depth)
+        for point in reversed(run_points)
+    ]
+    return LayerPiece(tuple(run_points + back), flat=flat)
 
 
 def _walk_contour(
@@ -2419,8 +3871,9 @@ def replay_recipe(
     bronze: list[LayerPiece] = []
     for run in recipe.runs:
         points = outline.pieces[run.piece_index].contours[run.contour_index].points
-        wall = _wall_piece(points, run, vector)
-        (bronze if run.color == "bronze" else dark).append(wall)
+        target = bronze if run.color == "bronze" else dark
+        for start, end in run.walls:
+            target.append(_wall_piece(points, start, end, vector))
 
     hatches: list[LayerPiece] = []
     for group in recipe.hatch_groups:

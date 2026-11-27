@@ -62,9 +62,18 @@ abcdefghijklmnopqrstuvwxyz
 | `Loetschberg-VF.woff` | WOFF web fallback |
 | `Loetschberg-VF[wght,wdth].ttf` | Desktop software with variable COLRv1 support |
 | `Loetschberg-Text-VF[wght,wdth].otf` | Monochrome CFF2 text work |
-| `Loetschberg-1.0.3.zip` | Complete release |
+| `Loetschberg-1.0.4.zip` | Complete release |
 
 For Figma, install only the Regular TTF. It uses the same visible face geometry and spacing as the webfont across both axes, with overlapping construction pieces joined for reliable local rendering. Extruded remains in the colour TTF and webfonts.
+
+### Release 1.0.4
+
+Every glyph was checked at all twelve sources, in both families and with the extrusion on.
+
+- Stems, bowls, bars, and diagonals now follow one stroke model, so a joint that is clean at Regular stays clean at every weight and width. The `6`, `7`, `9`, `4`, `5`, and the lowercase bowls no longer step or bulge away from Regular.
+- Round letters keep their height at every weight. Heavy cuts grow into the counter instead of past the cap and x-height.
+- Extrusion walls follow each junction as it moves. No wall is missing or wound against its neighbour at any source.
+- Lowercase accents clear their letters, dots keep pace with the stem, and the `@` tail joins its spiral.
 
 ### License
 
@@ -134,9 +143,18 @@ abcdefghijklmnopqrstuvwxyz
 | `Loetschberg-VF.woff` | WOFF-Fallback fürs Web |
 | `Loetschberg-VF[wght,wdth].ttf` | Desktop-Software mit variabler COLRv1-Unterstützig |
 | `Loetschberg-Text-VF[wght,wdth].otf` | Monochromi CFF2-Textarbeit |
-| `Loetschberg-1.0.3.zip` | Kompletts Release |
+| `Loetschberg-1.0.4.zip` | Kompletts Release |
 
 Für Figma installiersch nume d Regular-TTF. Si nutzt über beidi Achse die gliich sichtbari Forme und Abständ wie d Webschrift. Überlappendi Konstruktionsteili sind für zuverlässigs lokals Rendering vereint. Extruded bliibt i de Farb-TTF und de Webschrifte.
+
+### Release 1.0.4
+
+Jedes Zeiche isch a allne zwölf Masters prüeft worde, i beidne Familie und mit Extrusion.
+
+- Stämm, Böge, Balke und Diagonale folged eim Strichmodell. E Verbindig, wo bi Regular suuber isch, bliibt bi jedem Gwicht und jeder Breiti suuber. D `6`, `7`, `9`, `4`, `5` und di chliine Böge mached kei Stufe und kei Buuch meh.
+- Rundi Buechstabe bhalted bi jedem Gwicht iri Höchi. Schwäri Schnitt wachsed i de Innenruum und nöd über d Versal- und x-Höchi use.
+- D Extrusionswänd folged jeder Verbindig, wänn si sich verschiebt. A keim Master fählt e Wand oder hebt sich mit de Nachbarwand uf.
+- Akzänt uf Chliibuechstabe händ Abstand zum Buechstabe, Pünkt haltet mit em Stamm mit, und de Schwanz vom `@` schlüsst a d Spirale aa.
 
 ### Lizenz
 

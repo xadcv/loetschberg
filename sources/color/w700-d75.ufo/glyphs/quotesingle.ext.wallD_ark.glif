@@ -1,18 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="quotesingle.ext.wallDark" format="2">
-  <advance width="322.337846"/>
+  <advance width="314.052524"/>
   <outline>
     <contour>
-      <point x="224.33784615384616" y="490.0" type="line"/>
-      <point x="192.75338461538462" y="490.0" type="line"/>
-      <point x="161.16892307692308" y="490.0" type="line"/>
-      <point x="129.58446153846154" y="490.0" type="line"/>
-      <point x="98.0" y="490.0" type="line"/>
+      <point x="216.05252398120754" y="490" type="line"/>
+      <point x="186.53939298590566" y="490.0" type="line"/>
+      <point x="157.02626199060376" y="490.0" type="line"/>
+      <point x="127.51313099530188" y="490.0" type="line"/>
+      <point x="98.0" y="490" type="line"/>
       <point x="158.0" y="420.0" type="line"/>
-      <point x="189.58446153846154" y="420.0" type="line"/>
-      <point x="221.16892307692308" y="420.0" type="line"/>
-      <point x="252.75338461538462" y="420.0" type="line"/>
-      <point x="284.33784615384616" y="420.0" type="line"/>
+      <point x="187.51313099530188" y="420.0" type="line"/>
+      <point x="217.02626199060376" y="420.0" type="line"/>
+      <point x="246.53939298590566" y="420.0" type="line"/>
+      <point x="276.0525239812075" y="420.0" type="line"/>
     </contour>
   </outline>
 </glyph>

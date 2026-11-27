@@ -1,18 +1,22 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="cedilla.ext.wallBronze" format="2">
-  <advance width="304.86544"/>
+  <advance width="365.142857"/>
   <outline>
     <contour>
-      <point x="206.86543999999998" y="10.0" type="line"/>
-      <point x="206.86543999999998" y="-10.5" type="line"/>
-      <point x="206.86543999999998" y="-31.0" type="line"/>
-      <point x="206.86543999999998" y="-51.5" type="line"/>
-      <point x="206.86543999999998" y="-72.0" type="line"/>
-      <point x="266.86544000000004" y="-142.0" type="line"/>
-      <point x="266.86544000000004" y="-121.5" type="line"/>
-      <point x="266.86544000000004" y="-101.0" type="line"/>
-      <point x="266.86544000000004" y="-80.5" type="line"/>
-      <point x="266.86544000000004" y="-60.0" type="line"/>
+      <point x="267.14285696641406" y="10" type="line"/>
+      <point x="267.14285696641406" y="-14.333333333333371" type="line"/>
+      <point x="267.14285696641406" y="-38.66666666666663" type="line"/>
+      <point x="267.14285696641406" y="-63.0" type="line"/>
+      <point x="267.14285696641406" y="-87.33333333333337" type="line"/>
+      <point x="267.14285696641406" y="-111.66666666666663" type="line"/>
+      <point x="267.14285696641406" y="-136" type="line"/>
+      <point x="327.14285696641406" y="-206.0" type="line"/>
+      <point x="327.14285696641406" y="-181.66666666666663" type="line"/>
+      <point x="327.14285696641406" y="-157.33333333333337" type="line"/>
+      <point x="327.14285696641406" y="-133.0" type="line"/>
+      <point x="327.14285696641406" y="-108.66666666666663" type="line"/>
+      <point x="327.14285696641406" y="-84.33333333333337" type="line"/>
+      <point x="327.14285696641406" y="-60.0" type="line"/>
     </contour>
   </outline>
 </glyph>

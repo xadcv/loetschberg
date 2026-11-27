@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import zipfile
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -317,6 +318,19 @@ def test_expected_root_artifacts_exist() -> None:
     assert not missing, f"missing build artifacts: {missing}"
 
 
+def test_release_package_holds_the_built_fonts() -> None:
+    """The downloadable package must not lag behind the fonts beside it."""
+
+    packages = sorted(ROOT.glob("Loetschberg-*.zip"))
+    assert [package.name for package in packages] == ["Loetschberg-1.0.4.zip"]
+    with zipfile.ZipFile(packages[0]) as archive:
+        names = set(archive.namelist())
+        fonts = (PRIMARY_PATH, SIDECAR_PATH, REGULAR_COMPAT_PATH, WOFF_PATH, WOFF2_PATH)
+        assert {path.name for path in fonts} | {"README.md", "VARIANTS.md", "LICENSE"} == names
+        for path in fonts:
+            assert archive.read(path.name) == path.read_bytes(), path.name
+
+
 def test_desktop_font_table_contracts(
     primary_font: TTFont,
     sidecar_font: TTFont,
@@ -377,8 +391,8 @@ def test_default_instance_version_and_family_names(
         ]
         assert len(matching) == 1
         assert font["name"].getDebugName(matching[0].subfamilyNameID) == "Regular"
-        assert font["name"].getDebugName(5) == "Version 1.003"
-        assert font["head"].fontRevision == pytest.approx(1.003, abs=0.00002)
+        assert font["name"].getDebugName(5) == "Version 1.004"
+        assert font["head"].fontRevision == pytest.approx(1.004, abs=0.00002)
 
     assert primary_font["name"].getDebugName(1) == "Lötschberg"
     assert regular_compat_font["name"].getDebugName(1) == "Lötschberg"

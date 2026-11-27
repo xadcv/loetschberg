@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Odieresis.ext" format="2">
-  <advance width="1070.975824"/>
+  <advance width="1029.2"/>
   <outline>
     <component base="Odieresis"/>
   </outline>

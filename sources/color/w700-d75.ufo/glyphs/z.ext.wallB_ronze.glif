@@ -3,27 +3,31 @@
   <advance width="590.44"/>
   <outline>
     <contour>
-      <point x="492.44" y="519.5955200000001" type="line"/>
-      <point x="492.44" y="485.79776000000004" type="line"/>
-      <point x="492.44" y="452.0" type="line"/>
-      <point x="492.44" y="418.20223999999996" type="line"/>
-      <point x="492.44" y="384.40448" type="line"/>
-      <point x="552.44" y="314.40448" type="line"/>
-      <point x="552.44" y="348.20223999999996" type="line"/>
-      <point x="552.44" y="382.0" type="line"/>
-      <point x="552.44" y="415.79776000000004" type="line"/>
-      <point x="552.44" y="449.59552" type="line"/>
+      <point x="492.44" y="500" type="line"/>
+      <point x="492.44" y="472.961792" type="line"/>
+      <point x="492.44" y="445.923584" type="line"/>
+      <point x="492.44" y="418.88537599999995" type="line"/>
+      <point x="492.44" y="391.84716799999995" type="line"/>
+      <point x="492.44" y="364.80895999999996" type="line"/>
+      <point x="552.44" y="294.80895999999996" type="line"/>
+      <point x="552.44" y="321.84716799999995" type="line"/>
+      <point x="552.44" y="348.88537599999995" type="line"/>
+      <point x="552.44" y="375.923584" type="line"/>
+      <point x="552.44" y="402.961792" type="line"/>
+      <point x="552.44" y="430.0" type="line"/>
     </contour>
     <contour>
       <point x="492.44" y="135.19104000000004" type="line"/>
-      <point x="492.44" y="101.39328" type="line"/>
-      <point x="492.44" y="67.59552000000008" type="line"/>
-      <point x="492.44" y="33.79776000000004" type="line"/>
-      <point x="492.44" y="0.0" type="line"/>
+      <point x="492.44" y="108.15283199999999" type="line"/>
+      <point x="492.44" y="81.11462400000005" type="line"/>
+      <point x="492.44" y="54.076415999999995" type="line"/>
+      <point x="492.44" y="27.03820799999994" type="line"/>
+      <point x="492.44" y="0" type="line"/>
       <point x="552.44" y="-70.0" type="line"/>
-      <point x="552.44" y="-36.20223999999996" type="line"/>
-      <point x="552.44" y="-2.4044799999999213" type="line"/>
-      <point x="552.44" y="31.393280000000004" type="line"/>
+      <point x="552.44" y="-42.96179200000006" type="line"/>
+      <point x="552.44" y="-15.923584000000005" type="line"/>
+      <point x="552.44" y="11.114624000000049" type="line"/>
+      <point x="552.44" y="38.15283199999999" type="line"/>
       <point x="552.44" y="65.19104000000004" type="line"/>
     </contour>
   </outline>
