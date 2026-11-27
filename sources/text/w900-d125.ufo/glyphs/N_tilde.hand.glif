@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Ntilde.hand" format="2">
-  <advance width="1062.974"/>
+  <advance width="1052.18"/>
   <outline>
     <component base="N.hand"/>
     <component base="_mark.Ntilde.N.tilde.hand"/>

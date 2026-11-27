@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="degree.ext" format="2">
-  <advance width="476.058043"/>
+  <advance width="461.5752"/>
   <outline>
     <component base="degree"/>
   </outline>

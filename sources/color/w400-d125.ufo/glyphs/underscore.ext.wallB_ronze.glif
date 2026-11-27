@@ -3,15 +3,17 @@
   <advance width="896.0"/>
   <outline>
     <contour>
-      <point x="798.0" y="-30.0" type="line"/>
-      <point x="798.0" y="-52.5" type="line"/>
-      <point x="798.0" y="-75.0" type="line"/>
-      <point x="798.0" y="-97.5" type="line"/>
+      <point x="798.0" y="-30" type="line"/>
+      <point x="798.0" y="-48.0" type="line"/>
+      <point x="798.0" y="-66.0" type="line"/>
+      <point x="798.0" y="-84.0" type="line"/>
+      <point x="798.0" y="-102.0" type="line"/>
       <point x="798.0" y="-120.0" type="line"/>
       <point x="858.0" y="-190.0" type="line"/>
-      <point x="858.0" y="-167.5" type="line"/>
-      <point x="858.0" y="-145.0" type="line"/>
-      <point x="858.0" y="-122.5" type="line"/>
+      <point x="858.0" y="-172.0" type="line"/>
+      <point x="858.0" y="-154.0" type="line"/>
+      <point x="858.0" y="-136.0" type="line"/>
+      <point x="858.0" y="-118.0" type="line"/>
       <point x="858.0" y="-100.0" type="line"/>
     </contour>
   </outline>

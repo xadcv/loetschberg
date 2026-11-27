@@ -3,12 +3,12 @@
   <advance width="236.0"/>
   <outline>
     <contour>
-      <point x="138.0" y="0.0" type="line"/>
+      <point x="138.0" y="0" type="line"/>
       <point x="130.0" y="0.0" type="line"/>
       <point x="122.0" y="0.0" type="line"/>
       <point x="114.0" y="0.0" type="line"/>
       <point x="106.0" y="0.0" type="line"/>
-      <point x="98.0" y="0.0" type="line"/>
+      <point x="98.0" y="0" type="line"/>
       <point x="158.0" y="-70.0" type="line"/>
       <point x="166.0" y="-70.0" type="line"/>
       <point x="174.0" y="-70.0" type="line"/>
@@ -19,12 +19,12 @@
     <contour>
       <point x="43.21680346870224" y="600.305303701829" type="line"/>
       <point x="42.154685903745076" y="599.2796286918243" type="line"/>
-      <point x="41.02360813188893" y="598.330541750627" type="line"/>
+      <point x="41.02360813188892" y="598.330541750627" type="line"/>
       <point x="39.82908065034272" y="597.4626667344126" type="line"/>
       <point x="38.57692307692308" y="596.6802318430215" type="line"/>
       <point x="37.273235797461254" y="595.9870490205946" type="line"/>
-      <point x="35.9243702453366" y="595.3864953841642" type="line"/>
-      <point x="34.53689795793158" y="594.8814967706794" type="line"/>
+      <point x="35.924370245336604" y="595.3864953841642" type="line"/>
+      <point x="34.536897957931586" y="594.8814967706794" type="line"/>
       <point x="33.11757856076221" y="594.4745134826231" type="line"/>
       <point x="31.67332683526199" y="594.1675283016648" type="line"/>
       <point x="30.211179030661896" y="593.9620368287481" type="line"/>

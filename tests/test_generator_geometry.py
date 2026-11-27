@@ -238,20 +238,28 @@ def test_thin_digit_joins_have_positive_overlap(width: float) -> None:
 def _ordered_wall_polygons(
     recipe: gen.FrozenRecipe,
     layers: gen.ReplayedLayers,
-) -> tuple[tuple[Point, ...], ...]:
-    """Restore recipe-run order from the two colour-specific layer streams."""
+) -> tuple[tuple[tuple[Point, ...], bool], ...]:
+    """Restore recipe order from the two colour-specific layer streams.
+
+    Every run contributes one wall per facing segment. Each wall is returned
+    with its ``flat`` flag: a wall that faces away at this source keeps its
+    points but carries no depth.
+    """
 
     dark_index = 0
     bronze_index = 0
-    polygons: list[tuple[Point, ...]] = []
+    polygons: list[tuple[tuple[Point, ...], bool]] = []
     for run in recipe.runs:
-        if run.color == "bronze":
-            piece = layers.wall_bronze[bronze_index]
-            bronze_index += 1
-        else:
-            piece = layers.wall_dark[dark_index]
-            dark_index += 1
-        polygons.append(tuple((point.x, point.y) for point in piece.outer))
+        for _segment in run.walls:
+            if run.color == "bronze":
+                piece = layers.wall_bronze[bronze_index]
+                bronze_index += 1
+            else:
+                piece = layers.wall_dark[dark_index]
+                dark_index += 1
+            polygons.append(
+                (tuple((point.x, point.y) for point in piece.outer), piece.flat)
+            )
 
     assert dark_index == len(layers.wall_dark)
     assert bronze_index == len(layers.wall_bronze)
@@ -332,20 +340,21 @@ def _append_junction_failures(
             f"'H' {location}: stem widths {left_width:.6g}/{right_width:.6g}, "
             f"expected {params.s:.6g}"
         )
-    if not _close(left_stem[2], crossbar[0]):
+    # The crossbar overlaps each stem instead of abutting it: an abutting
+    # joint can open into a hairline once the outline is jittered or rounded.
+    if not left_stem[0] < crossbar[0] < left_stem[2]:
         failures.append(
-            f"'H' {location}: left junction {left_stem[2]:.6g} != "
-            f"{crossbar[0]:.6g}"
+            f"'H' {location}: crossbar start {crossbar[0]:.6g} is not buried in "
+            f"the left stem {left_stem[0]:.6g}..{left_stem[2]:.6g}"
         )
-    if not _close(crossbar[2], right_stem[0]):
+    if not right_stem[0] < crossbar[2] < right_stem[2]:
         failures.append(
-            f"'H' {location}: right junction {crossbar[2]:.6g} != "
-            f"{right_stem[0]:.6g}"
+            f"'H' {location}: crossbar end {crossbar[2]:.6g} is not buried in "
+            f"the right stem {right_stem[0]:.6g}..{right_stem[2]:.6g}"
         )
 
     g_round = _points(g_outline.pieces[0].outer)
     g_terminal = _points(g_outline.pieces[1].outer)
-    g_connector = _points(g_outline.pieces[2].outer)
     o_round = _points(o_outline.pieces[0].outer)
     terminal_box = _bbox(g_terminal)
     o_box = _bbox(o_round)
@@ -354,10 +363,21 @@ def _append_junction_failures(
             f"'G' {location}: terminal right {terminal_box[2]:.6g} != "
             f"round silhouette {o_box[2]:.6g}"
         )
-    if not _polygons_attach(g_round, g_connector):
-        failures.append(f"'G' {location}: connector is detached from the bowl")
-    if not _polygons_attach(g_connector, g_terminal):
-        failures.append(f"'G' {location}: terminal is detached from its connector")
+    if not _polygons_attach(g_round, g_terminal):
+        failures.append(f"'G' {location}: terminal is detached from the bowl")
+    # Both ends of the bowl's lower terminal lie inside the upright terminal.
+    lower_outer = max(
+        (point for point in g_round if point[1] > 350),
+        key=lambda point: point[0],
+    )
+    if not (
+        terminal_box[0] < lower_outer[0] <= terminal_box[2] + JOIN_EPSILON
+        and terminal_box[1] < lower_outer[1] < terminal_box[3]
+    ):
+        failures.append(
+            f"'G' {location}: bowl end {lower_outer!r} is not buried in the "
+            f"terminal {terminal_box!r}"
+        )
 
 
 def _append_attachment_failures(
@@ -505,7 +525,29 @@ def _audit_replayed_layer_geometry() -> LayerAuditResult:
                     master.track,
                 )
                 wall_polygons = _ordered_wall_polygons(recipe, layers)
-                for run_index, polygon in enumerate(wall_polygons):
+                for run_index, (polygon, flat) in enumerate(wall_polygons):
+                    half = len(polygon) // 2
+                    front_length = sum(
+                        math.dist(first, second)
+                        for first, second in zip(polygon[:half], polygon[1:half])
+                    )
+                    if flat:
+                        # Facing away: the rear run sits on the front run.
+                        drift = max(
+                            math.dist(front, rear)
+                            for front, rear in zip(
+                                polygon[:half], reversed(polygon[half:])
+                            )
+                        )
+                        if drift > 0.2:
+                            wall_failures.append(
+                                f"{glyph_name!r} master={master.key} family={family} "
+                                f"run={run_index}: flat wall keeps depth {drift:.3g}"
+                            )
+                        continue
+                    if front_length < 2.0:
+                        # The junction this wall follows has closed here.
+                        continue
                     if polygon:
                         raw_area = _polygon_area(polygon)
                         font_polygon = _font_contours(
@@ -526,6 +568,12 @@ def _audit_replayed_layer_geometry() -> LayerAuditResult:
                                 for x, y in font_polygon[0]
                             )
                         )
+                        if raw_area > 0:
+                            wall_failures.append(
+                                f"{glyph_name!r} master={master.key} family={family} "
+                                f"run={run_index}: raised wall is wound against "
+                                f"the extrusion (area {raw_area:.6g})"
+                            )
                         safe_polygon = _grid_safe_wall_contours(font_polygon)[0]
                         rounded_polygon = tuple(
                             (otRound(x), otRound(y))

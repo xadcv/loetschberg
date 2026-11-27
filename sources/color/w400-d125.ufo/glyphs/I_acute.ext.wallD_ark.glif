@@ -3,12 +3,12 @@
   <advance width="300.0"/>
   <outline>
     <contour>
-      <point x="202.0" y="0.0" type="line"/>
+      <point x="202.0" y="0" type="line"/>
       <point x="181.2" y="0.0" type="line"/>
       <point x="160.4" y="0.0" type="line"/>
       <point x="139.6" y="0.0" type="line"/>
       <point x="118.8" y="0.0" type="line"/>
-      <point x="98.0" y="0.0" type="line"/>
+      <point x="98.0" y="0" type="line"/>
       <point x="158.0" y="-70.0" type="line"/>
       <point x="178.8" y="-70.0" type="line"/>
       <point x="199.6" y="-70.0" type="line"/>
@@ -17,16 +17,16 @@
       <point x="262.0" y="-70.0" type="line"/>
     </contour>
     <contour>
-      <point x="124.22296834576781" y="754.217347775803" type="line"/>
-      <point x="108.9864841728839" y="772.1086738879014" type="line"/>
-      <point x="93.75" y="790.0" type="line"/>
-      <point x="78.5135158271161" y="807.8913261120986" type="line"/>
-      <point x="63.277031654232196" y="825.782652224197" type="line"/>
-      <point x="123.27703165423219" y="755.782652224197" type="line"/>
-      <point x="138.5135158271161" y="737.8913261120986" type="line"/>
-      <point x="153.75" y="720.0" type="line"/>
-      <point x="168.9864841728839" y="702.1086738879014" type="line"/>
-      <point x="184.2229683457678" y="684.217347775803" type="line"/>
+      <point x="124.22296834576781" y="757.8" type="line"/>
+      <point x="108.9864841728839" y="775.6913261120985" type="line"/>
+      <point x="93.75" y="793.5826522241971" type="line"/>
+      <point x="78.5135158271161" y="811.4739783362955" type="line"/>
+      <point x="63.277031654232196" y="829.3653044483941" type="line"/>
+      <point x="63.33703165423219" y="829.2953044483941" type="line"/>
+      <point x="78.5735158271161" y="811.4039783362956" type="line"/>
+      <point x="93.81" y="793.512652224197" type="line"/>
+      <point x="109.04648417288391" y="775.6213261120986" type="line"/>
+      <point x="124.28296834576781" y="757.73" type="line"/>
     </contour>
   </outline>
 </glyph>

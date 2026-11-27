@@ -3,31 +3,31 @@
   <advance width="364.8"/>
   <outline>
     <contour>
-      <point x="266.8" y="400.0" type="line"/>
+      <point x="266.8" y="400" type="line"/>
       <point x="233.04000000000002" y="400.0" type="line"/>
       <point x="199.28" y="400.0" type="line"/>
       <point x="165.52" y="400.0" type="line"/>
       <point x="131.76" y="400.0" type="line"/>
-      <point x="98.0" y="400.0" type="line"/>
+      <point x="98.0" y="400" type="line"/>
       <point x="158.0" y="330.0" type="line"/>
       <point x="191.76" y="330.0" type="line"/>
       <point x="225.52" y="330.0" type="line"/>
       <point x="259.28" y="330.0" type="line"/>
-      <point x="293.04" y="330.0" type="line"/>
+      <point x="293.03999999999996" y="330.0" type="line"/>
       <point x="326.8" y="330.0" type="line"/>
     </contour>
     <contour>
-      <point x="266.8" y="-80.0" type="line"/>
+      <point x="266.8" y="-80" type="line"/>
       <point x="233.04000000000002" y="-80.0" type="line"/>
       <point x="199.28" y="-80.0" type="line"/>
       <point x="165.52" y="-80.0" type="line"/>
       <point x="131.76" y="-80.0" type="line"/>
-      <point x="98.0" y="-80.0" type="line"/>
+      <point x="98.0" y="-80" type="line"/>
       <point x="158.0" y="-150.0" type="line"/>
       <point x="191.76" y="-150.0" type="line"/>
       <point x="225.52" y="-150.0" type="line"/>
       <point x="259.28" y="-150.0" type="line"/>
-      <point x="293.04" y="-150.0" type="line"/>
+      <point x="293.03999999999996" y="-150.0" type="line"/>
       <point x="326.8" y="-150.0" type="line"/>
     </contour>
   </outline>

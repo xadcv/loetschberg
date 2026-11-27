@@ -5,12 +5,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass, replace
+import zipfile
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Mapping, Sequence
+from typing import Mapping, Sequence
 
 from fontTools import agl
 from fontTools.colorLib.builder import buildCOLR, buildCPAL
@@ -55,11 +57,14 @@ X_HEIGHT = 500
 ASCENDER = 960
 DESCENDER = -300
 HATCH_N = 7
-FIXED_OT_TIMESTAMP = 3867523200  # 2026-07-22 00:00:00 UTC, seconds from 1904.
+FIXED_OT_TIMESTAMP = 3878582400  # 2026-11-27 00:00:00 UTC, seconds from 1904.
+RELEASE_DATE = (2026, 11, 27, 0, 0, 0)
+RELEASE_VERSION = "1.0.4"
 FONT_VERSION_MAJOR = 1
-FONT_VERSION_MINOR = 3
-FONT_VERSION_STRING = "1.003"
-FONT_REVISION = 1.003
+FONT_VERSION_MINOR = 4
+FONT_VERSION_STRING = "1.004"
+FONT_REVISION = 1.004
+RELEASE_ZIP = ROOT / f"Loetschberg-{RELEASE_VERSION}.zip"
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,59 +102,7 @@ class MasterSpec:
         return -55.0
 
     def params(self, *, hand: bool = False) -> gen.GeneratorParams:
-        s, sh = _weight_strokes(self.wght, self.wdth)
-        heavy_progress = _smoothstep((self.wght - 400) / 500)
-        # Heavy cuts need more skeleton room as well as more stroke. Expanding
-        # the skeleton most at Condensed prevents counters and joins from being
-        # consumed while preserving the requested width ordering.
-        skeleton_growth = _lerp(0.08, 0.04, (self.wdth - 75) / 50)
-        return gen.GeneratorParams(
-            s=s,
-            sh=sh,
-            w=(self.wdth / 100) * (1 + skeleton_growth * heavy_progress),
-            v=(60, 70),
-            hatch_n=HATCH_N,
-            hatch_t=9,
-            hatch_sp=17,
-            jit=3.4 if hand else 0,
-        )
-
-
-def _lerp(a: float, b: float, t: float) -> float:
-    return a + (b - a) * t
-
-
-def _smoothstep(value: float) -> float:
-    value = min(1.0, max(0.0, value))
-    return value * value * (3 - 2 * value)
-
-
-def _heavy_width_factor(width: float) -> float:
-    """Limit added Black ink where the condensed skeleton has less room."""
-
-    if width <= 100:
-        return _lerp(0.9, 1.0, (width - 75) / 25)
-    return _lerp(1.0, 1.04, (width - 100) / 25)
-
-
-def _weight_strokes(weight: float, width: float = 100) -> tuple[float, float]:
-    """Return coordinated vertical/horizontal strokes for the family.
-
-    Thin through Regular retains the canonical donor values. Above Regular,
-    growth eases toward a deliberate Black ceiling instead of scaling every
-    piece to 200 units. The added ink is width-aware, so condensed counters and
-    joins retain the same visual margin as the normal and expanded cuts.
-    """
-
-    if weight <= 400:
-        t = (weight - 100) / 300
-        return _lerp(40, 104, t), _lerp(36, 100, t)
-    progress = _smoothstep((weight - 400) / 500)
-    width_factor = _heavy_width_factor(width)
-    return (
-        104 + (176 - 104) * progress * width_factor,
-        100 + (170 - 100) * progress * width_factor,
-    )
+        return gen.design_params(self.wght, self.wdth, hand=hand)
 
 
 def master_specs() -> list[MasterSpec]:
@@ -380,6 +333,7 @@ def _grid_safe_wall_contours(
     contours: Sequence[Sequence[tuple[float, float]]],
     *,
     minimum_area: float = 8.0,
+    flat: Sequence[bool] | None = None,
 ) -> list[list[tuple[float, float]]]:
     """Keep edge-on wall planes nonzero after the compiler's integer rounding.
 
@@ -390,24 +344,36 @@ def _grid_safe_wall_contours(
     the raw winding and an explicit rounded-area margin. The shared face edge
     and the contour topology remain untouched.
 
-    This protects generated source masters. A wall whose tangent genuinely
-    crosses the extrusion direction between masters may still pass smoothly
-    through an edge-on state; the frozen-recipe model intentionally permits
-    that physical transition instead of forcing a different visibility run.
+    This protects raised walls at the generated source masters. ``flat``
+    marks walls that face away from the extrusion, or are buried, at this
+    source: they carry no depth by design and are passed through untouched.
     """
 
     result: list[list[tuple[float, float]]] = []
-    for source in contours:
+    for index, source in enumerate(contours):
         contour = list(source)
+        if flat is not None and flat[index]:
+            # A wall that faces away at this source is flat by design.
+            result.append(contour)
+            continue
         if len(contour) < 4 or len(contour) % 2:
             raise AssertionError(
                 f"wall contour must contain paired front/rear paths: {len(contour)}"
             )
         rounded = [(otRound(x), otRound(y)) for x, y in contour]
         raw_area = _polygon_area(contour)
+        half = len(contour) // 2
+        front_length = sum(
+            math.dist(first, second)
+            for first, second in zip(contour[:half], contour[1:half])
+        )
+        if abs(raw_area) <= 0.75 or front_length < 2.0:
+            # A wall whose junction has closed at this source has no length
+            # to repair; it may round to zero area.
+            result.append(contour)
+            continue
         rounded_area = _polygon_area(rounded)
         if raw_area and rounded_area == 0:
-            half = len(contour) // 2
             candidates: list[
                 tuple[int, float, int, int, list[tuple[float, float]]]
             ] = []
@@ -455,14 +421,16 @@ def _signature(contours: Sequence[Sequence[object]]) -> tuple[int, tuple[int, ..
 
 
 def _draw_contours(glyph, contours: Sequence[Sequence[tuple[float, float]]]) -> None:
-    pen = glyph.getPen()
+    # A point pen stores every point as given. A segment pen drops a closing
+    # point that coincides with the start, which would break compatibility.
+    pen = glyph.getPointPen()
     for contour in contours:
         if len(contour) < 3:
             continue
-        pen.moveTo(contour[0])
-        for point in contour[1:]:
-            pen.lineTo(point)
-        pen.closePath()
+        pen.beginPath()
+        for point in contour:
+            pen.addPoint(point, segmentType="line")
+        pen.endPath()
 
 
 def _add_component(glyph, base: str) -> None:
@@ -678,7 +646,10 @@ def _build_master_fonts(
                     source_contours, shift_x=layer_shift
                 )
                 if role in {"wallDark", "wallBronze"}:
-                    font_contours = _grid_safe_wall_contours(font_contours)
+                    font_contours = _grid_safe_wall_contours(
+                        font_contours,
+                        flat=[piece.flat for piece in pieces],
+                    )
                 lname = layer_name(name, role, is_hand)
                 _new_glyph(color, lname, width, font_contours)
                 signatures[lname] = _signature(source_contours)
@@ -1231,6 +1202,111 @@ def validate_outputs(topology_report: Mapping[str, object]) -> dict[str, object]
     return report
 
 
+def write_release_zip() -> Path:
+    """Write the release package with fixed metadata, so it is reproducible."""
+
+    for stale in ROOT.glob("Loetschberg-*.zip"):
+        if stale != RELEASE_ZIP:
+            stale.unlink()
+    members = [
+        PRIMARY,
+        SIDECAR,
+        REGULAR_COMPAT,
+        WOFF,
+        WOFF2,
+        ROOT / "README.md",
+        ROOT / "VARIANTS.md",
+        ROOT / "LICENSE",
+    ]
+    with zipfile.ZipFile(RELEASE_ZIP, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        for member in members:
+            info = zipfile.ZipInfo(member.name, date_time=RELEASE_DATE)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o644 << 16
+            archive.writestr(info, member.read_bytes(), compresslevel=9)
+    return RELEASE_ZIP
+
+
+def _fontbakery_report(label: str, title: str, font: Path) -> None:
+    """Run the OpenType profile and store its JSON result and a summary."""
+
+    json_path = ROOT / f"fontbakery-{label}-report.json"
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "fontbakery",
+            "check-opentype",
+            "--skip-network",
+            "--no-progress",
+            "--quiet",
+            "--json",
+            str(json_path),
+            str(font),
+        ],
+        cwd=ROOT,
+        check=False,
+    )
+    payload = json.loads(json_path.read_text(encoding="utf-8"))
+    # Keep the stored report independent of the checkout location.
+    text = json.dumps(payload, indent=4, ensure_ascii=False).replace(str(ROOT) + "/", "")
+    json_path.write_text(text + "\n", encoding="utf-8")
+    result = payload.get("result", {})
+    version = subprocess.run(
+        [sys.executable, "-m", "fontbakery", "--version"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    lines = [
+        f"# FontBakery report: {title}",
+        "",
+        f"File: `{font.name}`",
+        "",
+        f"FontBakery {version} `check-opentype --skip-network` result:",
+        "",
+    ]
+    order = ("ERROR", "FATAL", "FAIL", "WARN", "INFO", "PASS", "SKIP")
+    for status in order:
+        if result.get(status):
+            lines.append(f"- {status}: {result[status]}")
+    lines.append(f"- Not finished: {result.get('(not finished)', 0)}")
+    lines.extend(
+        [
+            "",
+            f"The complete machine-readable results are in `{json_path.name}`.",
+            "",
+        ]
+    )
+    (ROOT / f"fontbakery-{label}-report.md").write_text("\n".join(lines), encoding="utf-8")
+
+
+def write_reports() -> None:
+    """Regenerate the interpolation and FontBakery reports kept in the repo."""
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "fontTools.varLib.interpolatable",
+            "--json",
+            str(COLOR_DESIGNSPACE.relative_to(ROOT)),
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    report = json.loads(completed.stdout or "{}")
+    (ROOT / "interpolatable-report.json").write_text(
+        json.dumps(report, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    _fontbakery_report("primary", "primary colour font", PRIMARY)
+    _fontbakery_report("sidecar", "CFF2 text sidecar", SIDECAR)
+    _fontbakery_report("regular", "local Regular TTF", REGULAR_COMPAT)
+
+
 def _prepare_directories() -> None:
     for path in (SOURCES, BUILD):
         if path.exists():
@@ -1243,6 +1319,11 @@ def _prepare_directories() -> None:
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sources-only", action="store_true")
+    parser.add_argument(
+        "--reports",
+        action="store_true",
+        help="also regenerate the interpolation and FontBakery reports",
+    )
     args = parser.parse_args(argv)
     _prepare_directories()
     topology = generate_sources()
@@ -1250,6 +1331,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         return
     compile_fonts()
     report = validate_outputs(topology)
+    write_release_zip()
+    if args.reports:
+        write_reports()
     print(
         f"Built {PRIMARY.name}, {SIDECAR.name}, "
         f"{REGULAR_COMPAT.name}, {WOFF.name}, and {WOFF2.name} "

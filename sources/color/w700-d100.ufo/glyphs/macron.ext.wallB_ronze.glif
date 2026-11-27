@@ -4,14 +4,16 @@
   <outline>
     <contour>
       <point x="471.9968" y="679.9584" type="line"/>
-      <point x="471.9968" y="647.9792" type="line"/>
-      <point x="471.9968" y="616.0" type="line"/>
-      <point x="471.9968" y="584.0208" type="line"/>
+      <point x="471.9968" y="654.37504" type="line"/>
+      <point x="471.9968" y="628.79168" type="line"/>
+      <point x="471.9968" y="603.20832" type="line"/>
+      <point x="471.9968" y="577.62496" type="line"/>
       <point x="471.9968" y="552.0416" type="line"/>
       <point x="531.9968" y="482.0416" type="line"/>
-      <point x="531.9968" y="514.0208" type="line"/>
-      <point x="531.9968" y="546.0" type="line"/>
-      <point x="531.9968" y="577.9792" type="line"/>
+      <point x="531.9968" y="507.62496" type="line"/>
+      <point x="531.9968" y="533.20832" type="line"/>
+      <point x="531.9968" y="558.79168" type="line"/>
+      <point x="531.9968" y="584.37504" type="line"/>
       <point x="531.9968" y="609.9584" type="line"/>
     </contour>
   </outline>

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="germandbls.hand.ext" format="2">
-  <advance width="715.538771"/>
+  <advance width="685.434571"/>
   <outline>
     <component base="germandbls.hand"/>
   </outline>

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="eth.ext" format="2">
-  <advance width="804.976791"/>
+  <advance width="784.088879"/>
   <outline>
     <component base="eth"/>
   </outline>

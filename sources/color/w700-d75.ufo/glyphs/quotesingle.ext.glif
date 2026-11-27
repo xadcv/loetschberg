@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="quotesingle.ext" format="2">
-  <advance width="322.337846"/>
+  <advance width="314.052524"/>
   <outline>
     <component base="quotesingle"/>
   </outline>

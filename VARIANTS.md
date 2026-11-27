@@ -39,13 +39,17 @@ feature ss02 {
 | `wght` | Weight | 100 | 400 | 900 | Coordinated stroke, counter, skeleton, and advance progression |
 | `wdth` | Width | 75 | 100 | 125 | Skeleton/layout width with weight-aware compensation at the black end |
 
-Twelve exact sources cover four weights at three widths. Optical size and slant are intentionally absent from version 1.0.3. Handdrawn remains a stylistic set, so it does not consume an axis and works at every weight/width location.
+Twelve exact sources cover four weights at three widths. Optical size and slant are intentionally absent from version 1.0.4. Handdrawn remains a stylistic set, so it does not consume an axis and works at every weight/width location.
 
 ## Colour construction
 
 The production colour strategy is variable COLRv1. Ordinary `gvar`-driven layer glyphs carry shape variation while the paint graph remains fixed.
 
-`HATCH_N = 7` everywhere. Frozen wall runs, wall colours, hatch anchors, and layer order are computed once at the default master, separately for Regular and Handdrawn, then replayed at every source. Each hatch remains a compatible four-point quad. The COLRv1 graph clips the nominal hatch paint to the live wall union with `PaintComposite(SRC_IN)`.
+`HATCH_N = 7` everywhere. Wall runs, wall colours, hatch anchors, and layer order are frozen once, separately for Regular and Handdrawn, then replayed at every source. Each hatch remains a compatible four-point quad. The COLRv1 graph clips the nominal hatch paint to the live wall union with `PaintComposite(SRC_IN)`.
+
+A wall must start and stop where two pieces meet, and that point moves with weight and width. Each outline is therefore sampled between its junctions: every place where an edge enters or leaves another piece owns a sample point, and that point sits on the junction at every source. The default master fixes the junction structure; a junction that exists only at another source is added as a pair that collapses to one point elsewhere.
+
+A run is split wherever its edges stop facing the extrusion at any source. Each part is its own wall contour. At a source where it faces away it is flat: it keeps its points, carries no depth, and cannot cancel the wall beside it under the nonzero fill.
 
 Back-to-front paint order:
 
@@ -75,7 +79,19 @@ Install only this compatibility TTF for Figma. Extrusion remains available in th
 
 ## Interpolation invariant
 
-Every master in every glyph family and colour layer has the same contour count, point count per contour, point order, and start point. Jitter only moves existing points. Frozen recipes fix wall and hatch cardinality. A mismatch or integer-quantized wall collapse is a hard build failure.
+Every master in every glyph family and colour layer has the same contour count, point count per contour, point order, and start point. Jitter only moves existing points. Frozen recipes fix wall and hatch cardinality. A mismatch, or a raised wall that collapses on the integer grid, is a hard build failure.
+
+## Stroke model
+
+Every glyph is built against one rule set, so a joint that is clean at Regular holds across both axes.
+
+| Rule | Effect |
+|---|---|
+| Skeleton positions scale with width; stroke thickness follows weight | A stem is the same thickness at every width |
+| A stroke's outer edge sits `max(canonical, actual) / 2` from its skeleton | Light cuts keep the Regular silhouette and open the counter; heavy cuts grow evenly |
+| Vertical extremes stay on the alignment zones | Round letters keep cap and x-height at every weight |
+| A piece is placed from the edges of the stroke it joins | Bowls share their stem's edge; diagonals leave from bar corners |
+| Attached pieces overlap their parent | No joint is a zero-width seam |
 
 ## STAT and application UI
 
